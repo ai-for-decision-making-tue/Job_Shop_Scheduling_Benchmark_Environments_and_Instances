@@ -15,7 +15,7 @@ We aim to include a wide range of solution methods capable of solving machine sc
 | Load Balancing Heuristics | ✓ | ✓ | ✓ | ✓ | ✓ | | 
 | Dispatching Rules | ✓ | ✓ | ✓ | | ✓ | ✓* | 
 | Genetic Algorithm | ✓ | ✓ | ✓ | ✓ | ✓ | |  
-| HGNN - DRL | ✓ | ✓ | ✓ | |  | | 
+| FJSP-DRL | ✓ | ✓ | ✓ | |  | | 
 
 *Capable of online arrivals of FJSP problems
 
@@ -25,3 +25,5 @@ We aim to include a wide range of solution methods capable of solving machine sc
 
 ## 📝 Cite our repository:
 If you use our everaged our repository for your research? Kindly reference our paper in your work:
+
+🔜 Supporting paper and corresponding reference
