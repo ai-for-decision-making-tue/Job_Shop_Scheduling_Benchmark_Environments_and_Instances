@@ -1,0 +1,17 @@
+[instance]
+online_arrivals = false # false for static instance (from data) or true for online job arrivals
+problem_instance = "/fajsp/dafjs/DAFJS13"  # static instance (no online arrivals)
+dispatching_rule = "MOR"  # FIFO: First In First Out, MOR: Most Operation Remaining, LOR: Least Operations Remaining ,MWR: Most Work Remaining, LWR: Least Work Remaining
+machine_assignment_rule = "SPT"  #SPT: Shortest Processing Time, EET: Earliest End Time
+
+[online_arrival_details]
+number_total_machines = 5  # number of machines
+inter_arrival_time = 15  # inter_arrival_time between jobs
+simulation_time = 1000  # simulation duration time
+min_nr_operations_per_job = 2 # min number of operations per online arrived job
+max_nr_operations_per_job = 7 # max number of operations per online arrived job
+min_duration_per_operation = 2 # min duration of online arrived operation
+max_duration_per_operation = 40 # max duration of online arrived operation
+
+[output]
+plotting = true

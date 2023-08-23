@@ -1,0 +1,9 @@
+[instance]
+problem_instance = "/fajsp/dafjs/DAFJS20" # configure problem instance to be scheduled
+
+[algorithm]
+scheduler_name = "random_scheduler" # heuristic rule: random_scheduler, greedy_scheduler, local_selection_scheduler, global_selection_scheduler
+
+[output]
+plotting = true # plot instance and gantt chart of generated schedule
+ 
