@@ -1,4 +1,4 @@
-# Job Shop Scheduling Benchmark
+# Job Shop Scheduling Benchmark: Environments and Instances for Learning and Non-learning Methods 
 Welcome to the **Job Shop Scheduling Benchmark**
 
 This GitHub repository serves as a comprehensive benchmark for a wide range of machine scheduling problems, including  Job Shop Scheduling (JSP), Flow Shop Scheduling (FSP), Flexible Job Shop Scheduling (FJSP), FJSP with Assembly constraints (FAJSP), FJSP with Sequence-Dependent Setup Times (FJSP-SDST), and the online FJSP (with online job arrivals). Our primary goal is to provide a centralized hub for researchers, practitioners, and enthusiasts interested in tackling machine scheduling challenges. 
