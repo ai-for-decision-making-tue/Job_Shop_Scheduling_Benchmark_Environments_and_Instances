@@ -25,5 +25,6 @@ We aim to include a wide range of solution methods capable of solving machine sc
 
 ## 📝 Cite our repository:
 Kindly reference our paper in your work:
+Robbert Reijnen, Kjell van Straaten, Zaharah Bukhsh, and Yingqian Zhang. Job Shop Scheduling Benchmark: Environments and Instances for Learning and Non-learning Methods. 2023
 
 🔜 Supporting paper and corresponding reference
