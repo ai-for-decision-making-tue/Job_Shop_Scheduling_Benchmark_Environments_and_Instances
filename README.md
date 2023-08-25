@@ -24,8 +24,17 @@ We aim to include a wide range of solution methods capable of solving machine sc
 📢 We encourage you to make use of our repository to get started with your own solutions, and, when possible, release your solution method in this repository.
 
 ## 📝 Cite our repository:
-Kindly reference our paper in your work:
+Please consider citing our paper if you use code or ideas from this project:
 
-Robbert Reijnen, Kjell van Straaten, Zaharah Bukhsh, and Yingqian Zhang. Job Shop Scheduling Benchmark: Environments and Instances for Learning and Non-learning Methods. 2023
-
+Robbert Reijnen, Kjell van Straaten, Zaharah Bukhsh, and Yingqian Zhang (2023) [Job Shop Scheduling Benchmark: Environments and Instances for Learning and Non-learning Methods](https://arxiv.org/abs/2308.12794). arXiv preprint arXiv:2308.12794 
+```
+@misc{reijnen2023job,
+      title={Job Shop Scheduling Benchmark: Environments and Instances for Learning and Non-learning Methods}, 
+      author={Robbert Reijnen and Kjell van Straaten and Zaharah Bukhsh and Yingqian Zhang},
+      year={2023},
+      eprint={2308.12794},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI}
+}
+```
 🔜 Supporting paper and corresponding reference
