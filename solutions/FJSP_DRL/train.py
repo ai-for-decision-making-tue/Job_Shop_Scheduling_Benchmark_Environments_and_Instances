@@ -21,22 +21,23 @@ import torch
 import numpy as np
 from visdom import Visdom
 import os
-import PPO_model
-from env import CaseGenerator
-from validate import validate, get_validate_env
-from solutions.helper_functions import load_parameters
 import argparse
-
+import os
+cwd = os.getcwd()
 cwd = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(cwd)
 grandparent_dir = os.path.dirname(parent_dir)
 sys.path.extend([parent_dir, grandparent_dir])
 
+import PPO_model
+from env import CaseGenerator
+from validate import validate, get_validate_env
+from solutions.helper_functions import load_parameters
+
 logging.basicConfig(level=logging.INFO)
 
 base_path = Path(__file__).resolve().parents[2]
 PARAM_FILE = base_path / "configs" / "FJSP_DRL.toml"
-
 
 def setup_seed(seed):
     torch.manual_seed(seed)
