@@ -2,7 +2,7 @@ import argparse
 import logging
 
 from scheduling_environment.simulationEnv import SimulationEnv
-from data_parsers import parser_fajsp, parser_fjsp
+from data_parsers import parser_fajsp, parser_fjsp, parser_jsp_fsp
 from solutions.dispatching_rules.helper_functions import *
 from solutions.helper_functions import load_parameters
 from plotting.drawer import draw_gantt_chart, draw_precedence_relations
@@ -118,8 +118,10 @@ def main(param_file: str = PARAM_FILE):
                 simulationEnv.JobShop = parser_fjsp.parse(simulationEnv.JobShop, parameters['instance']['problem_instance'])
             elif 'fajsp' in parameters['instance']['problem_instance']:
                 simulationEnv.JobShop = parser_fajsp.parse(simulationEnv.JobShop, parameters['instance']['problem_instance'])
+            elif 'jsp' in parameters['instance']['problem_instance']:
+                simulationEnv.JobShop = parser_jsp_fsp.parse(simulationEnv.JobShop, parameters['instance']['problem_instance'])
         except Exception as e:
-            print(f"Only able to scheduled '/fjsp/ or 'fasjp/ jobs': {e}")
+            print(f"Only able to schedule '/fjsp/, '/fasjp/ or '/jsp/' jobs': {e}")
         simulationEnv.simulator.process(run_simulation(simulationEnv, parameters['instance']['dispatching_rule'], parameters['instance']['machine_assignment_rule']))
         simulationEnv.simulator.run()
         logging.info(f"Makespan: {simulationEnv.JobShop.makespan}")
