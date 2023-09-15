@@ -69,5 +69,5 @@ def parse(JobShop, instance, from_absolute_path=False):
     # Machines
     for id_machine in range(0, number_total_machines):
         JobShop.add_machine((Machine(id_machine)))
-    
+
     return JobShop
