@@ -29,11 +29,11 @@ def main(param_file=PARAM_FILE):
 
     folder = DEFAULT_RESULTS_ROOT
 
-    exp_name = str(parameters['solver']["solver"]) + "_" + str(parameters['solver']["time_limit"]) + "/" + \
+    exp_name = "gurobi_" + str(parameters['solver']["time_limit"]) + "/" + \
                 str(parameters['instance']['problem_instance'])
 
     data = FJSPmodel.parse_file(parameters['instance']['problem_instance'])
-    model = FJSPmodel.fjsp_milp(data)
+    model = FJSPmodel.fjsp_milp(data, parameters['solver']['time_limit'])
     model.optimize()
 
     # Status dictionary mapping
@@ -55,7 +55,6 @@ def main(param_file=PARAM_FILE):
     }
 
     results = {
-        'solver': str(parameters['solver']["solver"]),
         'time_limit': str(parameters['solver']["time_limit"]),
         'status': model.status,
         'statusString': status_dict.get(model.status, 'UNKNOWN'),

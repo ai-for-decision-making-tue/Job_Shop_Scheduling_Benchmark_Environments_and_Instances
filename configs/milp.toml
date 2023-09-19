@@ -2,5 +2,4 @@
 problem_instance = "/fjsp/6_Fattahi/SFJS1.fjs" # configure problem instance to be scheduled
 
 [solver]
-solver = "gurobi"
-time_limit = 1
+time_limit = 3600 # time limit for the gurobi solver, in seconds

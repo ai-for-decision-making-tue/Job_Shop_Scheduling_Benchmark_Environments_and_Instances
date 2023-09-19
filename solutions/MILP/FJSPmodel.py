@@ -24,7 +24,6 @@ def parse_file(filename):
 
             index, operation_id = 1, 0
             while index < len(operation_data):
-                print(operation_id)
                 total_op_nr += 1
 
                 # Extract machine and processing time data for each operation
@@ -77,7 +76,7 @@ def parse_file(filename):
     }
 
 
-def fjsp_milp(Data):
+def fjsp_milp(Data, time_limit):
     # Extracting the data
     jobs = Data['jobs']  # j,h
     operations_per_job = Data['operations_per_job']  # l,z
@@ -146,6 +145,6 @@ def fjsp_milp(Data):
                 operations_times[j, last_op, k] * (Y[j, last_op, k]) for k in machine_allocations[j, last_op])
         )
 
-    # model.params.TimeLimit = 1
+    model.params.TimeLimit = time_limit
 
     return model
