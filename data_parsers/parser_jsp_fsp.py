@@ -20,7 +20,6 @@ def parse(JobShop, instance, from_absolute_path=False):
 
         JobShop.set_nr_of_jobs(number_total_jobs)
         JobShop.set_nr_of_machines(number_total_machines)
-
         precedence_relations = {}
         job_id = 0
         operation_id = 0
@@ -38,7 +37,7 @@ def parse(JobShop, instance, from_absolute_path=False):
 
             while i < len(parsed_line):
                 # Current operation
-                operation = Operation(job_id, operation_id)
+                operation = Operation(job, job_id, operation_id)
                 operation_options = 1
                 for operation_option_id in range(operation_options):
                     operation.add_operation_option(int(parsed_line[i]), int(parsed_line[i + 1]))
