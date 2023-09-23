@@ -1,6 +1,6 @@
 import argparse
 from gurobipy import GRB
-from solutions.MILP import FJSPmodel
+from solutions.MILP import FJSPSDSTmodel
 from solutions.helper_functions import load_parameters
 import logging
 import json
@@ -32,8 +32,8 @@ def main(param_file=PARAM_FILE):
     exp_name = "gurobi_" + str(parameters['solver']["time_limit"]) + "/" + \
                 str(parameters['instance']['problem_instance'])
 
-    data = FJSPmodel.parse_file(parameters['instance']['problem_instance'])
-    model = FJSPmodel.fjsp_milp(data, parameters['solver']['time_limit'])
+    data = FJSPSDSTmodel.parse_file(parameters['instance']['problem_instance'])
+    model = FJSPSDSTmodel.fjsp_sdst_milp(data, parameters['solver']['time_limit'])
     model.optimize()
 
     # Status dictionary mapping
