@@ -1,3 +1,10 @@
+# Code based on the paper (Note: based on MILP-5):
+# "Mathematical modelling and a meta-heuristic for flexible job shop scheduling"
+# by V. Roshanaei, Ahmed Azab & H. ElMaraghy
+# Presented in International Journal of Production Research, 2013.
+# Paper URL: https://www.tandfonline.com/doi/full/10.1080/00207543.2013.827806
+
+
 from gurobipy import Model, GRB, quicksum
 
 
@@ -9,7 +16,6 @@ def parse_file(filename):
     numonJobs = []
     total_op_nr = 0
 
-    #TODO
     with open("./data/" + filename, 'r') as f:
         # Extract header data
         number_operations, number_machines, _ = map(float, f.readline().split())
@@ -39,24 +45,11 @@ def parse_file(filename):
                 operation_id += 1
                 index += o_num * 2 + 1
 
-        # Process sdsts data
-        machine_id, operation_id = 1, 1
-        total_ops = len(machine_allocations.keys())
-        for line in f:
-            sdst_values = list(map(int, line.split()))
-
-            for ix, sdst in enumerate(sdst_values):
-                sdsts[(machine_id, operation_id, ix + 1)] = sdst
-
-            if operation_id == total_ops:
-                operation_id = 0
-                machine_id += 1
-            operation_id += 1
-
     # Calculate derived values
     jobs = list(range(1, number_jobs + 1))
     machines = list(range(1, number_machines + 1))
     operations_per_job = {j: list(range(1, numonJobs[j - 1] + 1)) for j in jobs}
+    # calculate upper bound
     largeM = sum(
         max(operations_times[(job, op, l)] for l in machine_allocations[(job, op)]) for job in jobs for op in
         operations_per_job[job]
@@ -76,14 +69,14 @@ def parse_file(filename):
     }
 
 
-def fjsp_milp(Data, time_limit):
+def fjsp_milp(instance_data, time_limit):
     # Extracting the data
-    jobs = Data['jobs']  # j,h
-    operations_per_job = Data['operations_per_job']  # l,z
-    machine_allocations = Data['machine_allocations']  # Rj,l
-    operations_times = Data['operations_times']  # pj,l,i
-    largeM = Data['largeM']  # M
-    model = Model("MILP-5")
+    jobs = instance_data['jobs']  # j,h
+    operations_per_job = instance_data['operations_per_job']  # l,z
+    machine_allocations = instance_data['machine_allocations']  # Rj,l
+    operations_times = instance_data['operations_times']  # pj,l,i
+    largeM = instance_data['largeM']  # M
+    model = Model("MILP")
 
     # Decision Variables
     Y = {}

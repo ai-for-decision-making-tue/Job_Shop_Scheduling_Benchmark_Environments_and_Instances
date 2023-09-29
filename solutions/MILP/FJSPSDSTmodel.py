@@ -1,3 +1,9 @@
+# Code based on the paper:
+# "Solving the flexible job shop scheduling problem with sequence-dependent setup times"
+# by Liji Shen, Stéphane Dauzère-Pérès, Janis S. Neufeld
+# Presented in European Journal of Operational Research, 2018.
+# Paper URL: https://www.sciencedirect.com/science/article/pii/S037722171730752X
+
 from gurobipy import Model, GRB, quicksum
 
 
@@ -40,9 +46,10 @@ def parse_file(filename):
 
         job_operation_pairs = list(machine_allocations.keys())
         from_job, from_op = 1, 1
-        operation_counter = 0  # This counter will help reset after processing four operations on a machine
-        machine_id = 1  # Starting machine ID
+        operation_counter = 0
+        machine_id = 1
 
+        # Extract sequence dependent setup times information
         for line in f:
             sdst_values = list(map(int, line.split()))
             # Skip empty lines
@@ -79,20 +86,18 @@ def parse_file(filename):
         'operations_per_job': operations_per_job,
         'machine_allocations': machine_allocations,
         'operations_times': operations_times,
-        'largeM': 10000,
         "sdsts": sdsts
     }
 
 
-def fjsp_sdst_milp(Data, time_limit):
-    # Extracting the data
-    jobs = Data['jobs']  # j,h
-    operations_per_job = Data['operations_per_job']  # l,z
-    machine_allocations = Data['machine_allocations']  # Rj,l
-    operations_times = Data['operations_times']  # pj,l,i
-    largeM = Data['largeM']  # M
-    model = Model("MILP-5")
-    sdst = Data['sdsts']
+def fjsp_sdst_milp(instance_data, time_limit):
+    jobs = instance_data['jobs']
+    operations_per_job = instance_data['operations_per_job']
+    machine_allocations = instance_data['machine_allocations']
+    operations_times = instance_data['operations_times']
+    largeM = 10000
+    sdst = instance_data['sdsts']
+    model = Model("MILP")
 
     # Decision Variables
     Y = {}  # αijk: 1 if Oij is assigned to machine k, 0 otherwise
@@ -125,15 +130,6 @@ def fjsp_sdst_milp(Data, time_limit):
     for j in jobs:
         for l in operations_per_job[j][1:]:
             model.addConstr(S[j, l] >= S[j, l-1] + quicksum(operations_times[j, l-1, i] * Y[j, l-1, i] for i in machine_allocations[j, l-1]))
-    #
-    # for j in jobs:
-    #     for l in operations_per_job[j][1:]:
-    #         common_machines = set(machine_allocations[j, l]) & set(machine_allocations[j, l-1])
-    #         for i in common_machines:
-    #             model.addConstr(
-    #                 S[j, l] >= S[j, l - 1] + operations_times[j, l - 1, i] * Y[j, l - 1, i] + sdst[j, l - 1, j, l, i] *
-    #                 Y[j, l - 1, i] * Y[j, l, i])
-
 
     # Constraints (5) & (6): No overlapping of operations on the same machine k
     for j in jobs:
@@ -157,7 +153,6 @@ def fjsp_sdst_milp(Data, time_limit):
                             model.addConstr(
                                 S[h, z] >= S[j, l] + operations_times[j, l, i] + sdst[j, l, h, z, i] - ((
                                         3 - Y[j, l, i] - Y[h, z, i] - X[j, l, h, z]) * largeM))
-
 
     # Constraints (7): Determine makespan
     for j in jobs:

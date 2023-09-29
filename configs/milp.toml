@@ -1,5 +1,5 @@
 [instance]
-problem_instance = "/fjsp_sdst/1_Fattahi/Fattahi_setup_02.fjs" # configure problem instance to be scheduled
+problem_instance = "/fjsp/2_Hurink/edata/abz5.fjs" # configure problem instance to be scheduled
 
 [solver]
 time_limit = 3600 # time limit for the gurobi solver, in seconds
