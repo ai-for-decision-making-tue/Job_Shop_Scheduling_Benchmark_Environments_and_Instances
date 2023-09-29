@@ -9,7 +9,6 @@ def parse_file(filename):
     numonJobs = []
     total_op_nr = 0
 
-    #TODO
     with open("./data/" + filename, 'r') as f:
         # Extract header data
         number_operations, number_machines, _ = map(float, f.readline().split())
@@ -39,9 +38,6 @@ def parse_file(filename):
                 operation_id += 1
                 index += o_num * 2 + 1
 
-        # Process sdsts data
-        sdsts = {}  # Initialize an empty dictionary for the SDST values
-
         job_operation_pairs = list(machine_allocations.keys())
         from_job, from_op = 1, 1
         operation_counter = 0  # This counter will help reset after processing four operations on a machine
@@ -55,7 +51,6 @@ def parse_file(filename):
                     to_job, to_op = job_operation_pairs[ix]
                     sdsts[(from_job, from_op, to_job, to_op, machine_id)] = sdst
 
-                print(sdsts)
                 operation_counter += 1
 
                 # Reset counter if you've processed all operations for the current job on the current machine
@@ -74,12 +69,6 @@ def parse_file(filename):
     jobs = list(range(1, number_jobs + 1))
     machines = list(range(1, number_machines + 1))
     operations_per_job = {j: list(range(1, numonJobs[j - 1] + 1)) for j in jobs}
-    largeM = sum(
-        max(operations_times[(job, op, l)] for l in machine_allocations[(job, op)]) +
-        max(sdsts.get((job, op, other_job, other_op, l), 0)
-            for other_job in jobs for other_op in operations_per_job[other_job] for l in machine_allocations[(job, op)])
-        for job in jobs for op in operations_per_job[job]
-    )
 
     # Return parsed data
     return {
@@ -90,14 +79,13 @@ def parse_file(filename):
         'operations_per_job': operations_per_job,
         'machine_allocations': machine_allocations,
         'operations_times': operations_times,
-        'largeM': largeM,  #
+        'largeM': 10000,
         "sdsts": sdsts
     }
 
 
 def fjsp_sdst_milp(Data, time_limit):
     # Extracting the data
-    machines = Data['machines']
     jobs = Data['jobs']  # j,h
     operations_per_job = Data['operations_per_job']  # l,z
     machine_allocations = Data['machine_allocations']  # Rj,l
@@ -108,16 +96,20 @@ def fjsp_sdst_milp(Data, time_limit):
 
     # Decision Variables
     Y = {}  # αijk: 1 if Oij is assigned to machine k, 0 otherwise
-    S = {}  # Sijk for start time of operation Oij
+    S = {}  # Sij for start time of operation Oij
     X = {}  # βiji'j': 1 if Oij is scheduled before Oi'j', 0 otherwise
 
     for j in jobs:
         for l in operations_per_job[j]:
+            S[j, l] = model.addVar(lb=0, vtype=GRB.CONTINUOUS, name=f"S_{j}_{l}")
             for i in machine_allocations[j, l]:
-                S[j, l, i] = model.addVar(lb=0, vtype=GRB.CONTINUOUS, name=f"t_{j}_{l}_{i}")
                 Y[j, l, i] = model.addVar(vtype=GRB.BINARY, name=f"Y_{j}_{l}_{i}")
-                for h in jobs:
-                    for z in operations_per_job[h]:
+
+    for j in jobs:
+        for l in operations_per_job[j]:
+            for h in jobs:
+                for z in operations_per_job[h]:
+                    if not (j == h and l == z):
                         X[j, l, h, z] = model.addVar(vtype=GRB.BINARY, name=f"X_{j}_{l}_{h}_{z}")
 
     # Objective Function: Minimize Cmax
@@ -128,55 +120,51 @@ def fjsp_sdst_milp(Data, time_limit):
     for j in jobs:
         for l in operations_per_job[j]:
             model.addConstr(quicksum(Y[j, l, i] for i in machine_allocations[j, l]) == 1)
-            for i in machine_allocations[j, l]:
-                model.addConstr(S[j, l, i] <= largeM * Y[j, l, i])
 
     # Constraints (4): Precedence relations between consecutive operations of the same job
     for j in jobs:
-        for l in operations_per_job[j][:-1]:
-            lhs = quicksum(S[j, l + 1, i] for i in machine_allocations[j, l + 1])
-            rhs = quicksum(S[j, l, i] for i in machine_allocations[j, l]) + quicksum(
-                operations_times[j, l, i] * Y[j, l, i] for i in machine_allocations[j, l])
-            model.addConstr(lhs >= rhs)
+        for l in operations_per_job[j][1:]:
+            model.addConstr(S[j, l] >= S[j, l-1] + quicksum(operations_times[j, l-1, i] * Y[j, l-1, i] for i in machine_allocations[j, l-1]))
+    #
+    # for j in jobs:
+    #     for l in operations_per_job[j][1:]:
+    #         common_machines = set(machine_allocations[j, l]) & set(machine_allocations[j, l-1])
+    #         for i in common_machines:
+    #             model.addConstr(
+    #                 S[j, l] >= S[j, l - 1] + operations_times[j, l - 1, i] * Y[j, l - 1, i] + sdst[j, l - 1, j, l, i] *
+    #                 Y[j, l - 1, i] * Y[j, l, i])
 
-    for j in jobs:
-        for l in operations_per_job[j][:-1]:
-            for i in machine_allocations[j, l]:
-                for k in machine_allocations[j, l + 1]:
-                    if i == k:
-                        lhs = S[j, l + 1, k]
-                        rhs = S[j, l, i] + operations_times[j, l, i] * Y[j, l, i] + sdst[j, l, j, l + 1, i] * Y[
-                            j, l, i] * Y[j, l + 1, i]
-                        model.addConstr(lhs >= rhs)
 
     # Constraints (5) & (6): No overlapping of operations on the same machine k
     for j in jobs:
         for l in operations_per_job[j]:
             for h in jobs:
-                if h > j:
-                    for z in operations_per_job[h]:
+                for z in operations_per_job[h]:
+                    if not (j == h and l == z):
                         common_machines = set(machine_allocations[j, l]) & set(machine_allocations[h, z])
                         for i in common_machines:
                             model.addConstr(
-                                S[j, l, i] >= S[h, z, i] + operations_times[h, z, i] + sdst[h, z, j, l, i] - (largeM * (
-                                        3 - X[h, z, j, l] - Y[j, l, i] - Y[h, z, i])))
-                            model.addConstr(
-                                S[h, z, i] >= S[j, l, i] + operations_times[j, l, i] + sdst[j, l, h, z, i] - (largeM * (
-                                        X[j, l, h, z] + 2 - Y[j, l, i] - Y[h, z, i])))
+                                S[j, l] >= S[h, z] + operations_times[h, z, i] + sdst[h, z, j, l, i] - ((
+                                        2 - Y[j, l, i] - Y[h, z, i] + X[j, l, h, z]) * largeM))
 
-    # Consider its own setup time when no other job is scheduled before
     for j in jobs:
         for l in operations_per_job[j]:
-            for i in machine_allocations[j, l]:
-                model.addConstr(S[j, l, i] >= sdst[j, l, j, l, i] * Y[j, l, i])
+            for h in jobs:
+                for z in operations_per_job[h]:
+                    if not (j == h and l == z):
+                        common_machines = set(machine_allocations[j, l]) & set(machine_allocations[h, z])
+                        for i in common_machines:
+                            model.addConstr(
+                                S[h, z] >= S[j, l] + operations_times[j, l, i] + sdst[j, l, h, z, i] - ((
+                                        3 - Y[j, l, i] - Y[h, z, i] - X[j, l, h, z]) * largeM))
+
 
     # Constraints (7): Determine makespan
     for j in jobs:
         last_op = max(operations_per_job[j])
         model.addConstr(
-            cmax >= quicksum(S[j, last_op, k] for k in machine_allocations[j, last_op]) + quicksum(
-                operations_times[j, last_op, k] * (Y[j, last_op, k]) for k in machine_allocations[j, last_op])
-        )
+            cmax >= S[j, last_op] + quicksum(
+                operations_times[j, last_op, i] * Y[j, last_op, i] for i in machine_allocations[j, last_op]))
 
     model.params.TimeLimit = time_limit
 
