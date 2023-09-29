@@ -1,0 +1,5 @@
+[instance]
+problem_instance = "/fjsp/2_Hurink/edata/abz5.fjs" # configure problem instance to be scheduled
+
+[solver]
+time_limit = 3600 # time limit for the gurobi solver, in seconds

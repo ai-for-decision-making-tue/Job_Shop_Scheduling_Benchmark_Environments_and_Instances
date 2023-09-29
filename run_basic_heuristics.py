@@ -45,7 +45,7 @@ if __name__ == "__main__":
                         type=str,
                         nargs="?",
                         default=PARAM_FILE,
-                        help="path to config JSON",
+                        help="path to config file",
                         )
     args = parser.parse_args()
     main(param_file=args.config_file)
