@@ -242,15 +242,15 @@ class FJSPEnv(gym.Env):
         jobs = actions[2, :]
         self.N += 1
 
-        # if self.data_source != 'case':
-        #     for index in range(self.batch_size):
-        #         operation_ix = opes[index].item()
-        #         machine_ix = mas[index].item()
-        #         job_ix = jobs[index].item()
-        #         env = self.simulation_envs[index]
-        #         operation = env.operations[operation_ix]
-        #         duration = operation.processing_times[machine_ix]
-        #         env.schedule_operation_on_machine_backfilling(operation, machine_ix, duration)
+        if self.data_source != 'case':
+            for index in range(self.batch_size):
+                operation_ix = opes[index].item()
+                machine_ix = mas[index].item()
+                job_ix = jobs[index].item()
+                env = self.simulation_envs[index]
+                operation = env.operations[operation_ix]
+                duration = operation.processing_times[machine_ix]
+                env.schedule_operation_on_machine_backfilling(operation, machine_ix, duration)
 
         # Removed unselected O-M arcs of the scheduled operations
         remain_ope_ma_adj = torch.zeros(size=(self.batch_size, self.num_mas), dtype=torch.int64)

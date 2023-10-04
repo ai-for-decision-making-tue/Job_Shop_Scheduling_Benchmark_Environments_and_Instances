@@ -44,7 +44,7 @@ validation_folder = "/fjsp/song/dev/1005/"  # Folder for validation data
 # Configuration for test parameters
 [test_parameters]
 problem_instance = "/fjsp/1_Brandimarte/Mk02.fjs"               # Problem instance for testing
-trained_policy = "./solutions/L2D/models/song_10_5.pt"          # Load pretrained policy
+trained_policy = "./solutions/FJSP_DRL/models/song_10_5.pt"          # Load pretrained policy
 sample = false                                                  # Sampling flag for testing
 num_sample = 5                                                  # Number of samples for testing (nr )
 device = "cpu"                                                  # Device for testing ("cpu" or "cuda")
