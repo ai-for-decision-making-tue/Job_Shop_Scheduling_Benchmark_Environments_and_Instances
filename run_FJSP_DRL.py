@@ -25,6 +25,10 @@ logging.basicConfig(level=logging.INFO)
 PARAM_FILE = "configs/FJSP_DRL.toml"
 DEFAULT_RESULTS_ROOT = "./results/single_runs"
 
+import pkg_resources
+print(pkg_resources.get_distribution("gym").version)
+
+
 
 def initialize_device(parameters: dict) -> torch.device:
     device_str = "cpu"

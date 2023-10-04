@@ -2,8 +2,8 @@
 problem_instance = "/fjsp_sdst/1_Fattahi/Fattahi_setup_06.fjs"
 
 [algorithm]
-population_size = 1000 # number of individuals in the population
-ngen = 1 # number of generations
+population_size = 100 # number of individuals in the population
+ngen = 10 # number of generations
 rseed = 5 # random seed
 indpb = 0.2 # probability of mutating each gene
 cr = 0.7 # probability of mating
