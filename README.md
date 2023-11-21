@@ -16,8 +16,9 @@ We aim to include a wide range of solution methods capable of solving machine sc
 | Dispatching Rules | ✓ | ✓ | ✓ | | ✓ | ✓* | 
 | Genetic Algorithm | ✓ | ✓ | ✓ | ✓ | ✓ | |  
 | FJSP-DRL | ✓ | ✓ | ✓ | |  | | 
+| MILP | | | ✓ | ✓ | | | 
 
-*Capable of online arrivals of FJSP problems
+*Capable of online arrivals of FJSP problems 
 
 🔜 We have a few DRL-based solutions in the pipeline, which will be published here upon completion. 
 
@@ -37,4 +38,3 @@ Robbert Reijnen, Kjell van Straaten, Zaharah Bukhsh, and Yingqian Zhang (2023) [
       primaryClass={cs.AI}
 }
 ```
-🔜 Supporting paper and corresponding reference
