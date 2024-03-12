@@ -9,7 +9,37 @@ import collections
 from ortools.sat.python import cp_model
 
 
-def parse_file(filename: str) -> dict:
+def parse_file_jsp(filename: str) -> dict:
+    """
+    Parses a file containing job shop scheduling data and returns a dictionary
+    with the number of jobs, number of machines, and the job operations.
+
+    Args:
+        filename (str): The name of the file to parse.
+
+    Returns:
+        dict: A dictionary containing the parsed data with the following keys:
+            - "num_jobs": The number of jobs.
+            - "num_machines": The number of machines.
+            - "jobs": A list of job operations, where each job operation is a list
+              with a single tuple representing the machine and processing time.
+
+    """
+    with open("./data/" + filename, "r") as f:
+        num_jobs, num_machines = tuple(map(int, f.readline().strip().split()))
+        jobs = []
+        for _ in range(num_jobs):
+            job_operations = []
+            data_line = list(map(int, f.readline().split()))
+            job_operations = [
+                [(data_line[i + 1], data_line[i])] for i in range(0, len(data_line), 2)
+            ]
+            jobs.append(job_operations)
+
+    return {"num_jobs": num_jobs, "num_machines": num_machines, "jobs": jobs}
+
+
+def parse_file_fjsp(filename: str) -> dict:
     """
     Parses a file containing flexible job shop scheduling data and returns a
     dictionary with the number of jobs, number of machines, and the job operations.
@@ -28,7 +58,7 @@ def parse_file(filename: str) -> dict:
     with open("./data/" + filename, "r") as f:
         num_jobs, num_machines = tuple(map(int, f.readline().strip().split()[:2]))
         jobs = []
-        for i in range(num_jobs):
+        for _ in range(num_jobs):
             job_operations = []
             operation_data = list(map(int, f.readline().split()))
             index = 1

@@ -3,20 +3,25 @@ import json
 import logging
 import os
 
-from solutions.or_tools.FJSPmodel import fjsp_or_tools_model, parse_file, solve_model
 from solutions.helper_functions import load_parameters
+from solutions.or_tools.FJSPmodel import (
+    fjsp_or_tools_model,
+    parse_file_fjsp,
+    parse_file_jsp,
+    solve_model,
+)
 
 logging.basicConfig(level=logging.INFO)
 DEFAULT_RESULTS_ROOT = "./results/or_tools"
 PARAM_FILE = "configs/or_tools.toml"
 
 
-def main(param_file=PARAM_FILE):
+def main(param_file: str = PARAM_FILE) -> None:
     """
-    Solve the FJSP problem for the provided input file.
+    Solve the (F)JSP problem for the provided input file.
 
     Args:
-        filename (str): Path to the file containing the FJSP data.
+        filename (str): Path to the file containing the (F)JSP data.
 
     Returns:
         None. Prints the optimization result.
@@ -29,22 +34,29 @@ def main(param_file=PARAM_FILE):
 
     folder = DEFAULT_RESULTS_ROOT
 
-    exp_name = "or_tools_" + str(parameters['solver']["time_limit"]) + "/" + \
-                str(parameters['instance']['problem_instance'])
+    exp_name = (
+        "or_tools_"
+        + str(parameters["solver"]["time_limit"])
+        + "/"
+        + str(parameters["instance"]["problem_instance"])
+    )
 
-    if 'fjsp_sdst' in str(parameters['instance']['problem_instance']):
-        raise NotImplementedError("SDST model not implemented in OR-Tools")	
-    elif 'fjsp' in str(parameters['instance']['problem_instance']):
-        data = parse_file(parameters['instance']['problem_instance'])
+    if "fjsp" in str(parameters["instance"]["problem_instance"]):
+        data = parse_file_fjsp(parameters["instance"]["problem_instance"])
         model, vars = fjsp_or_tools_model(data)
-    solver, status, solution_count = solve_model(model, parameters['solver']['time_limit'])
+    elif "jsp" in str(parameters["instance"]["problem_instance"]):
+        data = parse_file_jsp(parameters["instance"]["problem_instance"])
+        model, vars = fjsp_or_tools_model(data)
+    solver, status, solution_count = solve_model(
+        model, parameters["solver"]["time_limit"]
+    )
 
     # Gather Final Schedule
     all_jobs = range(data["num_jobs"])
     jobs = data["jobs"]
     starts = vars["starts"]
     presences = vars["presences"]
-    
+
     schedule = []
     for job_id in all_jobs:
         job_info = {"job": job_id, "tasks": []}
@@ -62,21 +74,26 @@ def main(param_file=PARAM_FILE):
             print(
                 "  task_%i_%i starts at %i (alt %i, machine %i, duration %i)"
                 % (job_id, task_id, start_value, selected, machine, duration)
-            ) 
-            task_info = {"task": task_id, "start": start_value, "machine": machine, "duration": duration}
+            )
+            task_info = {
+                "task": task_id,
+                "start": start_value,
+                "machine": machine,
+                "duration": duration,
+            }
             job_info["tasks"].append(task_info)
         schedule.append(job_info)
     # Status dictionary mapping
     results = {
-        'time_limit': str(parameters['solver']["time_limit"]),
-        'status': status,
-        'statusString': solver.StatusName(status),
-        'objValue': solver.ObjectiveValue(),
-        'runtime': solver.WallTime(),
-        'numBranches': solver.NumBranches(),
-        'conflicts': solver.NumConflicts(),
-        'solutions': solution_count,
-        'Schedule': schedule,
+        "time_limit": str(parameters["solver"]["time_limit"]),
+        "status": status,
+        "statusString": solver.StatusName(status),
+        "objValue": solver.ObjectiveValue(),
+        "runtime": solver.WallTime(),
+        "numBranches": solver.NumBranches(),
+        "conflicts": solver.NumConflicts(),
+        "solutions": solution_count,
+        "Schedule": schedule,
     }
 
     # Ensure the directory exists; create if not
@@ -90,7 +107,7 @@ def main(param_file=PARAM_FILE):
     # Save results to JSON (will create or overwrite the file)
     with open(file_path, "w") as outfile:
         json.dump(results, outfile, indent=4)
-    
+
     # Print Results
     print("Solve status: %s" % solver.StatusName(status))
     print("Optimal objective value: %i" % solver.ObjectiveValue())
@@ -102,12 +119,13 @@ def main(param_file=PARAM_FILE):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run OR-Tools CP-SAT")
-    parser.add_argument("config_file",
-                        metavar='-f',
-                        type=str,
-                        nargs="?",
-                        default=PARAM_FILE,
-                        help="path to config file",
-                        )
+    parser.add_argument(
+        "config_file",
+        metavar="-f",
+        type=str,
+        nargs="?",
+        default=PARAM_FILE,
+        help="path to config file",
+    )
     args = parser.parse_args()
     main(param_file=args.config_file)

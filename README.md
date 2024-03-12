@@ -17,7 +17,7 @@ We aim to include a wide range of solution methods capable of solving machine sc
 | Genetic Algorithm | ✓ | ✓ | ✓ | ✓ | ✓ | |  
 | FJSP-DRL | ✓ | ✓ | ✓ | |  | | 
 | MILP | | | ✓ | ✓ | | | 
-| OR-Tools CP-SAT | | | ✓ | | | |
+| OR-Tools CP-SAT | ✓ | | ✓ | | | |
 
 *Capable of online arrivals of FJSP problems 
 
