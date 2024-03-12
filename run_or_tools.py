@@ -44,7 +44,10 @@ def main(param_file: str = PARAM_FILE) -> None:
     if "fjsp" in str(parameters["instance"]["problem_instance"]):
         data = parse_file_fjsp(parameters["instance"]["problem_instance"])
         model, vars = fjsp_or_tools_model(data)
-    elif "jsp" in str(parameters["instance"]["problem_instance"]):
+    elif any(
+        scheduling_problem in str(parameters["instance"]["problem_instance"])
+        for scheduling_problem in ["jsp", "fsp"]
+    ):
         data = parse_file_jsp(parameters["instance"]["problem_instance"])
         model, vars = fjsp_or_tools_model(data)
     solver, status, solution_count = solve_model(
