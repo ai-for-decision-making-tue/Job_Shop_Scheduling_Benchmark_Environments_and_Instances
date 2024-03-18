@@ -4,7 +4,6 @@
 # Presented in International Journal of Production Research, 2013.
 # Paper URL: https://www.tandfonline.com/doi/full/10.1080/00207543.2013.827806
 
-
 from gurobipy import Model, GRB, quicksum
 
 
@@ -64,7 +63,7 @@ def parse_file(filename):
         'operations_per_job': operations_per_job,
         'machine_allocations': machine_allocations,
         'operations_times': operations_times,
-        'largeM': largeM,  #
+        'largeM': largeM,
         "sdsts": sdsts
     }
 
