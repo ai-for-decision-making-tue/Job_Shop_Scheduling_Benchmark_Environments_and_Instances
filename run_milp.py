@@ -1,6 +1,6 @@
 import argparse
 from gurobipy import GRB
-from solutions.MILP import FJSPSDSTmodel, FJSPmodel
+from solutions.MILP import FJSPSDSTmodel, FJSPmodel, JSPmodel
 from solutions.helper_functions import load_parameters
 import logging
 import json
@@ -38,6 +38,10 @@ def main(param_file=PARAM_FILE):
     elif 'fjsp' in str(parameters['instance']['problem_instance']):
         data = FJSPmodel.parse_file(parameters['instance']['problem_instance'])
         model = FJSPmodel.fjsp_milp(data, parameters['solver']['time_limit'])
+    elif 'jsp' in str(parameters['instance']['problem_instance']):
+        data = JSPmodel.parse_file(parameters['instance']['problem_instance'])
+        model = JSPmodel.jsp_milp(data, parameters['solver']['time_limit'])
+
     model.optimize()
 
     # Status dictionary mapping
