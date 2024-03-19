@@ -1,7 +1,7 @@
 import argparse
 from gurobipy import GRB
-from solutions.MILP import FJSPSDSTmodel, FJSPmodel, JSPmodel
-from solutions.helper_functions import load_parameters
+from solution_methods.MILP import FJSPSDSTmodel, FJSPmodel, JSPmodel
+from solution_methods.helper_functions import load_parameters
 import logging
 import json
 import os

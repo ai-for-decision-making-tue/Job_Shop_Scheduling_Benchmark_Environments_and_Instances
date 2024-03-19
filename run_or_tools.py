@@ -3,8 +3,8 @@ import json
 import logging
 import os
 
-from solutions.helper_functions import load_parameters
-from solutions.or_tools.FJSPmodel import (
+from solution_methods.helper_functions import load_parameters
+from solution_methods.or_tools.FJSPmodel import (
     fjsp_or_tools_model,
     parse_file_fjsp,
     parse_file_jsp,
@@ -95,7 +95,7 @@ def main(param_file: str = PARAM_FILE) -> None:
         "runtime": solver.WallTime(),
         "numBranches": solver.NumBranches(),
         "conflicts": solver.NumConflicts(),
-        "solutions": solution_count,
+        "solution_methods": solution_count,
         "Schedule": schedule,
     }
 

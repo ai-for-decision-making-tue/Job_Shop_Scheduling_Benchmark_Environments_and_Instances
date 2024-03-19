@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 
-from solutions.helper_functions import update_operations_available_for_scheduling
+from solution_methods.helper_functions import update_operations_available_for_scheduling
 from scheduling_environment.jobShop import JobShop
 
 

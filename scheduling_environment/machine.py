@@ -30,6 +30,36 @@ class Machine:
         sorted_operations = sorted(self._processed_operations, key=lambda op: op['start_time'])
         return [op['operation'] for op in sorted_operations]
 
+    @property
+    def next_available_time(self):
+        """Returns the time moment all currently scheduled operations have been finished on this machine."""
+        return max([operation.scheduled_end_time for operation in self.scheduled_operations], default=0)
+
+    def add_operation_to_schedule(self, operation: Operation, processing_time, sequence_dependent_setup_times):
+        """Add an operation to the scheduled operations list of the machine without backfilling."""
+
+        # find max finishing time predecessors
+        finishing_time_predecessors = operation.finishing_time_predecessors
+        finishing_time_machine = max([operation.scheduled_end_time for operation in self.scheduled_operations],default=0)
+
+        setup_time = 0
+        if len(self.scheduled_operations) != 0:
+            setup_time = \
+                sequence_dependent_setup_times[self.machine_id][self.scheduled_operations[-1].operation_id][
+                    operation.operation_id]
+        start_time = max(finishing_time_predecessors, finishing_time_machine + setup_time)
+        operation.add_operation_scheduling_information(self.machine_id, start_time, setup_time, processing_time)
+
+        self._processed_operations.append({
+            'operation': operation,
+            'start_time': start_time,
+            'end_time': start_time + processing_time,
+            'processing_time': processing_time,
+            'start_setup': start_time-setup_time,
+            'end_setup': start_time,
+            'setup_time': setup_time
+        })
+
     def add_operation_to_schedule_at_time(self, operation, start_time, processing_time, setup_time):
         """Scheduled an operations at a certain time."""
 
