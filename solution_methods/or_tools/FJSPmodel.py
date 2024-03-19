@@ -85,7 +85,7 @@ def parse_file_fjsp(filename: str) -> dict:
 
 
 class SolutionPrinter(cp_model.CpSolverSolutionCallback):
-    """Print intermediate solutions."""
+    """Print intermediate solution_methods."""
 
     def __init__(self):
         cp_model.CpSolverSolutionCallback.__init__(self)
@@ -244,7 +244,7 @@ def solve_model(
         time_limit: The maximum time limit in seconds for solving the model.
 
     Returns:
-        A tuple containing the solver object, the status of the solver, and the number of solutions found.
+        A tuple containing the solver object, the status of the solver, and the number of solution_methods found.
     """
     solver = cp_model.CpSolver()
     solver.parameters.max_time_in_seconds = time_limit

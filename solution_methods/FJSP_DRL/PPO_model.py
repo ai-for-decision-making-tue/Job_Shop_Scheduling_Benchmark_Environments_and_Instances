@@ -13,8 +13,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Categorical
 
-from solutions.FJSP_DRL.hgnn import GATedge, MLPsim
-from solutions.FJSP_DRL.mlp import MLPCritic, MLPActor
+from solution_methods.FJSP_DRL.hgnn import GATedge, MLPsim
+from solution_methods.FJSP_DRL.mlp import MLPCritic, MLPActor
 
 
 class Memory:

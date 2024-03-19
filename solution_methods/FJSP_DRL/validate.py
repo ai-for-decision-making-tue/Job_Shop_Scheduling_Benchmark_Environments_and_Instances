@@ -14,7 +14,7 @@ import torch
 from pathlib import Path
 import gym
 
-import PPO_model
+import solution_methods.FJSP_DRL.PPO_model as PPO_model
 
 base_path = Path(__file__).resolve().parents[2]
 
@@ -31,7 +31,7 @@ def get_validate_env(env_paras, train_paras):
     return env
 
 
-def validate(env_paras, env, model_policy):
+def validate(env_paras, env_validate, model_policy):
     """
     Validate the policy during training, and the process is similar to test
     """
@@ -39,19 +39,20 @@ def validate(env_paras, env, model_policy):
     batch_size = env_paras["batch_size"]
     memory = PPO_model.Memory()
     print('There are {0} dev instances.'.format(batch_size))  # validation set is also called development set
-    state = env.state
+    env_validate.reset()
+    state = env_validate.state
     done = False
-    dones = env.done_batch
+    dones = env_validate.done_batch
     while ~done:
         with torch.no_grad():
             actions = model_policy.act(state, memory, dones, flag_sample=False, flag_train=False)
-        state, rewards, dones = env.step(actions)
+        state, rewards, dones, _ = env_validate.step(actions)
         done = dones.all()
-    gantt_result = env.validate_gantt()[0]
+    gantt_result = env_validate.validate_gantt()[0]
     if not gantt_result:
         print("Scheduling Error!")
-    makespan = copy.deepcopy(env.makespan_batch.mean())
-    makespan_batch = copy.deepcopy(env.makespan_batch)
-    env.reset()
+    makespan = copy.deepcopy(env_validate.makespan_batch.mean())
+    makespan_batch = copy.deepcopy(env_validate.makespan_batch)
+    env_validate.reset()
     print('validating time: ', time.time() - start, '\n')
     return makespan, makespan_batch

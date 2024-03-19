@@ -7,10 +7,10 @@ from multiprocessing.pool import Pool
 
 
 from plotting.drawer import draw_precedence_relations, draw_gantt_chart
-from solutions.helper_functions import record_stats, load_parameters, load_job_shop_env, dict_to_excel
-from solutions.genetic_algorithm.operators import (evaluate_population, evaluate_individual, variation,
-                                                   init_individual, init_population, mutate_shortest_proc_time,
-                                                   mutate_sequence_exchange, pox_crossover, repair_precedence_constraints)
+from solution_methods.helper_functions import record_stats, load_parameters, load_job_shop_env, dict_to_excel
+from solution_methods.genetic_algorithm.operators import (evaluate_population, evaluate_individual, variation,
+                                                          init_individual, init_population, mutate_shortest_proc_time,
+                                                          mutate_sequence_exchange, pox_crossover, repair_precedence_constraints)
 
 logging.basicConfig(level=logging.INFO)
 

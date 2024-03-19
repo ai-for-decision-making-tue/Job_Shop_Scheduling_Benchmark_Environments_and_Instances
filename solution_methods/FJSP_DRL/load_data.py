@@ -13,7 +13,7 @@ import numpy as np
 from pathlib import Path
 
 from scheduling_environment.jobShop import JobShop
-from solutions.helper_functions import load_job_shop_env
+from solution_methods.helper_functions import load_job_shop_env
 from scheduling_environment.operation import Operation
 
 # Add the base path to the Python module search path
@@ -21,7 +21,7 @@ base_path = Path(__file__).resolve().parents[2]
 sys.path.append(str(base_path))
 
 
-def load_fjs_case(lines, num_mas, num_opes):
+def load_feats_from_case(lines, num_mas, num_opes):
     """
     Load the local FJSP instance.
     """
@@ -58,19 +58,17 @@ def load_fjs_case(lines, num_mas, num_opes):
            torch.tensor(nums_ope).int(), matrix_cal_cumul
 
 
-def load_fjs(path, num_mas, num_opes, num_jobs) -> tuple[tuple[
-                                                             torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor], JobShop]:
+def load_fjs(path, num_mas, num_opes, num_jobs):
     """
     Load the local FJSP instance.
     """
     jobShopEnv = load_job_shop_env(path, from_absolute_path=True)
-    drl_tensors = load_fjs_from_sim(jobShopEnv, num_mas, num_opes)
+    drl_tensors = load_feats_from_sim(jobShopEnv, num_mas, num_opes)
 
     return drl_tensors, jobShopEnv
 
 
-def load_fjs_from_sim(jobShopEnv: JobShop, num_mas, num_opes) -> tuple[
-    torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+def load_feats_from_sim(jobShopEnv: JobShop, num_mas, num_opes):
     """convert scheduling_environment environment to DRL environment"""
     matrix_proc_time = torch.zeros(size=(num_opes, num_mas))
     matrix_ope_ma_adj = torch.zeros(size=(num_opes, num_mas)).int()
