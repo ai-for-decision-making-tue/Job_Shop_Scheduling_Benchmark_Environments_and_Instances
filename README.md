@@ -1,4 +1,4 @@
-![example workflow](https://github.com/ai-for-decision-making-tue/Job_Shop_Scheduling_Benchmark_Environments_and_Instances/actions/workflows/test.yml/badge.svg)
+![example workflow](https://github.com/ai-for-decision-making-tue/Job_Shop_Scheduling_Benchmark_Environments_and_Instances/actions/workflows/testing.yml/badge.svg)
 
 
 
