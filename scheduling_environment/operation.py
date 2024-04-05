@@ -1,5 +1,5 @@
-from typing import List, Dict
 from collections import OrderedDict
+from typing import Dict, List
 
 
 class Operation:
@@ -34,7 +34,7 @@ class Operation:
 
     @property
     def scheduling_information(self) -> Dict:
-        """Return the scheduling information of the operation"""
+        """Return the scheduling information of the operation."""
         return self._scheduling_information
 
     @property
@@ -59,7 +59,9 @@ class Operation:
     @property
     def scheduled_duration(self) -> int:
         """Return the scheduled duration of the operation."""
-        return self._scheduled_duration
+        if 'processing_time' in self._scheduling_information:
+            return self._scheduling_information['processing_time']
+        return None
 
     @property
     def scheduled_machine(self) -> None:
@@ -74,6 +76,11 @@ class Operation:
         return self._predecessors
 
     @property
+    def optional_machines_id(self) -> List:
+        """Returns the list of machine ids that are eligible for processing this operation."""
+        return list(self._processing_times.keys())
+
+    @property
     def finishing_time_predecessors(self) -> int:
         """Return the finishing time of the latest predecessor."""
         if not self.predecessors:
@@ -82,10 +89,11 @@ class Operation:
         return max(end_times_predecessors)
 
     def update_job_id(self, new_job_id: int) -> None:
-        """Update the id of a job (used for assembly scheduling problems, with no pregiven job id)"""
+        """Update the id of a job (used for assembly scheduling problems, with no pre-given job id)."""
         self._job_id = new_job_id
 
     def update_job(self, job) -> None:
+        """Update job information (edge case for FAJSP)."""
         self._job = job
 
     def add_predecessors(self, predecessors: List) -> None:
@@ -93,10 +101,11 @@ class Operation:
         self.predecessors.extend(predecessors)
 
     def add_operation_option(self, machine_id, duration) -> None:
-        """Add an operation option to the current operation."""
+        """Add an machine option to the current operation."""
         self._processing_times[machine_id] = duration
 
     def update_sequence_dependent_setup_times(self, start_time_setup, setup_duration):
+        """Update the sequence dependent setup times of this operation."""
         self._start_time_setup = start_time_setup
         self._setup_duration = setup_duration
 

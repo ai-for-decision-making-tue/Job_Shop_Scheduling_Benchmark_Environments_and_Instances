@@ -1,12 +1,13 @@
-import time
 import random
+import time
 
 import numpy as np
 
 from scheduling_environment.jobShop import JobShop
 from scheduling_environment.operation import Operation
-from solutions.heuristics_scheduler.heuristics import global_selection_scheduler, local_selection_scheduler, random_scheduler
-from solutions.helper_functions import update_operations_available_for_scheduling
+from solution_methods.helper_functions import update_operations_available_for_scheduling
+from solution_methods.heuristics_scheduler.heuristics import (
+    global_selection_scheduler, local_selection_scheduler, random_scheduler)
 
 
 def select_next_operation_from_job(jobShopEnv: JobShop, job_id) -> Operation:

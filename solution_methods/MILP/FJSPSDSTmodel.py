@@ -4,7 +4,7 @@
 # Presented in European Journal of Operational Research, 2018.
 # Paper URL: https://www.sciencedirect.com/science/article/pii/S037722171730752X
 
-from gurobipy import Model, GRB, quicksum
+from gurobipy import GRB, Model, quicksum
 
 
 def parse_file(filename):

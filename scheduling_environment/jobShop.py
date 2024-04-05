@@ -1,6 +1,7 @@
-from typing import List, Dict
-from scheduling_environment.machine import Machine
+from typing import Dict, List
+
 from scheduling_environment.job import Job
+from scheduling_environment.machine import Machine
 from scheduling_environment.operation import Operation
 
 
@@ -171,7 +172,7 @@ class JobShop:
         if not machine:
             raise ValueError(
                 f"Invalid machine ID {machine_id}")
-        self.schedule_operation_on_machine_backfilling(operation, machine_id, duration)
+        machine.add_operation_to_schedule_backfilling(operation, duration, self._sequence_dependent_setup_times)
         self.mark_operation_as_scheduled(operation)
 
     def unschedule_operation(self, operation: Operation) -> None:
@@ -180,15 +181,14 @@ class JobShop:
         machine.unschedule_operation(operation)
         self.mark_operation_as_available(operation)
 
-    def schedule_operation_on_machine_backfilling(self, operation: Operation, machine_id, duration) -> None:
+    def schedule_operation_on_machine(self, operation: Operation, machine_id, duration) -> None:
         """Schedule an operation on a specific machine."""
         machine = self.get_machine(machine_id)
         if machine is None:
             raise ValueError(
                 f"Invalid machine ID {machine_id}")
 
-        machine.add_operation_to_schedule_backfilling(
-            operation, duration, self._sequence_dependent_setup_times)
+        machine.add_operation_to_schedule(operation, duration, self._sequence_dependent_setup_times)
 
     def mark_operation_as_scheduled(self, operation: Operation) -> None:
         """Mark an operation as scheduled."""

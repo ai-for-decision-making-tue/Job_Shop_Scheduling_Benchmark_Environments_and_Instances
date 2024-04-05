@@ -1,35 +1,17 @@
-# GITHUB REPO: https://github.com/songwenas12/fjsp-drl
-
-# Code based on the paper:
-# "Flexible Job Shop Scheduling via Graph Neural Network and Deep Reinforcement Learning"
-# by Wen Song, Xinyang Chen, Qiqiang Li and Zhiguang Cao
-# Presented in IEEE Transactions on Industrial Informatics, 2023.
-# Paper URL: https://ieeexplore.ieee.org/document/9826438
-
-import random
-import sys
 import copy
-
-import gymnasium as gym
-import torch
-import numpy as np
-from pathlib import Path
 from dataclasses import dataclass
 
-from solutions.FJSP_DRL.load_data import load_fjs, nums_detec, load_fjs_case
-from scheduling_environment.jobShop import JobShop
+import numpy as np
+import torch
 
-
-# Add the base path to the Python module search path
-base_path = Path(__file__).resolve().parents[2]
-sys.path.append(str(base_path))
+from solution_methods.FJSP_DRL.load_data import load_feats_from_case, nums_detec
 
 
 @dataclass
 class EnvState:
-    '''
+    """
     Class for the state of the environment
-    '''
+    """
     # static
     opes_appertain_batch: torch.Tensor = None
     ope_pre_adj_batch: torch.Tensor = None
@@ -72,21 +54,20 @@ def convert_feat_job_2_ope(feat_job_batch, opes_appertain_batch):
     return feat_job_batch.gather(1, opes_appertain_batch)
 
 
-class FJSPEnv(gym.Env):
+class FJSPEnv_training():
     """
     FJSP environment
     """
 
     def __init__(self, case, env_paras, data_source='case'):
-        '''
+        """
         :param case: The instance generator or the addresses of the instances
         :param env_paras: A dictionary of parameters for the environment
         :param data_source: Indicates that the instances came from a generator or files
-        '''
+        """
 
         # load paras
         # static
-        self.show_mode = env_paras["show_mode"]  # Result display mode (deprecated in the final experiment)
         self.batch_size = env_paras["batch_size"]  # Number of parallel instances during training
         self.num_jobs = env_paras["num_jobs"]  # Number of jobs
         self.num_mas = env_paras["num_mas"]  # Number of machines
@@ -95,12 +76,9 @@ class FJSPEnv(gym.Env):
         # load instance
         num_data = 8  # The amount of data extracted from instance
         tensors = [[] for _ in range(num_data)]
-        self.simulation_envs: list[JobShop] = []  # variable for keeping track of scheduling_environment envs
         self.num_opes = 0
         lines = []
-        self.data_source = data_source
-
-        if data_source=='case':  # Generate instances through generators
+        if data_source == 'case':  # Generate instances through generators
             for i in range(self.batch_size):
                 lines.append(case.get_case(i)[0])  # Generate an instance and save it
                 num_jobs, num_mas, num_opes = nums_detec(lines[i])
@@ -115,13 +93,9 @@ class FJSPEnv(gym.Env):
                 self.num_opes = max(self.num_opes, num_opes)
         # load feats
         for i in range(self.batch_size):
-            if data_source == 'case':
-                load_data = load_fjs_case(lines[i], self.num_mas, self.num_opes)
-            else:
-                load_data, env = load_fjs(case[i], self.num_mas, self.num_opes, self.num_jobs)
-                self.simulation_envs.append(env)
+            load_data = load_feats_from_case(lines[i], num_mas, self.num_opes)
             for j in range(num_data):
-                tensors[j].append(load_data[j].to(self.device))
+                tensors[j].append(load_data[j])
 
         # dynamic feats
         # shape: (batch_size, num_opes, num_mas)
@@ -176,8 +150,7 @@ class FJSPEnv(gym.Env):
         feat_opes_batch[:, 3, :] = convert_feat_job_2_ope(self.nums_ope_batch, self.opes_appertain_batch)
         feat_opes_batch[:, 5, :] = torch.bmm(feat_opes_batch[:, 2, :].unsqueeze(1),
                                              self.cal_cumul_adj_batch).squeeze()
-        end_time_batch = (feat_opes_batch[:, 5, :] +
-                          feat_opes_batch[:, 2, :]).gather(1, self.end_ope_biases_batch)
+        end_time_batch = (feat_opes_batch[:, 5, :] + feat_opes_batch[:, 2, :]).gather(1, self.end_ope_biases_batch)
         feat_opes_batch[:, 4, :] = convert_feat_job_2_ope(end_time_batch, self.opes_appertain_batch)
         feat_mas_batch[:, 0, :] = torch.count_nonzero(self.ope_ma_adj_batch, dim=1)
         self.feat_opes_batch = feat_opes_batch
@@ -242,16 +215,6 @@ class FJSPEnv(gym.Env):
         jobs = actions[2, :]
         self.N += 1
 
-        if self.data_source != 'case':
-            for index in range(self.batch_size):
-                operation_ix = opes[index].item()
-                machine_ix = mas[index].item()
-                job_ix = jobs[index].item()
-                env = self.simulation_envs[index]
-                operation = env.operations[operation_ix]
-                duration = operation.processing_times[machine_ix]
-                env.schedule_operation_on_machine_backfilling(operation, machine_ix, duration)
-
         # Removed unselected O-M arcs of the scheduled operations
         remain_ope_ma_adj = torch.zeros(size=(self.batch_size, self.num_mas), dtype=torch.int64)
         remain_ope_ma_adj[self.batch_idxes, mas] = 1
@@ -281,11 +244,9 @@ class FJSPEnv(gym.Env):
         start_times = self.feat_opes_batch[self.batch_idxes, 5, :] * is_scheduled  # real start time of scheduled opes
         un_scheduled = 1 - is_scheduled  # unscheduled opes
         estimate_times = torch.bmm((start_times + mean_proc_time).unsqueeze(1),
-                                   self.cal_cumul_adj_batch[self.batch_idxes, :, :]).squeeze() \
-                         * un_scheduled  # estimate start time of unscheduled opes
+                                   self.cal_cumul_adj_batch[self.batch_idxes, :, :]).squeeze() * un_scheduled  # estimate start time of unscheduled opes
         self.feat_opes_batch[self.batch_idxes, 5, :] = start_times + estimate_times
-        end_time_batch = (self.feat_opes_batch[self.batch_idxes, 5, :] +
-                          self.feat_opes_batch[self.batch_idxes, 2, :]).gather(1, self.end_ope_biases_batch[
+        end_time_batch = (self.feat_opes_batch[self.batch_idxes, 5, :] + self.feat_opes_batch[self.batch_idxes, 2, :]).gather(1, self.end_ope_biases_batch[
                                                                                   self.batch_idxes, :])
         self.feat_opes_batch[self.batch_idxes, 4, :] = convert_feat_job_2_ope(end_time_batch, self.opes_appertain_batch[
                                                                                               self.batch_idxes, :])
@@ -340,7 +301,7 @@ class FJSPEnv(gym.Env):
                           self.ope_ma_adj_batch, self.mask_job_procing_batch, self.mask_job_finish_batch,
                           self.mask_ma_procing_batch,
                           self.ope_step_batch, self.time)
-        return self.state, self.reward_batch, self.done_batch
+        return self.state, self.reward_batch, self.done_batch, None
 
     def if_no_eligible(self):
         """
@@ -501,97 +462,3 @@ class FJSPEnv(gym.Env):
 
     def close(self):
         pass
-
-
-class CaseGenerator:
-    """
-    FJSP instance generator
-    """
-    def __init__(self, job_init, num_mas, opes_per_job_min, opes_per_job_max, nums_ope=None, path='../data/',
-                 flag_same_opes=True, flag_doc=False):
-        if nums_ope is None:
-            nums_ope = []
-        self.flag_doc = flag_doc  # Whether save the instance to a file
-        self.flag_same_opes = flag_same_opes
-        self.nums_ope = nums_ope
-        self.path = path  # Instance save path (relative path)
-        self.job_init = job_init
-        self.num_mas = num_mas
-
-        self.mas_per_ope_min = 1  # The minimum number of machines that can process an operation
-        self.mas_per_ope_max = num_mas
-        self.opes_per_job_min = opes_per_job_min  # The minimum number of operations for a job
-        self.opes_per_job_max = opes_per_job_max
-        self.proctime_per_ope_min = 1  # Minimum average processing time
-        self.proctime_per_ope_max = 20
-        self.proctime_dev = 0.2
-
-    def get_case(self, idx=0):
-        """
-        Generate FJSP instance
-        :param idx: The instance number
-        """
-        self.num_jobs = self.job_init
-        if not self.flag_same_opes:
-            self.nums_ope = [random.randint(self.opes_per_job_min, self.opes_per_job_max) for _ in range(self.num_jobs)]
-        self.num_opes = sum(self.nums_ope)
-        self.nums_option = [random.randint(self.mas_per_ope_min, self.mas_per_ope_max) for _ in range(self.num_opes)]
-        self.num_options = sum(self.nums_option)
-        self.ope_ma = []
-        for val in self.nums_option:
-            self.ope_ma = self.ope_ma + sorted(random.sample(range(1, self.num_mas+1), val))
-        self.proc_time = []
-        self.proc_times_mean = [random.randint(self.proctime_per_ope_min, self.proctime_per_ope_max) for _ in range(self.num_opes)]
-        for i in range(len(self.nums_option)):
-            low_bound = max(self.proctime_per_ope_min,round(self.proc_times_mean[i]*(1-self.proctime_dev)))
-            high_bound = min(self.proctime_per_ope_max,round(self.proc_times_mean[i]*(1+self.proctime_dev)))
-            proc_time_ope = [random.randint(low_bound, high_bound) for _ in range(self.nums_option[i])]
-            self.proc_time = self.proc_time + proc_time_ope
-        self.num_ope_biass = [sum(self.nums_ope[0:i]) for i in range(self.num_jobs)]
-        self.num_ma_biass = [sum(self.nums_option[0:i]) for i in range(self.num_opes)]
-        line0 = '{0}\t{1}\t{2}\n'.format(self.num_jobs, self.num_mas, self.num_options / self.num_opes)
-        lines = []
-        lines_doc = []
-        lines.append(line0)
-        lines_doc.append('{0}\t{1}\t{2}'.format(self.num_jobs, self.num_mas, self.num_options / self.num_opes))
-        for i in range(self.num_jobs):
-            flag = 0
-            flag_time = 0
-            flag_new_ope = 1
-            idx_ope = -1
-            idx_ma = 0
-            line = []
-            option_max = sum(self.nums_option[self.num_ope_biass[i]:(self.num_ope_biass[i]+self.nums_ope[i])])
-            idx_option = 0
-            while True:
-                if flag == 0:
-                    line.append(self.nums_ope[i])
-                    flag += 1
-                elif flag == flag_new_ope:
-                    idx_ope += 1
-                    idx_ma = 0
-                    flag_new_ope += self.nums_option[self.num_ope_biass[i]+idx_ope] * 2 + 1
-                    line.append(self.nums_option[self.num_ope_biass[i]+idx_ope])
-                    flag += 1
-                elif flag_time == 0:
-                    line.append(self.ope_ma[self.num_ma_biass[self.num_ope_biass[i]+idx_ope] + idx_ma])
-                    flag += 1
-                    flag_time = 1
-                else:
-                    line.append(self.proc_time[self.num_ma_biass[self.num_ope_biass[i]+idx_ope] + idx_ma])
-                    flag += 1
-                    flag_time = 0
-                    idx_option += 1
-                    idx_ma += 1
-                if idx_option == option_max:
-                    str_line = " ".join([str(val) for val in line])
-                    lines.append(str_line + '\n')
-                    lines_doc.append(str_line)
-                    break
-        lines.append('\n')
-        if self.flag_doc:
-            doc = open(self.path + '{0}j_{1}m_{2}.fjs'.format(self.num_jobs, self.num_mas, str.zfill(str(idx+1),3)),'a')
-            for i in range(len(lines_doc)):
-                print(lines_doc[i], file=doc)
-            doc.close()
-        return lines, self.num_jobs, self.num_jobs

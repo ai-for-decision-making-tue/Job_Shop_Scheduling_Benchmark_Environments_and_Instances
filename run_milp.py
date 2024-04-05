@@ -1,17 +1,19 @@
 import argparse
-from gurobipy import GRB
-from solutions.MILP import FJSPSDSTmodel, FJSPmodel
-from solutions.helper_functions import load_parameters
-import logging
 import json
+import logging
 import os
+
+from gurobipy import GRB
+
+from solution_methods.helper_functions import load_parameters
+from solution_methods.MILP import FJSPmodel, FJSPSDSTmodel, JSPmodel
 
 logging.basicConfig(level=logging.INFO)
 DEFAULT_RESULTS_ROOT = "./results/milp"
 PARAM_FILE = "configs/milp.toml"
 
 
-def main(param_file=PARAM_FILE):
+def run_method(folder, exp_name, **kwargs):
     """
     Solve the FJSP problem for the provided input file.
 
@@ -21,23 +23,17 @@ def main(param_file=PARAM_FILE):
     Returns:
         None. Prints the optimization result.
     """
-    try:
-        parameters = load_parameters(param_file)
-    except FileNotFoundError:
-        logging.error(f"Parameter file {param_file} not found.")
-        return
 
-    folder = DEFAULT_RESULTS_ROOT
+    if 'fjsp_sdst' in str(kwargs['instance']['problem_instance']):
+        data = FJSPSDSTmodel.parse_file(kwargs['instance']['problem_instance'])
+        model = FJSPSDSTmodel.fjsp_sdst_milp(data, kwargs['solver']['time_limit'])
+    elif 'fjsp' in str(kwargs['instance']['problem_instance']):
+        data = FJSPmodel.parse_file(kwargs['instance']['problem_instance'])
+        model = FJSPmodel.fjsp_milp(data, kwargs['solver']['time_limit'])
+    elif 'jsp' in str(kwargs['instance']['problem_instance']):
+        data = JSPmodel.parse_file(kwargs['instance']['problem_instance'])
+        model = JSPmodel.jsp_milp(data, kwargs['solver']['time_limit'])
 
-    exp_name = "gurobi_" + str(parameters['solver']["time_limit"]) + "/" + \
-                str(parameters['instance']['problem_instance'])
-
-    if 'fjsp_sdst' in str(parameters['instance']['problem_instance']):
-        data = FJSPSDSTmodel.parse_file(parameters['instance']['problem_instance'])
-        model = FJSPSDSTmodel.fjsp_sdst_milp(data, parameters['solver']['time_limit'])
-    elif 'fjsp' in str(parameters['instance']['problem_instance']):
-        data = FJSPmodel.parse_file(parameters['instance']['problem_instance'])
-        model = FJSPmodel.fjsp_milp(data, parameters['solver']['time_limit'])
     model.optimize()
 
     # Status dictionary mapping
@@ -59,7 +55,7 @@ def main(param_file=PARAM_FILE):
     }
 
     results = {
-        'time_limit': str(parameters['solver']["time_limit"]),
+        'time_limit': str(kwargs['solver']["time_limit"]),
         'status': model.status,
         'statusString': status_dict.get(model.status, 'UNKNOWN'),
         'objValue': model.objVal if model.status == GRB.OPTIMAL else None,
@@ -84,6 +80,21 @@ def main(param_file=PARAM_FILE):
     # Save results to JSON (will create or overwrite the file)
     with open(file_path, "w") as outfile:
         json.dump(results, outfile, indent=4)
+
+
+def main(param_file=PARAM_FILE):
+
+    try:
+        parameters = load_parameters(param_file)
+    except FileNotFoundError:
+        logging.error(f"Parameter file {param_file} not found.")
+        return
+
+    folder = DEFAULT_RESULTS_ROOT
+
+    exp_name = "gurobi_" + str(parameters['solver']["time_limit"]) + "/" + str(parameters['instance']['problem_instance'])
+
+    run_method(folder, exp_name, **parameters)
 
 
 if __name__ == "__main__":

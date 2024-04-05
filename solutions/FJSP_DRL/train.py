@@ -14,7 +14,7 @@ import time
 import logging
 from collections import deque
 
-import gymnasium as gym
+import gym
 import pandas as pd
 from pathlib import Path
 import torch

@@ -1,8 +1,8 @@
-from pathlib import Path
 import re
+from pathlib import Path
 
-from scheduling_environment.machine import Machine
 from scheduling_environment.job import Job
+from scheduling_environment.machine import Machine
 from scheduling_environment.operation import Operation
 
 

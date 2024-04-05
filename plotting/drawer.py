@@ -1,12 +1,14 @@
 import copy
-import random
 import os
-import networkx as nx
+import random
 from statistics import mean
-from scheduling_environment.jobShop import JobShop
-import numpy as np
-import matplotlib.pyplot as plt
+
 import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+
+from scheduling_environment.jobShop import JobShop
 
 
 def create_colormap():
