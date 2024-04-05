@@ -1,4 +1,5 @@
-![example workflow](https://github.com/ai-for-decision-making-tue/Job_Shop_Scheduling_Benchmark_Environments_and_Instances/actions/workflows/testing.yml/badge.svg)
+![python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%20-blue)
+![Testing](https://github.com/ai-for-decision-making-tue/Job_Shop_Scheduling_Benchmark_Environments_and_Instances/actions/workflows/testing.yml/badge.svg)
 
 
 
