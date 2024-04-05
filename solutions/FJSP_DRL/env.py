@@ -10,7 +10,7 @@ import random
 import sys
 import copy
 
-import gym
+import gymnasium as gym
 import torch
 import numpy as np
 from pathlib import Path

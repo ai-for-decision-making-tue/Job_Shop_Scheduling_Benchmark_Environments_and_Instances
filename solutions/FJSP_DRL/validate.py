@@ -12,7 +12,7 @@ import os
 
 import torch
 from pathlib import Path
-import gym
+import gymnasium as gym
 
 import PPO_model
 

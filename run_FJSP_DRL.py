@@ -10,7 +10,7 @@ import argparse
 import copy
 import logging
 
-import gym
+import gymnasium as gym
 import pynvml
 import torch
 
