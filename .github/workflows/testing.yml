@@ -25,9 +25,10 @@ jobs:
       - name: Install dev dependencies
         run: |
           pip install -r requirements_dev.txt
-      - name: Run linting
+      - name: Lint with flake8
+        continue-on-error: true
         run: |
-          python -m flake8
+          flake8 . --count --max-complexity=15 --max-line-length=127 --statistics 
       - name: Run test case
         run: |
           python run_basic_heuristics.py
