@@ -3,7 +3,7 @@ name: Testing
 on: [push]
 
 jobs:
-  build:
+  testing:
 
     runs-on: ubuntu-latest
     timeout-minutes: 10 
@@ -17,13 +17,17 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      # You can test your matrix by printing the current Python version
-      - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
+          cache: 'pip' # caching pip dependencie
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel
           pip install -r requirements.txt
+      - name: Install dev dependencies
+        run: |
+          pip install -r requirements_dev.txt
+      - name: Run linting
+        run: |
+          python -m flake8
       - name: Run test case
         run: |
           python run_basic_heuristics.py
