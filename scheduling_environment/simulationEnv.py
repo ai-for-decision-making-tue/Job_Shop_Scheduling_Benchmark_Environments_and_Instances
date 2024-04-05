@@ -1,10 +1,11 @@
-import simpy
 import random
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
 
+import simpy
+
+from scheduling_environment.job import Job
 from scheduling_environment.jobShop import JobShop
 from scheduling_environment.machine import Machine
-from scheduling_environment.job import Job
 from scheduling_environment.operation import Operation
 
 

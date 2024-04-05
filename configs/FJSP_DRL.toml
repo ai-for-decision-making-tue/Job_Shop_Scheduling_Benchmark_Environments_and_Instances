@@ -1,16 +1,16 @@
 [env_parameters]
-num_jobs = 10           # Number of jobs in the environment
-num_mas = 5             # Number of machine agents
-batch_size = 20          # Batch size for training
-ope_feat_dim = 6       # Dimension of operation features
-ma_feat_dim = 3         # Dimension of machine agent features
-valid_batch_size = 5    # Batch size for validation
+num_jobs = 10               # Number of jobs in the environment
+num_mas = 5                 # Number of machine agents
+batch_size = 20             # Batch size for training
+ope_feat_dim = 6            # Dimension of operation features
+ma_feat_dim = 3             # Dimension of machine agent features
+valid_batch_size = 5        # Batch size for validation
 device = "cpu"              # Device for training ("cpu" or "cuda")
 
 [model_parameters]
 in_size_ma = 3              # Input size for machine agent
 out_size_ma = 8             # Output size for machine agent
-in_size_ope = 6           # Input size for operation
+in_size_ope = 6             # Input size for operation
 out_size_ope = 8            # Output size for operation
 hidden_size_ope = 128       # Hidden size for operation model
 num_heads = [1, 1]          # Number of attention heads
@@ -44,9 +44,10 @@ device = "cpu"              # Device for training ("cpu" or "cuda")
 
 # Configuration for test parameters
 [test_parameters]
-problem_instance = "/fjsp/1_Brandimarte/Mk02.fjs"                                 # Problem instance for testing
+seed = 1
+problem_instance = "/fjsp/1_Brandimarte/Mk02.fjs"                       # Problem instance for testing
 trained_policy = "/solution_methods/FJSP_DRL/save/train_20240314_192906/song_10_5.pt"   # Load pretrained policy
-sample = true                                                                     # Sampling flag for testing
-num_sample = 1                                                                    # Number of samples for testing (nr )
+sample = false                                                          # Sampling flag for testing
+num_sample = 1                                                          # Number of samples for testing (nr )
 plotting = true                                                         # plot instance representation and ganttchart
-device = "cpu"                                                         # Device for testing ("cpu" or "cuda")
+device = "cpu"                                                          # Device for testing ("cpu" or "cuda")

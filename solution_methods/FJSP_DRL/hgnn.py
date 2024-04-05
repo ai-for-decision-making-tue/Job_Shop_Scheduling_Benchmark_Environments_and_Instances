@@ -7,9 +7,9 @@
 # Paper URL: https://ieeexplore.ieee.org/document/9826438
 
 import torch
+import torch.nn.functional as F
 from torch import nn
 from torch.nn import Identity
-import torch.nn.functional as F
 
 
 class GATedge(nn.Module):

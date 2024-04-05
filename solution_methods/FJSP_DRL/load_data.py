@@ -7,14 +7,14 @@
 # Paper URL: https://ieeexplore.ieee.org/document/9826438
 
 import sys
-
-import torch
-import numpy as np
 from pathlib import Path
 
+import numpy as np
+import torch
+
 from scheduling_environment.jobShop import JobShop
-from solution_methods.helper_functions import load_job_shop_env
 from scheduling_environment.operation import Operation
+from solution_methods.helper_functions import load_job_shop_env
 
 # Add the base path to the Python module search path
 base_path = Path(__file__).resolve().parents[2]
@@ -38,7 +38,7 @@ def load_feats_from_case(lines, num_mas, num_opes):
         if flag == 0:
             flag += 1
         # last line
-        elif line is "\n":
+        elif line == "\n":
             break
         # other
         else:
@@ -96,8 +96,8 @@ def load_feats_from_sim(jobShopEnv: JobShop, num_mas, num_opes):
                 predecessor: Operation
                 matrix_pre_proc[predecessor.operation_id][operation.operation_id] = True
 
-    return matrix_proc_time, matrix_ope_ma_adj, matrix_pre_proc, matrix_pre_proc.t(), \
-           opes_appertain, num_ope_biases, nums_ope, matrix_cal_cumul
+    return matrix_proc_time, matrix_ope_ma_adj, matrix_pre_proc, matrix_pre_proc.t(), opes_appertain, num_ope_biases, \
+           nums_ope, matrix_cal_cumul
 
 
 def nums_detec(lines):

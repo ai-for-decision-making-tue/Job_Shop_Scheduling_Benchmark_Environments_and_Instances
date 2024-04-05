@@ -1,6 +1,7 @@
-from typing import List, Dict
-from scheduling_environment.machine import Machine
+from typing import Dict, List
+
 from scheduling_environment.job import Job
+from scheduling_environment.machine import Machine
 from scheduling_environment.operation import Operation
 
 

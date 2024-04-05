@@ -1,17 +1,17 @@
-import gym
 import copy
-import torch
-import numpy as np
-
 from dataclasses import dataclass
+
+import numpy as np
+import torch
+
 from solution_methods.FJSP_DRL.load_data import load_feats_from_case, nums_detec
 
 
 @dataclass
 class EnvState:
-    '''
+    """
     Class for the state of the environment
-    '''
+    """
     # static
     opes_appertain_batch: torch.Tensor = None
     ope_pre_adj_batch: torch.Tensor = None
@@ -48,23 +48,23 @@ class EnvState:
 
 
 def convert_feat_job_2_ope(feat_job_batch, opes_appertain_batch):
-    '''
+    """
     Convert job features into operation features (such as dimension)
-    '''
+    """
     return feat_job_batch.gather(1, opes_appertain_batch)
 
 
-class FJSPEnv_training(gym.Env):
-    '''
+class FJSPEnv_training():
+    """
     FJSP environment
-    '''
+    """
 
     def __init__(self, case, env_paras, data_source='case'):
-        '''
+        """
         :param case: The instance generator or the addresses of the instances
         :param env_paras: A dictionary of parameters for the environment
         :param data_source: Indicates that the instances came from a generator or files
-        '''
+        """
 
         # load paras
         # static
@@ -150,8 +150,7 @@ class FJSPEnv_training(gym.Env):
         feat_opes_batch[:, 3, :] = convert_feat_job_2_ope(self.nums_ope_batch, self.opes_appertain_batch)
         feat_opes_batch[:, 5, :] = torch.bmm(feat_opes_batch[:, 2, :].unsqueeze(1),
                                              self.cal_cumul_adj_batch).squeeze()
-        end_time_batch = (feat_opes_batch[:, 5, :] +
-                          feat_opes_batch[:, 2, :]).gather(1, self.end_ope_biases_batch)
+        end_time_batch = (feat_opes_batch[:, 5, :] + feat_opes_batch[:, 2, :]).gather(1, self.end_ope_biases_batch)
         feat_opes_batch[:, 4, :] = convert_feat_job_2_ope(end_time_batch, self.opes_appertain_batch)
         feat_mas_batch[:, 0, :] = torch.count_nonzero(self.ope_ma_adj_batch, dim=1)
         self.feat_opes_batch = feat_opes_batch
@@ -208,9 +207,9 @@ class FJSPEnv_training(gym.Env):
         self.old_state = copy.deepcopy(self.state)
 
     def step(self, actions):
-        '''
+        """
         Environment transition function
-        '''
+        """
         opes = actions[0, :]
         mas = actions[1, :]
         jobs = actions[2, :]
@@ -245,11 +244,9 @@ class FJSPEnv_training(gym.Env):
         start_times = self.feat_opes_batch[self.batch_idxes, 5, :] * is_scheduled  # real start time of scheduled opes
         un_scheduled = 1 - is_scheduled  # unscheduled opes
         estimate_times = torch.bmm((start_times + mean_proc_time).unsqueeze(1),
-                                   self.cal_cumul_adj_batch[self.batch_idxes, :, :]).squeeze() \
-                         * un_scheduled  # estimate start time of unscheduled opes
+                                   self.cal_cumul_adj_batch[self.batch_idxes, :, :]).squeeze() * un_scheduled  # estimate start time of unscheduled opes
         self.feat_opes_batch[self.batch_idxes, 5, :] = start_times + estimate_times
-        end_time_batch = (self.feat_opes_batch[self.batch_idxes, 5, :] +
-                          self.feat_opes_batch[self.batch_idxes, 2, :]).gather(1, self.end_ope_biases_batch[
+        end_time_batch = (self.feat_opes_batch[self.batch_idxes, 5, :] + self.feat_opes_batch[self.batch_idxes, 2, :]).gather(1, self.end_ope_biases_batch[
                                                                                   self.batch_idxes, :])
         self.feat_opes_batch[self.batch_idxes, 4, :] = convert_feat_job_2_ope(end_time_batch, self.opes_appertain_batch[
                                                                                               self.batch_idxes, :])
@@ -307,9 +304,9 @@ class FJSPEnv_training(gym.Env):
         return self.state, self.reward_batch, self.done_batch, None
 
     def if_no_eligible(self):
-        '''
+        """
         Check if there are still O-M pairs to be processed
-        '''
+        """
         ope_step_batch = torch.where(self.ope_step_batch > self.end_ope_biases_batch,
                                      self.end_ope_biases_batch, self.ope_step_batch)
         op_proc_time = self.proc_times_batch.gather(1, ope_step_batch.unsqueeze(-1).expand(-1, -1,
@@ -327,9 +324,9 @@ class FJSPEnv_training(gym.Env):
         return flag_trans_2_next_time
 
     def next_time(self, flag_trans_2_next_time):
-        '''
+        """
         Transit to the next time
-        '''
+        """
         # need to transit
         flag_need_trans = (flag_trans_2_next_time == 0) & (~self.done_batch)
         # available_time of machines
@@ -366,9 +363,9 @@ class FJSPEnv_training(gym.Env):
                                                  True, self.mask_job_finish_batch)
 
     def reset(self):
-        '''
+        """
         Reset the environment to its initial state
-        '''
+        """
         self.proc_times_batch = copy.deepcopy(self.old_proc_times_batch)
         self.ope_ma_adj_batch = copy.deepcopy(self.old_ope_ma_adj_batch)
         self.cal_cumul_adj_batch = copy.deepcopy(self.old_cal_cumul_adj_batch)
@@ -397,17 +394,17 @@ class FJSPEnv_training(gym.Env):
         return self.state
 
     def get_idx(self, id_ope, batch_id):
-        '''
+        """
         Get job and operation (relative) index based on instance index and operation (absolute) index
-        '''
+        """
         idx_job = max([idx for (idx, val) in enumerate(self.num_ope_biases_batch[batch_id]) if id_ope >= val])
         idx_ope = id_ope - self.num_ope_biases_batch[batch_id][idx_job]
         return idx_job, idx_ope
 
     def validate_gantt(self):
-        '''
+        """
         Verify whether the schedule is feasible
-        '''
+        """
         ma_gantt_batch = [[[] for _ in range(self.num_mas)] for __ in range(self.batch_size)]
         for batch_id, schedules in enumerate(self.schedules_batch):
             for i in range(int(self.nums_opes[batch_id])):
