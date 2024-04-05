@@ -29,6 +29,22 @@ jobs:
         continue-on-error: true
         run: |
           flake8 . --count --max-complexity=15 --max-line-length=127 --statistics 
+      - name: Lint with pylint
+        continue-on-error: true
+        run: |
+          find . -type f -name "*.py" | xargs pylint
+      - name: Lint with black
+        continue-on-error: true
+        run: |
+          black --check .
+      - name: Lint with isort
+        continue-on-error: true
+        run: |
+          isort . --check-only
+      - name: Check typing
+        continue-on-error: true
+        run: |
+          mypy .
       - name: Run test case
         run: |
           python run_basic_heuristics.py
