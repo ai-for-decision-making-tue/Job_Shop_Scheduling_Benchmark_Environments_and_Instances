@@ -1,11 +1,11 @@
 import argparse
 import logging
 
-from scheduling_environment.simulationEnv import SimulationEnv
 from data_parsers import parser_fajsp, parser_fjsp, parser_jsp_fsp
+from plotting.drawer import draw_gantt_chart, draw_precedence_relations
+from scheduling_environment.simulationEnv import SimulationEnv
 from solution_methods.dispatching_rules.helper_functions import *
 from solution_methods.helper_functions import load_parameters
-from plotting.drawer import draw_gantt_chart, draw_precedence_relations
 
 PARAM_FILE = "configs/dispatching_rules.toml"
 

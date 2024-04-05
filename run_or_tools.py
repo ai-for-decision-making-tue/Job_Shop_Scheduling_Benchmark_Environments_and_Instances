@@ -4,12 +4,7 @@ import logging
 import os
 
 from solution_methods.helper_functions import load_parameters
-from solution_methods.or_tools.FJSPmodel import (
-    fjsp_or_tools_model,
-    parse_file_fjsp,
-    parse_file_jsp,
-    solve_model,
-)
+from solution_methods.or_tools.FJSPmodel import fjsp_or_tools_model, parse_file_fjsp, parse_file_jsp, solve_model
 
 logging.basicConfig(level=logging.INFO)
 DEFAULT_RESULTS_ROOT = "./results/or_tools"
@@ -35,10 +30,7 @@ def main(param_file: str = PARAM_FILE) -> None:
     folder = DEFAULT_RESULTS_ROOT
 
     exp_name = (
-        "or_tools_"
-        + str(parameters["solver"]["time_limit"])
-        + "/"
-        + str(parameters["instance"]["problem_instance"])
+        "or_tools_" + str(parameters["solver"]["time_limit"]) + "/" + str(parameters["instance"]["problem_instance"])
     )
 
     if "fjsp" in str(parameters["instance"]["problem_instance"]):

@@ -2,8 +2,8 @@ import random
 
 import numpy as np
 
-from solution_methods.helper_functions import update_operations_available_for_scheduling
 from scheduling_environment.jobShop import JobShop
+from solution_methods.helper_functions import update_operations_available_for_scheduling
 
 
 def random_scheduler(jobShop: JobShop) -> JobShop:

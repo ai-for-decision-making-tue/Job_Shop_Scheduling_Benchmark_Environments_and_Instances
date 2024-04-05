@@ -10,14 +10,14 @@ We aim to include a wide range of solution methods capable of solving machine sc
 
 
 
-| Solution methods | Job Shop | Flow Show | Flexible Job Shop | SDST | Assembly | Online Arrivals |
+| Solution methods | Job Shop (JSP) | Flow Show (FSP) | Flexible Job Shop (FJSP) | FJSP SDST | FAJSP | Online (F)JSP |
 | :---: | :---:| :---: | :---: | :---: | :---: | :---: |
-| Load Balancing Heuristics | ✓ | ✓ | ✓ | ✓ | ✓ | | 
 | Dispatching Rules | ✓ | ✓ | ✓ | | ✓ | ✓* | 
-| Genetic Algorithm | ✓ | ✓ | ✓ | ✓ | ✓ | |  
+| Load Balancing Heuristics | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| Genetic Algorithm | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| MILP | ✓ | ✓ | ✓ | ✓ | | | 
+| CP-SAT | ✓ | ✓ | ✓ | | | |
 | FJSP-DRL | ✓ | ✓ | ✓ | |  | | 
-| MILP | | | ✓ | ✓ | | | 
-| OR-Tools CP-SAT | ✓ | ✓ | ✓ | | | |
 
 *Capable of online arrivals of FJSP problems 
 

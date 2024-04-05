@@ -1,4 +1,5 @@
 from typing import List
+
 from scheduling_environment.operation import Operation
 
 

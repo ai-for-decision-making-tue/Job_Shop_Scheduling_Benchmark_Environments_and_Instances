@@ -4,7 +4,7 @@
 # Presented in International Journal of Production Research, 2013.
 # Paper URL: https://www.tandfonline.com/doi/full/10.1080/00207543.2013.827806
 
-from gurobipy import Model, GRB, quicksum
+from gurobipy import GRB, Model, quicksum
 
 
 def parse_file(filename):

@@ -1,15 +1,82 @@
 import argparse
-from solution_methods.FJSP_DRL import training
-from solution_methods.FJSP_DRL import test
+import logging
+import os
+import time
+
+import torch
+
+from plotting.drawer import draw_gantt_chart
+from solution_methods.FJSP_DRL.env_test import FJSPEnv_test
+from solution_methods.FJSP_DRL.PPO import HGNNScheduler
+from solution_methods.helper_functions import load_job_shop_env, load_parameters
 
 PARAM_FILE = "configs/FJSP_DRL.toml"
 
 
-def main(execute_mode, param_file: str):
-    if execute_mode == 'train':
-        training.train_FJSP_DRL(param_file)
-    if execute_mode == 'test':
-        test.test_instance(param_file)
+def initialize_device(parameters: dict) -> torch.device:
+    device_str = "cpu"
+    if parameters['test_parameters']['device'] == "cuda":
+        device_str = "cuda:0" if torch.cuda.is_available() else "cpu"
+    return torch.device(device_str)
+
+
+def run_method(**parameters):
+    # Extract parameters
+    device = initialize_device(parameters)
+    model_parameters = parameters["model_parameters"]
+    test_parameters = parameters["test_parameters"]
+
+    # Configure default device
+    torch.set_default_tensor_type('torch.cuda.FloatTensor' if device.type == 'cuda' else 'torch.FloatTensor')
+    if device.type == 'cuda':
+        torch.cuda.set_device(device)
+
+    # Load trained policy
+    trained_policy = os.getcwd() + test_parameters['trained_policy']
+    if trained_policy.endswith('.pt'):
+        if device.type == 'cuda':
+            policy = torch.load(trained_policy)
+        else:
+            policy = torch.load(trained_policy, map_location='cpu')
+
+        model_parameters["actor_in_dim"] = model_parameters["out_size_ma"] * 2 + model_parameters["out_size_ope"] * 2
+        model_parameters["critic_in_dim"] = model_parameters["out_size_ma"] + model_parameters["out_size_ope"]
+
+        hgnn_model = HGNNScheduler(model_parameters).to(device)
+        print('\nloading saved model:', trained_policy)
+        hgnn_model.load_state_dict(policy)
+
+    # Configure environment and load instance
+    instance_path = test_parameters['problem_instance']
+    JSMEnv = load_job_shop_env(instance_path)
+    env_test = FJSPEnv_test(JSMEnv, test_parameters)
+
+    # Get state and completion signal
+    state = env_test.state
+    done = False
+    last_time = time.time()
+
+    # Generate schedule for instance
+    while ~done:
+        with torch.no_grad():
+            actions = hgnn_model.act(state, [], done, flag_train=False, flag_sample=test_parameters['sample'])
+        state, _, done = env_test.step(actions)
+
+    print("spend_time:", time.time() - last_time)
+    print("makespan(s):", env_test.JSP_instance.makespan)
+
+    if test_parameters['plotting']:
+        draw_gantt_chart(env_test.JSP_instance)
+
+
+def main(param_file=PARAM_FILE):
+    try:
+        parameters = load_parameters(param_file)
+    except FileNotFoundError:
+        logging.error(f"Parameter file {param_file} not found.")
+        return
+
+    run_method(**parameters)
 
 
 if __name__ == "__main__":
@@ -24,13 +91,4 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
-    # if train the FJSP_DRL model with a tensor env, please specify the mode as 'train'
-    # mode = 'train'
-    # the size of training cases (number of jobs and machines) can be modified in /configs/FJSP_DRL.toml
-
-    # if test a saved model using a simulation env, please specify the mode as 'test'
-    # the test instance can be specified in /configs/FJSP_DRL.toml
-    mode = 'test'
-
-    main(mode, param_file=args.config_file)
+    main(param_file=args.config_file)

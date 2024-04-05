@@ -2,7 +2,7 @@
 # by A. S. Manne, Presented in Operations Research, 1960.
 # Paper URL: https://www.jstor.org/stable/167204
 
-from gurobipy import Model, GRB
+from gurobipy import GRB, Model
 
 
 def parse_file(filename):

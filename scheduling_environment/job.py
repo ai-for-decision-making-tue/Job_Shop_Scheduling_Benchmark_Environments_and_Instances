@@ -1,5 +1,6 @@
-from .operation import Operation
 from typing import List
+
+from .operation import Operation
 
 
 class Job:

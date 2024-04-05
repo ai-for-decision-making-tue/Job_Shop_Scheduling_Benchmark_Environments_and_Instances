@@ -1,5 +1,4 @@
 import random
-import time
 
 
 class CaseGenerator:
@@ -38,12 +37,12 @@ class CaseGenerator:
         self.num_options = sum(self.nums_option)
         self.ope_ma = []
         for val in self.nums_option:
-            self.ope_ma = self.ope_ma + sorted(random.sample(range(1, self.num_mas+1), val))
+            self.ope_ma = self.ope_ma + sorted(random.sample(range(1, self.num_mas + 1), val))
         self.proc_time = []
         self.proc_times_mean = [random.randint(self.proctime_per_ope_min, self.proctime_per_ope_max) for _ in range(self.num_opes)]
         for i in range(len(self.nums_option)):
-            low_bound = max(self.proctime_per_ope_min,round(self.proc_times_mean[i]*(1-self.proctime_dev)))
-            high_bound = min(self.proctime_per_ope_max,round(self.proc_times_mean[i]*(1+self.proctime_dev)))
+            low_bound = max(self.proctime_per_ope_min, round(self.proc_times_mean[i] * (1 - self.proctime_dev)))
+            high_bound = min(self.proctime_per_ope_max, round(self.proc_times_mean[i] * (1 + self.proctime_dev)))
             proc_time_ope = [random.randint(low_bound, high_bound) for _ in range(self.nums_option[i])]
             self.proc_time = self.proc_time + proc_time_ope
         self.num_ope_biass = [sum(self.nums_ope[0:i]) for i in range(self.num_jobs)]
@@ -60,7 +59,7 @@ class CaseGenerator:
             idx_ope = -1
             idx_ma = 0
             line = []
-            option_max = sum(self.nums_option[self.num_ope_biass[i]:(self.num_ope_biass[i]+self.nums_ope[i])])
+            option_max = sum(self.nums_option[self.num_ope_biass[i]:(self.num_ope_biass[i] + self.nums_ope[i])])
             idx_option = 0
             while True:
                 if flag == 0:
@@ -69,15 +68,15 @@ class CaseGenerator:
                 elif flag == flag_new_ope:
                     idx_ope += 1
                     idx_ma = 0
-                    flag_new_ope += self.nums_option[self.num_ope_biass[i]+idx_ope] * 2 + 1
-                    line.append(self.nums_option[self.num_ope_biass[i]+idx_ope])
+                    flag_new_ope += self.nums_option[self.num_ope_biass[i] + idx_ope] * 2 + 1
+                    line.append(self.nums_option[self.num_ope_biass[i] + idx_ope])
                     flag += 1
                 elif flag_time == 0:
-                    line.append(self.ope_ma[self.num_ma_biass[self.num_ope_biass[i]+idx_ope] + idx_ma])
+                    line.append(self.ope_ma[self.num_ma_biass[self.num_ope_biass[i] + idx_ope] + idx_ma])
                     flag += 1
                     flag_time = 1
                 else:
-                    line.append(self.proc_time[self.num_ma_biass[self.num_ope_biass[i]+idx_ope] + idx_ma])
+                    line.append(self.proc_time[self.num_ma_biass[self.num_ope_biass[i] + idx_ope] + idx_ma])
                     flag += 1
                     flag_time = 0
                     idx_option += 1
@@ -89,7 +88,7 @@ class CaseGenerator:
                     break
         lines.append('\n')
         if self.flag_doc:
-            doc = open(self.path + '{0}j_{1}m_{2}.fjs'.format(self.num_jobs, self.num_mas, str.zfill(str(idx+1),3)),'a')
+            doc = open(self.path + '{0}j_{1}m_{2}.fjs'.format(self.num_jobs, self.num_mas, str.zfill(str(idx + 1), 3)), 'a')
             for i in range(len(lines_doc)):
                 print(lines_doc[i], file=doc)
             doc.close()

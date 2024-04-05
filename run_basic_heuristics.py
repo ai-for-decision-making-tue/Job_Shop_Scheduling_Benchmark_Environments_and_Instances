@@ -1,9 +1,9 @@
 import argparse
-import time
 import logging
+import time
 
-from solution_methods.helper_functions import *
 from plotting.drawer import draw_gantt_chart, draw_precedence_relations
+from solution_methods.helper_functions import *
 
 logging.basicConfig(level=logging.INFO)
 PARAM_FILE = "configs/basic_heuristics.toml"

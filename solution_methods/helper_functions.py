@@ -1,10 +1,10 @@
 import os
-import tomli
 
 import pandas as pd
+import tomli
 
+from data_parsers import parser_fajsp, parser_fjsp, parser_fjsp_sdst, parser_jsp_fsp
 from scheduling_environment.jobShop import JobShop
-from data_parsers import parser_fajsp, parser_fjsp, parser_jsp_fsp, parser_fjsp_sdst
 
 
 def load_parameters(config_toml):

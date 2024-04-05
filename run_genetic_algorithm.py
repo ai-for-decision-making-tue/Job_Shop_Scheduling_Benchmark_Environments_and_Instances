@@ -1,16 +1,16 @@
 import argparse
 import logging
 import multiprocessing
-import numpy as np
-from deap import base, creator, tools
 from multiprocessing.pool import Pool
 
+import numpy as np
+from deap import base, creator, tools
 
-from plotting.drawer import draw_precedence_relations, draw_gantt_chart
-from solution_methods.helper_functions import record_stats, load_parameters, load_job_shop_env, dict_to_excel
-from solution_methods.genetic_algorithm.operators import (evaluate_population, evaluate_individual, variation,
-                                                          init_individual, init_population, mutate_shortest_proc_time,
-                                                          mutate_sequence_exchange, pox_crossover, repair_precedence_constraints)
+from plotting.drawer import draw_gantt_chart, draw_precedence_relations
+from solution_methods.genetic_algorithm.operators import (
+    evaluate_individual, evaluate_population, init_individual, init_population, mutate_sequence_exchange,
+    mutate_shortest_proc_time, pox_crossover, repair_precedence_constraints, variation)
+from solution_methods.helper_functions import dict_to_excel, load_job_shop_env, load_parameters, record_stats
 
 logging.basicConfig(level=logging.INFO)
 
@@ -70,7 +70,7 @@ def initialize_run(pool: Pool, **kwargs):
     return initial_population, toolbox, stats, hof, jobShopEnv
 
 
-def algo_run(jobShopEnv, population, toolbox, folder, exp_name, stats=None, hof=None, **kwargs):
+def run_method(jobShopEnv, population, toolbox, folder, exp_name, stats=None, hof=None, **kwargs):
     """Executes the genetic algorithm and returns the best individual.
 
     Args:
@@ -161,7 +161,7 @@ def main(param_file=PARAM_FILE):
 
     exp_name = ("/rseed" + str(parameters['algorithm']["rseed"]) + "/")
     population, toolbox, stats, hof, jobShopEnv = initialize_run(pool, **parameters)
-    best_individual = algo_run(jobShopEnv, population, toolbox, folder, exp_name, stats, hof, **parameters)
+    best_individual = run_method(jobShopEnv, population, toolbox, folder, exp_name, stats, hof, **parameters)
     return best_individual
 
 

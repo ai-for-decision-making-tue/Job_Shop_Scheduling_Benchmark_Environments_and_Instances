@@ -6,15 +6,12 @@
 # Presented in IEEE Transactions on Industrial Informatics, 2023.
 # Paper URL: https://ieeexplore.ieee.org/document/9826438
 
-import random
-import sys
 import copy
-
-import gym
-import torch
-import numpy as np
-from pathlib import Path
+import sys
 from dataclasses import dataclass
+from pathlib import Path
+
+import torch
 
 from scheduling_environment.jobShop import JobShop
 from solution_methods.FJSP_DRL.load_data import load_feats_from_sim
@@ -70,15 +67,14 @@ def convert_feat_job_2_ope(feat_job_batch, opes_appertain_batch):
     """
     return feat_job_batch.gather(1, opes_appertain_batch)
 
-class FJSPEnv_test():
 
-    def __init__(self, JobShop_module, env_paras):
+class FJSPEnv_test():
+    def __init__(self, JobShop_module, test_parameters):
         # static
-        self.batch_size = env_paras["batch_size"]  # Batch Size
-        self.num_jobs = env_paras["num_jobs"]  # Number of jobs
-        self.num_mas = env_paras["num_mas"]  # Number of machines
-        self.paras = env_paras  # Parameters
-        self.device = env_paras["device"]  # Computing device for PyTorch
+        self.batch_size = 1
+        self.num_jobs = JobShop_module.nr_of_jobs  # Number of jobs
+        self.num_mas = JobShop_module.nr_of_machines  # Number of machines
+        self.device = test_parameters["device"]  # Computing device for PyTorch
 
         self.JSP_instance: list[JobShop] = JobShop_module
 
@@ -86,15 +82,13 @@ class FJSPEnv_test():
         num_data = 8  # The amount of data extracted from instance
         tensors = [[] for _ in range(num_data)]
         self.num_opes = 0
-        for i in range(self.batch_size):
-            self.num_opes = max(self.num_jobs, len(self.JSP_instance[i].operations))
+        self.num_opes = max(self.num_jobs, len(self.JSP_instance.operations))
 
         # Extract features from each JobShop module
-        for i in range(self.batch_size):
-            raw_features = load_feats_from_sim(self.JSP_instance[i], self.num_mas, self.num_opes)
-            # print(raw_features[0].shape)
-            for j in range(num_data):
-                tensors[j].append(raw_features[j].to(self.device))
+        raw_features = load_feats_from_sim(self.JSP_instance, self.num_mas, self.num_opes)
+        # print(raw_features[0].shape)
+        for j in range(num_data):
+            tensors[j].append(raw_features[j].to(self.device))
 
         # dynamic feats
         # shape: (batch_size, num_opes, num_mas)
@@ -128,16 +122,17 @@ class FJSPEnv_test():
         self.ope_step_batch = copy.deepcopy(self.num_ope_biases_batch)
 
         # Generate raw feature vectors
-        feat_opes_batch = torch.zeros(size=(self.batch_size, self.paras["ope_feat_dim"], self.num_opes))
-        feat_mas_batch = torch.zeros(size=(self.batch_size, self.paras["ma_feat_dim"], self.num_mas))
+        ope_feat_dim = 6
+        ma_feat_dim = 3
+        num_sample = 1
+        feat_opes_batch = torch.zeros(size=(num_sample, ope_feat_dim, self.num_opes))
+        feat_mas_batch = torch.zeros(size=(num_sample, ma_feat_dim, self.num_mas))
 
         feat_opes_batch[:, 1, :] = torch.count_nonzero(self.ope_ma_adj_batch, dim=2)
         feat_opes_batch[:, 2, :] = torch.sum(self.proc_times_batch, dim=2).div(feat_opes_batch[:, 1, :] + 1e-9)
         feat_opes_batch[:, 3, :] = convert_feat_job_2_ope(self.nums_ope_batch, self.opes_appertain_batch)
-        feat_opes_batch[:, 5, :] = torch.bmm(feat_opes_batch[:, 2, :].unsqueeze(1),
-                                             self.cal_cumul_adj_batch).squeeze()
-        end_time_batch = (feat_opes_batch[:, 5, :] +
-                          feat_opes_batch[:, 2, :]).gather(1, self.end_ope_biases_batch)
+        feat_opes_batch[:, 5, :] = torch.bmm(feat_opes_batch[:, 2, :].unsqueeze(1), self.cal_cumul_adj_batch).squeeze()
+        end_time_batch = (feat_opes_batch[:, 5, :] + feat_opes_batch[:, 2, :]).gather(1, self.end_ope_biases_batch)
         feat_opes_batch[:, 4, :] = convert_feat_job_2_ope(end_time_batch, self.opes_appertain_batch)
         feat_mas_batch[:, 0, :] = torch.count_nonzero(self.ope_ma_adj_batch, dim=1)
         self.JSM_feat_opes_batch = feat_opes_batch
@@ -146,13 +141,13 @@ class FJSPEnv_test():
         # Masks of current status, dynamic
         # shape: (batch_size, num_jobs), True for jobs in process
         self.JSM_mask_job_procing_batch = torch.full(size=(self.batch_size, self.num_jobs), dtype=torch.bool,
-                                                 fill_value=False)
+                                                     fill_value=False)
         # shape: (batch_size, num_jobs), True for completed jobs
         self.JSM_mask_job_finish_batch = torch.full(size=(self.batch_size, self.num_jobs), dtype=torch.bool,
-                                                fill_value=False)
+                                                    fill_value=False)
         # shape: (batch_size, num_mas), True for machines in process
         self.JSM_mask_ma_procing_batch = torch.full(size=(self.batch_size, self.num_mas), dtype=torch.bool,
-                                                fill_value=False)
+                                                    fill_value=False)
 
         self.makespan_batch = torch.max(self.JSM_feat_opes_batch[:, 4, :], dim=1)[0]  # shape: (batch_size)
         self.done_batch = self.JSM_mask_job_finish_batch.all(dim=1)  # shape: (batch_size)
@@ -177,7 +172,6 @@ class FJSPEnv_test():
         self.old_feat_mas_batch = copy.deepcopy(self.JSM_feat_mas_batch)
         self.old_state = copy.deepcopy(self.state)
 
-
     def step(self, actions):
         """
         Environment transition function, based on JobShop module
@@ -187,14 +181,13 @@ class FJSPEnv_test():
         jobs = actions[2, :]
         self.N += 1
 
-        for index in range(self.batch_size):
-            ope_idx = opes[index].item()
-            mac_idx = mas[index].item()
-            env = self.JSP_instance[index]
-            operation = env.operations[ope_idx]
-            duration = operation.processing_times[mac_idx]
-            env.schedule_operation_on_machine(operation, mac_idx, duration)
-            env.get_job(operation.job_id).scheduled_operations.append(operation)
+        ope_idx = opes.item()
+        mac_idx = mas.item()
+        env = self.JSP_instance
+        operation = env.operations[ope_idx]
+        duration = operation.processing_times[mac_idx]
+        env.schedule_operation_on_machine(operation, mac_idx, duration)
+        env.get_job(operation.job_id).scheduled_operations.append(operation)
 
         # Removed unselected O-M arcs of the scheduled operations
         remain_ope_ma_adj = torch.zeros(size=(self.batch_size, self.num_mas), dtype=torch.int64)
@@ -209,79 +202,71 @@ class FJSPEnv_test():
              torch.ones(self.batch_idxes.size(0), dtype=torch.float),
              proc_times), dim=1)
 
-
         # Update 'Number of unscheduled operations in the job' - use JobShop
-        for instance_idx in range(self.batch_size):
-            job_idx = jobs[instance_idx].item()
-            unscheduled_opes = 0
-            for each_ope in self.JSP_instance[instance_idx].get_job(job_idx).operations:
-                if each_ope.scheduling_information.__len__() == 0:
-                    unscheduled_opes += 1
-            start_ope_idx = self.num_ope_biases_batch[self.batch_idxes, jobs]
-            end_ope_idx = self.end_ope_biases_batch[self.batch_idxes, jobs]
-            self.JSM_feat_opes_batch[self.batch_idxes[instance_idx], 3, start_ope_idx[instance_idx]:end_ope_idx[instance_idx] + 1] = unscheduled_opes
+
+        job_idx = jobs.item()
+        unscheduled_opes = 0
+        for each_ope in self.JSP_instance.get_job(job_idx).operations:
+            if each_ope.scheduling_information.__len__() == 0:
+                unscheduled_opes += 1
+        start_ope_idx = self.num_ope_biases_batch[self.batch_idxes, jobs]
+        end_ope_idx = self.end_ope_biases_batch[self.batch_idxes, jobs]
+        self.JSM_feat_opes_batch[self.batch_idxes, 3, start_ope_idx:end_ope_idx + 1] = unscheduled_opes
 
         # Update 'Start time' and 'Job completion time' - use JobShop
-        self.JSM_feat_opes_batch[self.batch_idxes, 5, opes] = self.JSM_time[self.batch_idxes]
-        for instance_idx in range(self.batch_size):
-            for each_ope in self.JSP_instance[instance_idx].operations:
-                if each_ope.scheduling_information.__len__() == 0:
-                    if each_ope.predecessors.__len__() == 0:
-                        est_start_time = self.JSM_feat_opes_batch[self.batch_idxes[instance_idx], 5, each_ope.operation_id]
-                    else:
-                        if each_ope.predecessors[0].scheduling_information.__len__() == 0:
-                            est_start_time = self.JSM_feat_opes_batch[self.batch_idxes[instance_idx], 5, each_ope.predecessors[0].operation_id] + self.JSM_feat_opes_batch[self.batch_idxes[instance_idx], 2, each_ope.predecessors[0].operation_id]
-                        else:
-                            est_start_time = each_ope.predecessors[0].scheduling_information['start_time']  + each_ope.predecessors[0].scheduling_information['processing_time']
+        self.JSM_feat_opes_batch[self.batch_idxes, 5, opes] = self.JSM_time
+        for each_ope in self.JSP_instance.operations:
+            if each_ope.scheduling_information.__len__() == 0:
+                if each_ope.predecessors.__len__() == 0:
+                    est_start_time = self.JSM_feat_opes_batch[self.batch_idxes, 5, each_ope.operation_id]
                 else:
-                    est_start_time = each_ope.scheduling_information['start_time']
-                self.JSM_feat_opes_batch[self.batch_idxes[instance_idx], 5, each_ope.operation_id] = est_start_time
+                    if each_ope.predecessors[0].scheduling_information.__len__() == 0:
+                        est_start_time = self.JSM_feat_opes_batch[self.batch_idxes, 5, each_ope.predecessors[0].operation_id] + self.JSM_feat_opes_batch[self.batch_idxes, 2, each_ope.predecessors[0].operation_id]
+                    else:
+                        est_start_time = each_ope.predecessors[0].scheduling_information['start_time'] + each_ope.predecessors[0].scheduling_information['processing_time']
+            else:
+                est_start_time = each_ope.scheduling_information['start_time']
+            self.JSM_feat_opes_batch[self.batch_idxes, 5, each_ope.operation_id] = est_start_time
 
-            for each_job in self.JSP_instance[instance_idx].jobs:
-                est_end_times = [(self.JSM_feat_opes_batch[self.batch_idxes[instance_idx], 5, ope_in_job.operation_id] + self.JSM_feat_opes_batch[self.batch_idxes[instance_idx], 2, ope_in_job.operation_id]) for ope_in_job in each_job.operations]
-                job_end_time = max(est_end_times)
-                for ope_of_job in each_job.operations:
-                    self.JSM_feat_opes_batch[self.batch_idxes[instance_idx], 4, ope_of_job.operation_id] = job_end_time
+        for each_job in self.JSP_instance.jobs:
+            est_end_times = [(self.JSM_feat_opes_batch[self.batch_idxes, 5, ope_in_job.operation_id] + self.JSM_feat_opes_batch[self.batch_idxes, 2, ope_in_job.operation_id]) for ope_in_job in each_job.operations]
+            job_end_time = max(est_end_times)
+            for ope_of_job in each_job.operations:
+                self.JSM_feat_opes_batch[self.batch_idxes, 4, ope_of_job.operation_id] = job_end_time
 
         # Check if there are still O-M pairs to be processed, otherwise the environment transits to the next time - using JobShop Module
-        for instance_idx in range(self.batch_size):
-            this_env = self.JSP_instance[instance_idx]
-            cur_times = []
-            for each_job in this_env.jobs:
-                if len(each_job.scheduled_operations) == len(each_job.operations):
-                    continue
-                next_ope = each_job.operations[len(each_job.scheduled_operations)]
-                latest_ope_end_time = next_ope.finishing_time_predecessors
-                for each_mach_id in next_ope.optional_machines_id:
-                    # if schedule the next operation of this job on an optional machine, the earlist start time
-                    # operation available: predecessor operation end
-                    # machine available: last assigned operation end
-                    cur_times.append(max(latest_ope_end_time, this_env.get_machine(each_mach_id).next_available_time, self.JSM_time[instance_idx]))
-            self.JSM_time[instance_idx] = min(cur_times, default=self.JSM_time[instance_idx])
+        this_env = self.JSP_instance
+        cur_times = []
+        for each_job in this_env.jobs:
+            if len(each_job.scheduled_operations) == len(each_job.operations):
+                continue
+            next_ope = each_job.operations[len(each_job.scheduled_operations)]
+            latest_ope_end_time = next_ope.finishing_time_predecessors
+            for each_mach_id in next_ope.optional_machines_id:
+                # if schedule the next operation of this job on an optional machine, the earlist start time
+                # operation available: predecessor operation end
+                # machine available: last assigned operation end
+                cur_times.append(max(latest_ope_end_time, this_env.get_machine(each_mach_id).next_available_time, self.JSM_time))
+        self.JSM_time = min(cur_times, default=self.JSM_time)
 
         # Update feature vectors of machines - using JobShop module
-        self.JSM_feat_mas_batch[self.batch_idxes, 0, :] = torch.count_nonzero(self.ope_ma_adj_batch[self.batch_idxes, :, :],dim=1).float()
-        for instance_idx in range(self.batch_size):
-            for each_mach in self.JSP_instance[instance_idx].machines:
-                workload = sum([ope_on_mach.scheduled_duration for ope_on_mach in each_mach.scheduled_operations])
-                cur_time = self.JSM_time[self.batch_idxes[instance_idx], None]
-                workload = min(cur_time, workload)
-                self.JSM_feat_mas_batch[self.batch_idxes[instance_idx], 2, each_mach.machine_id] = workload / (cur_time + 1e-9)
-                self.JSM_feat_mas_batch[self.batch_idxes[instance_idx], 1, each_mach.machine_id] = each_mach.next_available_time
-
+        self.JSM_feat_mas_batch[self.batch_idxes, 0, :] = torch.count_nonzero(self.ope_ma_adj_batch[self.batch_idxes, :, :], dim=1).float()
+        for each_mach in self.JSP_instance.machines:
+            workload = sum([ope_on_mach.scheduled_duration for ope_on_mach in each_mach.scheduled_operations])
+            cur_time = self.JSM_time
+            workload = min(cur_time, workload)
+            self.JSM_feat_mas_batch[self.batch_idxes, 2, each_mach.machine_id] = workload / (cur_time + 1e-9)
+            self.JSM_feat_mas_batch[self.batch_idxes, 1, each_mach.machine_id] = each_mach.next_available_time
 
         # Update other variable according to actions - using JobShop module
         self.ope_step_batch[self.batch_idxes, jobs] += 1
         JSM_mask_jp_list = []
         JSM_mask_jf_list = []
         JSM_mask_mp_list = []
-        for instance_idx in range(self.batch_size):
-            JSM_mask_jp_list.append([True if this_job.next_ope_earliest_begin_time > self.JSM_time[instance_idx] else False
-                                     for this_job in self.JSP_instance[instance_idx].jobs])
-            JSM_mask_jf_list.append([True if this_job.operations.__len__() == this_job.scheduled_operations.__len__() else False
-                 for this_job in self.JSP_instance[instance_idx].jobs])
-            JSM_mask_mp_list.append([True if this_mach.next_available_time > self.JSM_time[instance_idx] else False
-                 for this_mach in self.JSP_instance[instance_idx].machines])
+        JSM_mask_jp_list.append([True if this_job.next_ope_earliest_begin_time > self.JSM_time else False
+                                 for this_job in self.JSP_instance.jobs])
+        JSM_mask_jf_list.append([True if this_job.operations.__len__() == this_job.scheduled_operations.__len__() else False for this_job in self.JSP_instance.jobs])
+        JSM_mask_mp_list.append([True if this_mach.next_available_time > self.JSM_time else False for this_mach in self.JSP_instance.machines])
         self.JSM_mask_job_procing_batch = torch.tensor(JSM_mask_jp_list, dtype=torch.bool)
         self.JSM_mask_job_finish_batch = torch.tensor(JSM_mask_jf_list, dtype=torch.bool)
         self.JSM_mask_ma_procing_batch = torch.tensor(JSM_mask_mp_list, dtype=torch.bool)
@@ -325,12 +310,11 @@ class FJSPEnv_test():
         self.ope_step_batch = copy.deepcopy(self.num_ope_biases_batch)
 
         self.JSM_mask_job_procing_batch = torch.full(size=(self.batch_size, self.num_jobs), dtype=torch.bool,
-                                                 fill_value=False)
+                                                     fill_value=False)
         self.JSM_mask_job_finish_batch = torch.full(size=(self.batch_size, self.num_jobs), dtype=torch.bool,
-                                                fill_value=False)
+                                                    fill_value=False)
         self.JSM_mask_ma_procing_batch = torch.full(size=(self.batch_size, self.num_mas), dtype=torch.bool,
-                                                fill_value=False)
-
+                                                    fill_value=False)
         self.machines_batch = torch.zeros(size=(self.batch_size, self.num_mas, 4))
         self.machines_batch[:, :, 0] = torch.ones(size=(self.batch_size, self.num_mas))
 
@@ -338,4 +322,3 @@ class FJSPEnv_test():
         self.done_batch = self.JSM_mask_job_finish_batch.all(dim=1)
 
         return self.state
-

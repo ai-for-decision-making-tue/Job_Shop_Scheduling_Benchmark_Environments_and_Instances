@@ -8,13 +8,14 @@
 
 import copy
 import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Categorical
 
 from solution_methods.FJSP_DRL.hgnn import GATedge, MLPsim
-from solution_methods.FJSP_DRL.mlp import MLPCritic, MLPActor
+from solution_methods.FJSP_DRL.mlp import MLPActor, MLPCritic
 
 
 class Memory:
@@ -99,12 +100,19 @@ class MLPs(nn.Module):
         """
         h = (feats[1], feats[0], feats[0], feats[0])
         # Identity matrix for self-loop of nodes
-        self_adj = torch.eye(feats[0].size(-2),
-                             dtype=torch.int64).unsqueeze(0).expand_as(ope_pre_adj_batch[batch_idxes])
+        self_adj = (
+            torch.eye(feats[0].size(-2), dtype=torch.int64)
+            .unsqueeze(0)
+            .expand_as(ope_pre_adj_batch[batch_idxes])
+        )
 
         # Calculate an return operation embedding
-        adj = (ope_ma_adj_batch[batch_idxes], ope_pre_adj_batch[batch_idxes],
-               ope_sub_adj_batch[batch_idxes], self_adj)
+        adj = (
+            ope_ma_adj_batch[batch_idxes],
+            ope_pre_adj_batch[batch_idxes],
+            ope_sub_adj_batch[batch_idxes],
+            self_adj,
+        )
         MLP_embeddings = []
         for i in range(len(adj)):
             MLP_embeddings.append(self.gnn_layers[i](h[i], adj[i]))
@@ -163,11 +171,11 @@ class HGNNScheduler(nn.Module):
     def feature_normalize(self, data):
         return (data - torch.mean(data)) / ((data.std() + 1e-5))
 
-    '''
+    """
         raw_opes: shape: [len(batch_idxes), max(num_opes), in_size_ope]
         raw_mas: shape: [len(batch_idxes), num_mas, in_size_ma]
         proc_time: shape: [len(batch_idxes), max(num_opes), num_mas]
-    '''
+    """
 
     def get_normalized(self, raw_opes, raw_mas, proc_time, batch_idxes, nums_opes, flag_sample=False, flag_train=False):
         """
@@ -243,7 +251,7 @@ class HGNNScheduler(nn.Module):
         if not flag_sample and not flag_train:
             h_opes_pooled = []
             for i in range(len(batch_idxes)):
-                h_opes_pooled.append(torch.mean(h_opes[i, :nums_opes[i], :], dim=-2))
+                h_opes_pooled.append(torch.mean(h_opes[i, : nums_opes[i], :], dim=-2))
             h_opes_pooled = torch.stack(h_opes_pooled)  # shape: [len(batch_idxes), d]
         else:
             h_opes_pooled = h_opes.mean(dim=-2)  # shape: [len(batch_idxes), out_size_ope]
@@ -269,8 +277,7 @@ class HGNNScheduler(nn.Module):
         ma_eligible = ~state.mask_ma_procing_batch[batch_idxes].unsqueeze(1).expand_as(h_jobs_padding[..., 0])
         # Matrix indicating whether job is eligible
         # shape: [len(batch_idxes), num_jobs, num_mas]
-        job_eligible = ~(state.mask_job_procing_batch[batch_idxes] +
-                         state.mask_job_finish_batch[batch_idxes])[:, :, None].expand_as(h_jobs_padding[..., 0])
+        job_eligible = ~(state.mask_job_procing_batch[batch_idxes] + state.mask_job_finish_batch[batch_idxes])[:, :, None].expand_as(h_jobs_padding[..., 0])
         # shape: [len(batch_idxes), num_jobs, num_mas]
         eligible = job_eligible & ma_eligible & (eligible_proc == 1)
         if (~(eligible)).all():
@@ -285,11 +292,11 @@ class HGNNScheduler(nn.Module):
 
         # Get priority index and probability of actions with masking the ineligible actions
         scores = self.actor(h_actions).flatten(1)
-        scores[~mask] = float('-inf')
+        scores[~mask] = float("-inf")
         action_probs = F.softmax(scores, dim=1)
 
         # Store data in memory during training
-        if flag_train == True:
+        if flag_train is True:
             memories.ope_ma_adj.append(copy.deepcopy(state.ope_ma_adj_batch))
             memories.ope_pre_adj.append(copy.deepcopy(state.ope_pre_adj_batch))
             memories.ope_sub_adj.append(copy.deepcopy(state.ope_sub_adj_batch))
@@ -321,8 +328,7 @@ class HGNNScheduler(nn.Module):
         opes = ope_step_batch[state.batch_idxes, jobs]
 
         # Store data in memory during training
-        if flag_train == True:
-            # memories.states.append(copy.deepcopy(state))
+        if flag_train is True:
             memories.logprobs.append(dist.log_prob(action_indexes))
             memories.action_indexes.append(action_indexes)
 
@@ -357,7 +363,7 @@ class HGNNScheduler(nn.Module):
         scores = self.actor(h_actions).flatten(1)
         mask = eligible.transpose(1, 2).flatten(1)
 
-        scores[~mask] = float('-inf')
+        scores[~mask] = float("-inf")
         action_probs = F.softmax(scores, dim=1)
         state_values = self.critic(h_pooled)
         dist = Categorical(action_probs.squeeze())
@@ -433,24 +439,23 @@ class PPO:
                 else:
                     start_idx = i * minibatch_size
                     end_idx = full_batch_size
-                logprobs, state_values, dist_entropy = \
-                    self.policy.evaluate(old_ope_ma_adj[start_idx: end_idx, :, :],
-                                         old_ope_pre_adj[start_idx: end_idx, :, :],
-                                         old_ope_sub_adj[start_idx: end_idx, :, :],
-                                         old_raw_opes[start_idx: end_idx, :, :],
-                                         old_raw_mas[start_idx: end_idx, :, :],
-                                         old_proc_time[start_idx: end_idx, :, :],
-                                         old_jobs_gather[start_idx: end_idx, :, :],
-                                         old_eligible[start_idx: end_idx, :, :],
-                                         old_action_envs[start_idx: end_idx])
+                logprobs, state_values, dist_entropy = self.policy.evaluate(
+                    old_ope_ma_adj[start_idx:end_idx, :, :],
+                    old_ope_pre_adj[start_idx:end_idx, :, :],
+                    old_ope_sub_adj[start_idx:end_idx, :, :],
+                    old_raw_opes[start_idx:end_idx, :, :],
+                    old_raw_mas[start_idx:end_idx, :, :],
+                    old_proc_time[start_idx:end_idx, :, :],
+                    old_jobs_gather[start_idx:end_idx, :, :],
+                    old_eligible[start_idx:end_idx, :, :],
+                    old_action_envs[start_idx:end_idx],
+                )
 
                 ratios = torch.exp(logprobs - old_logprobs[i * minibatch_size:(i + 1) * minibatch_size].detach())
                 advantages = rewards_envs[i * minibatch_size:(i + 1) * minibatch_size] - state_values.detach()
                 surr1 = ratios * advantages
                 surr2 = torch.clamp(ratios, 1 - self.eps_clip, 1 + self.eps_clip) * advantages
-                loss = - self.A_coeff * torch.min(surr1, surr2) \
-                       + self.vf_coeff * self.MseLoss(state_values,
-                                                      rewards_envs[i * minibatch_size:(i + 1) * minibatch_size]) \
+                loss = - self.A_coeff * torch.min(surr1, surr2) + self.vf_coeff * self.MseLoss(state_values, rewards_envs[i * minibatch_size:(i + 1) * minibatch_size]) \
                        - self.entropy_coeff * dist_entropy
                 loss_epochs += loss.mean().detach()
 
@@ -461,5 +466,6 @@ class PPO:
         # Copy new weights into old policy:
         self.policy_old.load_state_dict(self.policy.state_dict())
 
-        return loss_epochs.item() / self.K_epochs, \
-               discounted_rewards.item() / (self.num_envs * train_paras["update_timestep"])
+        return loss_epochs.item() / self.K_epochs, discounted_rewards.item() / (
+            self.num_envs * train_paras["update_timestep"]
+        )
