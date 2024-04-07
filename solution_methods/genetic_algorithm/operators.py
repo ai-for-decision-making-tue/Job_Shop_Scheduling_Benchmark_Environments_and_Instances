@@ -1,6 +1,4 @@
 import random
-import time
-
 import numpy as np
 
 from scheduling_environment.jobShop import JobShop

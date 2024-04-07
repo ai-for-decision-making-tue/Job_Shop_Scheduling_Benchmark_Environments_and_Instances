@@ -8,16 +8,9 @@ import torch
 from plotting.drawer import draw_gantt_chart
 from solution_methods.FJSP_DRL.env_test import FJSPEnv_test
 from solution_methods.FJSP_DRL.PPO import HGNNScheduler
-from solution_methods.helper_functions import load_job_shop_env, load_parameters
+from solution_methods.helper_functions import load_job_shop_env, load_parameters, initialize_device, set_seeds
 
 PARAM_FILE = "configs/FJSP_DRL.toml"
-
-
-def initialize_device(parameters: dict) -> torch.device:
-    device_str = "cpu"
-    if parameters['test_parameters']['device'] == "cuda":
-        device_str = "cuda:0" if torch.cuda.is_available() else "cpu"
-    return torch.device(device_str)
 
 
 def run_method(**parameters):
@@ -25,6 +18,7 @@ def run_method(**parameters):
     device = initialize_device(parameters)
     model_parameters = parameters["model_parameters"]
     test_parameters = parameters["test_parameters"]
+    set_seeds(parameters["test_parameters"]["seed"])
 
     # Configure default device
     torch.set_default_tensor_type('torch.cuda.FloatTensor' if device.type == 'cuda' else 'torch.FloatTensor')
@@ -47,9 +41,8 @@ def run_method(**parameters):
         hgnn_model.load_state_dict(policy)
 
     # Configure environment and load instance
-    instance_path = test_parameters['problem_instance']
-    JSMEnv = load_job_shop_env(instance_path)
-    env_test = FJSPEnv_test(JSMEnv, test_parameters)
+    jobShopEnv = load_job_shop_env(test_parameters['problem_instance'])
+    env_test = FJSPEnv_test(jobShopEnv, test_parameters)
 
     # Get state and completion signal
     state = env_test.state

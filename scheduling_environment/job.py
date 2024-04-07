@@ -1,6 +1,5 @@
 from typing import List
-
-from .operation import Operation
+from scheduling_environment.operation import Operation
 
 
 class Job:
