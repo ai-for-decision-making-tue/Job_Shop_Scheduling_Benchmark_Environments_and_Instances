@@ -32,8 +32,8 @@ A_coeff = 1.0               # Coefficient for actor loss
 vf_coeff = 0.5              # Coefficient for value function loss
 entropy_coeff = 0.01        # Coefficient for entropy loss
 max_iterations = 1000       # Maximum number of iterations
-save_timestep = 20          # Timestep for saving model checkpoints
-update_timestep = 1         # Timestep for model updates
+save_timestep = 20          # Time step for saving model checkpoints
+update_timestep = 1         # Time step for model updates
 minibatch_size = 512        # Mini-batch size for training
 parallel_iter = 20          # Number of parallel iterations
 viz = false                 # Visualize the training process --> when true: first launch local server with: python -m visdom.server (and set to: online)
@@ -44,10 +44,9 @@ device = "cpu"              # Device for training ("cpu" or "cuda")
 
 # Configuration for test parameters
 [test_parameters]
-seed = 1
+seed = 3                                                                # Set random seed for result replication
 problem_instance = "/fjsp/1_Brandimarte/Mk02.fjs"                       # Problem instance for testing
 trained_policy = "/solution_methods/FJSP_DRL/save/train_20240314_192906/song_10_5.pt"   # Load pretrained policy
 sample = false                                                          # Sampling flag for testing
-num_sample = 1                                                          # Number of samples for testing (nr )
 plotting = true                                                         # plot instance representation and ganttchart
 device = "cpu"                                                          # Device for testing ("cpu" or "cuda")

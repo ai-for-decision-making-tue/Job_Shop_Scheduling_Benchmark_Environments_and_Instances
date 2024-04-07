@@ -10,7 +10,7 @@ from plotting.drawer import draw_gantt_chart, draw_precedence_relations
 from solution_methods.genetic_algorithm.operators import (
     evaluate_individual, evaluate_population, init_individual, init_population, mutate_sequence_exchange,
     mutate_shortest_proc_time, pox_crossover, repair_precedence_constraints, variation)
-from solution_methods.helper_functions import dict_to_excel, load_job_shop_env, load_parameters, record_stats
+from solution_methods.helper_functions import load_job_shop_env, load_parameters, record_stats, set_seeds
 
 logging.basicConfig(level=logging.INFO)
 
@@ -33,6 +33,8 @@ def initialize_run(pool: Pool, **kwargs):
     except FileNotFoundError:
         logging.error(f"Problem instance {kwargs['instance']['problem_instance']} not found.")
         return
+
+    set_seeds(kwargs["algorithm"]["seed"])
 
     toolbox = base.Toolbox()
     toolbox.register("map", pool.map)
@@ -159,7 +161,7 @@ def main(param_file=PARAM_FILE):
             + str(parameters['algorithm']["indpb"])
     )
 
-    exp_name = ("/rseed" + str(parameters['algorithm']["rseed"]) + "/")
+    exp_name = ("/seed" + str(parameters['algorithm']["seed"]) + "/")
     population, toolbox, stats, hof, jobShopEnv = initialize_run(pool, **parameters)
     best_individual = run_method(jobShopEnv, population, toolbox, folder, exp_name, stats, hof, **parameters)
     return best_individual

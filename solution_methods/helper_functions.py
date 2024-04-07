@@ -1,7 +1,10 @@
 import os
+import random
+import numpy as np
 
 import pandas as pd
 import tomli
+import torch
 
 from data_parsers import parser_fajsp, parser_fjsp, parser_fjsp_sdst, parser_jsp_fsp
 from scheduling_environment.jobShop import JobShop
@@ -34,33 +37,19 @@ def load_job_shop_env(problem_instance: str, from_absolute_path=False) -> JobSho
     return jobShopEnv
 
 
-def create_stats_list(population, gen):
-    stats_list = []
-    for ind in population:
-        tmp_dict = {}
-        tmp_dict.update(
-            {
-                "Generation": gen,
-                "obj1": ind.fitness.values[0]
-            })
-        if hasattr(ind, "objectives"):
-            tmp_dict.update(
-                {
-                    "obj1": ind.objectives[0],
-                }
-            )
-        tmp_dict = {**tmp_dict}
-        stats_list.append(tmp_dict)
-    return stats_list
+def set_seeds(seed_value=0):
+    random.seed(seed_value)
+    np.random.seed(seed_value)
+    torch.manual_seed(seed_value)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed_value)
 
 
-def record_stats(gen, population, logbook, stats, verbose, df_list, logging):
-    stats_list = create_stats_list(population, gen)
-    df_list.append(pd.DataFrame(stats_list))
-    record = stats.compile(population) if stats is not None else {}
-    logbook.record(gen=gen, **record)
-    if verbose:
-        logging.info(logbook.stream)
+def initialize_device(parameters: dict) -> torch.device:
+    device_str = "cpu"
+    if parameters['test_parameters']['device'] == "cuda":
+        device_str = "cuda:0" if torch.cuda.is_available() else "cpu"
+    return torch.device(device_str)
 
 
 def update_operations_available_for_scheduling(env):
@@ -75,22 +64,3 @@ def update_operations_available_for_scheduling(env):
         )
     ]
     env.set_operations_available_for_scheduling(operations_available)
-
-
-def dict_to_excel(dictionary, folder, filename):
-    """Save outputs in files"""
-
-    # Check if the folder exists, if not, create it
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-
-    # Check if the file exists, if so, give a warning
-    full_path = os.path.join(folder, filename)
-    if os.path.exists(full_path):
-        print(f"Warning: {full_path} already exists. Overwriting file.")
-
-    # Convert the dictionary to a DataFrame
-    df = pd.DataFrame([dictionary])
-
-    # Save the DataFrame to Excel
-    df.to_excel(full_path, index=False, engine='openpyxl')
