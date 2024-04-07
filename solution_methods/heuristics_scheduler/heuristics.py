@@ -31,7 +31,6 @@ def greedy_scheduler(jobShop: JobShop) -> JobShop:
     """
 
     update_operations_available_for_scheduling(jobShop)
-
     while len(jobShop.operations_to_be_scheduled) > 0:
         best_operation = None
         best_machine_id = None
@@ -48,8 +47,8 @@ def greedy_scheduler(jobShop: JobShop) -> JobShop:
     return jobShop
 
 
-def local_selection_scheduler(jobShop: JobShop) -> JobShop:
-    """ local selection scheduler
+def local_load_balancing_scheduler(jobShop: JobShop) -> JobShop:
+    """ local load balancing scheduler
 
     :param env: The environment where jobs need to be.
     :return: The environment after jobs have been assigned.
@@ -83,8 +82,8 @@ def local_selection_scheduler(jobShop: JobShop) -> JobShop:
     return jobShop
 
 
-def global_selection_scheduler(jobShop: JobShop) -> JobShop:
-    """ global selection scheduler
+def global_load_balancing_scheduler(jobShop: JobShop) -> JobShop:
+    """ global load balancing scheduler
 
     :param env: The environment where jobs need to be.
     :return: The environment after jobs have been assigned.
