@@ -5,7 +5,7 @@ from scheduling_environment.jobShop import JobShop
 from scheduling_environment.operation import Operation
 from solution_methods.helper_functions import update_operations_available_for_scheduling
 from solution_methods.heuristics_scheduler.heuristics import (
-    global_selection_scheduler, local_selection_scheduler, random_scheduler)
+    global_selection_scheduler, local_load_balancing_scheduler, random_scheduler)
 
 
 def select_next_operation_from_job(jobShopEnv: JobShop, job_id) -> Operation:
@@ -55,7 +55,7 @@ def init_individual(ind_class, params, jobShopEnv):
     if rand <= 0.6:  # 60% initial assignment with global selection scheduler
         jobShopEnv = global_selection_scheduler(jobShopEnv)
     elif rand <= 0.9:  # 30% initial assignment with local selection scheduler
-        jobShopEnv = local_selection_scheduler(jobShopEnv)
+        jobShopEnv = local_load_balancing_scheduler(jobShopEnv)
     else:  # 10% initial assignment with random scheduler
         jobShopEnv = random_scheduler(jobShopEnv)
 
