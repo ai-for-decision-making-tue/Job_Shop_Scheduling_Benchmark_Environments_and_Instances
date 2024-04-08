@@ -1,0 +1,8 @@
+[instance]
+problem_instance = "/jsp/adams/abz5" # configure problem instance to be scheduled
+
+[solver]
+time_limit = 3600 # time limit for the OR-tools CP-SAT solver, in seconds
+
+[output]
+plotting = true # draw ganttchart of found solution

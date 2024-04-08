@@ -48,6 +48,7 @@ def run_method(folder, exp_name, **kwargs):
     elif 'jsp' in str(kwargs['instance']['problem_instance']):
         jobShopEnv = JSPmodel.update_env(jobShopEnv, results)
 
+    # Plot ganttchart
     if kwargs['output']['plotting']:
         draw_gantt_chart(jobShopEnv)
 
