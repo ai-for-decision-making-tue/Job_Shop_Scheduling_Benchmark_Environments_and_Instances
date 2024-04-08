@@ -6,3 +6,4 @@ time_limit = 64800 # time limit for the gurobi solver, in seconds
 
 [output]
 plotting = true # draw ganttchart of found solution
+
