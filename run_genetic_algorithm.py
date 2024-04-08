@@ -10,7 +10,8 @@ from plotting.drawer import draw_gantt_chart, draw_precedence_relations
 from solution_methods.genetic_algorithm.operators import (
     evaluate_individual, evaluate_population, init_individual, init_population, mutate_sequence_exchange,
     mutate_shortest_proc_time, pox_crossover, repair_precedence_constraints, variation)
-from solution_methods.helper_functions import load_job_shop_env, load_parameters, record_stats, set_seeds
+from solution_methods.genetic_algorithm.helper_functions import record_stats
+from solution_methods.helper_functions import load_job_shop_env, load_parameters, set_seeds
 
 logging.basicConfig(level=logging.INFO)
 
