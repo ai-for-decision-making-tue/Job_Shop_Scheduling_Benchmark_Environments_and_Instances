@@ -3,10 +3,10 @@ import json
 import logging
 import os
 
-from gurobipy import GRB
-
-from solution_methods.helper_functions import load_parameters
+from solution_methods.helper_functions import load_parameters, load_job_shop_env
 from solution_methods.MILP import FJSPmodel, FJSPSDSTmodel, JSPmodel
+from solution_methods.MILP.utils import retrieve_decision_variables
+from plotting.drawer import draw_gantt_chart
 
 logging.basicConfig(level=logging.INFO)
 DEFAULT_RESULTS_ROOT = "./results/milp"
@@ -24,50 +24,32 @@ def run_method(folder, exp_name, **kwargs):
         None. Prints the optimization result.
     """
 
-    if 'fjsp_sdst' in str(kwargs['instance']['problem_instance']):
-        data = FJSPSDSTmodel.parse_file(kwargs['instance']['problem_instance'])
-        model = FJSPSDSTmodel.fjsp_sdst_milp(data, kwargs['solver']['time_limit'])
-    elif 'fjsp' in str(kwargs['instance']['problem_instance']):
-        data = FJSPmodel.parse_file(kwargs['instance']['problem_instance'])
-        model = FJSPmodel.fjsp_milp(data, kwargs['solver']['time_limit'])
-    elif 'jsp' in str(kwargs['instance']['problem_instance']):
-        data = JSPmodel.parse_file(kwargs['instance']['problem_instance'])
-        model = JSPmodel.jsp_milp(data, kwargs['solver']['time_limit'])
+    try:
+        jobShopEnv = load_job_shop_env(kwargs['instance']['problem_instance'])
+        if 'fjsp_sdst' in str(kwargs['instance']['problem_instance']):
+            model = FJSPSDSTmodel.fjsp_sdst_milp(jobShopEnv, kwargs['solver']['time_limit'])
+        elif 'fjsp' in str(kwargs['instance']['problem_instance']):
+            model = FJSPmodel.fjsp_milp(jobShopEnv, kwargs['solver']['time_limit'])
+        elif 'jsp' in str(kwargs['instance']['problem_instance']):
+            model = JSPmodel.jsp_milp(jobShopEnv, kwargs['solver']['time_limit'])
+    except Exception as e:
+        print(f"MILP only implemented for 'jsp', 'fjs (as jsp)', 'fjsp', 'fjsp_sdst': {e}")
 
     model.optimize()
 
-    # Status dictionary mapping
-    status_dict = {
-        GRB.OPTIMAL: 'OPTIMAL',
-        GRB.INFEASIBLE: 'INFEASIBLE',
-        GRB.INF_OR_UNBD: 'INF_OR_UNBD',
-        GRB.UNBOUNDED: 'UNBOUNDED',
-        GRB.CUTOFF: 'CUTOFF',
-        GRB.ITERATION_LIMIT: 'ITERATION_LIMIT',
-        GRB.NODE_LIMIT: 'NODE_LIMIT',
-        GRB.TIME_LIMIT: 'TIME_LIMIT',
-        GRB.SOLUTION_LIMIT: 'SOLUTION_LIMIT',
-        GRB.INTERRUPTED: 'INTERRUPTED',
-        GRB.NUMERIC: 'NUMERIC',
-        GRB.SUBOPTIMAL: 'SUBOPTIMAL',
-        GRB.INPROGRESS: 'INPROGRESS',
-        GRB.USER_OBJ_LIMIT: 'USER_OBJ_LIMIT'
-    }
+    # Retrieve the decisions made by the MILP model
+    results = retrieve_decision_variables(model, kwargs['solver']['time_limit'])
 
-    results = {
-        'time_limit': str(kwargs['solver']["time_limit"]),
-        'status': model.status,
-        'statusString': status_dict.get(model.status, 'UNKNOWN'),
-        'objValue': model.objVal if model.status == GRB.OPTIMAL else None,
-        'objBound': model.ObjBound if hasattr(model, "ObjBound") else None,
-        'variables': {},
-        'runtime': model.Runtime,
-        'nodeCount': model.NodeCount,
-        'iterationCount': model.IterCount,
-    }
+    # Update jobShopEnv
+    if 'fjsp_sdst' in str(kwargs['instance']['problem_instance']):
+        jobShopEnv = FJSPSDSTmodel.update_env(jobShopEnv, results)
+    elif 'fjsp' in str(kwargs['instance']['problem_instance']):
+        jobShopEnv = FJSPmodel.update_env(jobShopEnv, results)
+    elif 'jsp' in str(kwargs['instance']['problem_instance']):
+        jobShopEnv = JSPmodel.update_env(jobShopEnv, results)
 
-    for v in model.getVars():
-        results['variables'][v.varName] = v.x
+    if kwargs['output']['plotting']:
+        draw_gantt_chart(jobShopEnv)
 
     # Ensure the directory exists; create if not
     dir_path = os.path.join(folder, exp_name)
