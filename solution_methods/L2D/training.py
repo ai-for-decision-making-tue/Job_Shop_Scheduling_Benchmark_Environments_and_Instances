@@ -29,7 +29,7 @@ def main():
     envs = [SJSSP(n_j=n_job, n_m=n_machine) for _ in range(train_parameters["num_envs"])]
 
     data_generator = uni_instance_gen
-    file_path = str(base_path) + '/solution_methods/L2D/generated_train_data/'
+    file_path = str(base_path) + '/solution_methods/L2D/generated_data/'
     dataLoaded = np.load(file_path+'generatedData' + str(env_parameters["n_j"]) + '_' + str(env_parameters["n_m"])
                          + '_Seed' + str(env_parameters["np_seed_validation"]) + '.npy')
     vali_data = []
