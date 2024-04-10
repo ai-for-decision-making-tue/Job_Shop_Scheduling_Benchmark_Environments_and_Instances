@@ -5,31 +5,37 @@ https://github.com/google/or-tools/blob/stable/examples/python/flexible_job_shop
 """
 
 import collections
+
 from ortools.sat.python import cp_model
 
 
 def update_env(jobShopEnv, vars, solver, status, solution_count, time_limit):
-    # Gather Final Schedule
-    all_jobs = range(jobShopEnv.nr_of_jobs)
-    jobs = [[[(value, key) for key, value in operation.processing_times.items()] for operation in job.operations] for job in jobShopEnv.jobs]
-    starts = vars["starts"]
-    presences = vars["presences"]
+    """Update the job shop scheduling environment with the solution found by the solver."""
 
-    if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+    # Map job operations to their processing times and machines (according to used OR-tools format)
+    jobs_operations = [[[(value, key) for key, value in operation.processing_times.items()] for operation in job.operations] for job in jobShopEnv.jobs]
+    starts, presences = vars["starts"], vars["presences"]
+
+    # Check if a solution has been found
+    if status in [cp_model.OPTIMAL, cp_model.FEASIBLE]:
         print("Solution:")
 
         schedule = []
-        for job_id in all_jobs:
+        # Iterate through all jobs and tasks to construct the schedule
+        for job_id, job_operations in enumerate(jobs_operations):
             job_info = {"job": job_id, "tasks": []}
-            for task_id in range(len(jobs[job_id])):
-                start_time = solver.Value(starts[(job_id, task_id)])
-                machine_id = -1
-                processing_time = -1
-                for alt_id in range(len(jobs[job_id][task_id])):
-                    if solver.Value(presences[(job_id, task_id, alt_id)]):
-                        processing_time = jobs[job_id][task_id][alt_id][0]
-                        machine_id = jobs[job_id][task_id][alt_id][1]
 
+            for task_id, alternatives in enumerate(job_operations):
+                start_time = solver.Value(starts[(job_id, task_id)])
+                machine_id, processing_time = -1, -1  # Initialize as not found
+
+                # Identify the chosen machine and processing time for the task
+                for alt_id, (alt_time, alt_machine_id) in enumerate(alternatives):
+                    if solver.Value(presences[(job_id, task_id, alt_id)]):
+                        processing_time, machine_id = alt_time, alt_machine_id
+                        break  # Exit the loop once the selected alternative is found
+
+                # Append task information to the job schedule
                 task_info = {
                     "task": task_id,
                     "start": start_time,
@@ -38,15 +44,16 @@ def update_env(jobShopEnv, vars, solver, status, solution_count, time_limit):
                 }
                 job_info["tasks"].append(task_info)
 
-                # add schedule info to environment
+                # Update the environment with the task's scheduling information
                 job = jobShopEnv.get_job(job_id)
                 machine = jobShopEnv.get_machine(machine_id)
                 operation = job.operations[task_id]
-                setup_time = 0
+                setup_time = 0  # No setup time required for FJSP
                 machine.add_operation_to_schedule_at_time(operation, start_time, processing_time, setup_time)
+
             schedule.append(job_info)
 
-        # Status dictionary mapping
+        # Compile results
         results = {
             "time_limit": str(time_limit),
             "status": status,
@@ -59,8 +66,7 @@ def update_env(jobShopEnv, vars, solver, status, solution_count, time_limit):
             "Schedule": schedule,
         }
 
-        # Finally print the solution found.
-        print(f"Optimal Schedule Length: {solver.ObjectiveValue}")
+        print(f"Optimal Schedule Length: {solver.ObjectiveValue()}")
     else:
         print("No solution found.")
 
@@ -70,47 +76,27 @@ def update_env(jobShopEnv, vars, solver, status, solution_count, time_limit):
 def fjsp_cp_sat_model(jobShopEnv) -> tuple[cp_model.CpModel, dict]:
     """
     Creates a flexible job shop scheduling model using the OR-Tools library.
-
-    Args:
-        data (dict): A dictionary containing the input data for the flexible job shop scheduling problem.
-            The dictionary should have the following keys:
-            - "num_jobs" (int): The number of jobs in the problem.
-            - "num_machines" (int): The number of machines in the problem.
-            - "jobs" (list): A list of jobs, where each job is represented as a list of tasks.
-                Each task is represented as a list of alternatives, where each alternative is a tuple
-                containing the duration of the task and the machine on which it can be executed.
-
-    Returns:
-        tuple[cp_model.CpModel, dict]: A tuple containing the flexible job shop scheduling model and a dictionary
-        with the variables and intervals created during the model construction. The dictionary has the
-        following keys:
-        - "starts" (dict): A dictionary mapping (job_id, task_id) tuples to the corresponding start variables.
-        - "presences" (dict): A dictionary mapping (job_id, task_id, alt_id) tuples to the corresponding
-            presence variables.
-
     """
-    jobs = [[[(value, key) for key, value in operation.processing_times.items()] for operation in job.operations] for job in jobShopEnv.jobs]
-    num_jobs = jobShopEnv.nr_of_jobs
-    num_machines = jobShopEnv.nr_of_machines
-    all_jobs = range(num_jobs)
-    all_machines = range(num_machines)
+
+    # Map job operations to their processing times and machines (according to used OR-tools format)
+    jobs_operations = [[[(value, key) for key, value in operation.processing_times.items()] for operation in job.operations] for job in jobShopEnv.jobs]
 
     # Computes horizon dynamically as the sum of all durations
-    horizon = sum(max(alternative[0] for alternative in task) for job in jobs for task in job)
+    horizon = sum(max(alternative[0] for alternative in task) for job in jobs_operations for task in job)
     print(f"Horizon = {horizon}")
 
     # Create the model
     model = cp_model.CpModel()
 
-    # Global storage of variables.
+    # Global storage of variables
     intervals_per_resources = collections.defaultdict(list)
     starts = {}  # indexed by (job_id, task_id).
     presences = {}  # indexed by (job_id, task_id, alt_id).
     job_ends = []
 
-    # Scan the jobs and create the relevant variables and intervals.
-    for job_id in all_jobs:
-        job = jobs[job_id]
+    # Scan the jobs and create the relevant variables and intervals
+    for job_id in range(jobShopEnv.nr_of_jobs):
+        job = jobs_operations[job_id]
         num_tasks = len(job)
         previous_end = None
         for task_id in range(num_tasks):
@@ -127,22 +113,22 @@ def fjsp_cp_sat_model(jobShopEnv) -> tuple[cp_model.CpModel, dict]:
                 min_duration = min(min_duration, alt_duration)
                 max_duration = max(max_duration, alt_duration)
 
-            # Create main interval for the task.
+            # Create main interval for the task
             suffix_name = "_j%i_t%i" % (job_id, task_id)
             start = model.NewIntVar(0, horizon, "start" + suffix_name)
             duration = model.NewIntVar(min_duration, max_duration, "duration" + suffix_name)
             end = model.NewIntVar(0, horizon, "end" + suffix_name)
             interval = model.NewIntervalVar(start, duration, end, "interval" + suffix_name)
 
-            # Store the start for the solution.
+            # Store the start for the solution
             starts[(job_id, task_id)] = start
 
-            # Add precedence with previous task in the same job.
+            # Add precedence with previous task in the same job
             if previous_end is not None:
                 model.Add(start >= previous_end)
             previous_end = end
 
-            # Create alternative intervals.
+            # Create alternative intervals
             if num_alternatives > 1:
                 l_presences = []
                 for alt_id in all_alternatives:
@@ -156,18 +142,18 @@ def fjsp_cp_sat_model(jobShopEnv) -> tuple[cp_model.CpModel, dict]:
                     )
                     l_presences.append(l_presence)
 
-                    # Link the primary/global variables with the local ones.
+                    # Link the primary/global variables with the local ones
                     model.Add(start == l_start).OnlyEnforceIf(l_presence)
                     model.Add(duration == l_duration).OnlyEnforceIf(l_presence)
                     model.Add(end == l_end).OnlyEnforceIf(l_presence)
 
-                    # Add the local interval to the right machine.
+                    # Add the local interval to the right machine
                     intervals_per_resources[task[alt_id][1]].append(l_interval)
 
-                    # Store the presences for the solution.
+                    # Store the presences for the solution
                     presences[(job_id, task_id, alt_id)] = l_presence
 
-                # Select exactly one presence variable.
+                # Select exactly one presence variable
                 model.AddExactlyOne(l_presences)
             else:
                 intervals_per_resources[task[0][1]].append(interval)
@@ -175,8 +161,8 @@ def fjsp_cp_sat_model(jobShopEnv) -> tuple[cp_model.CpModel, dict]:
 
         job_ends.append(previous_end)
 
-    # Create machines constraints.
-    for machine_id in all_machines:
+    # Create machines constraints
+    for machine_id in range(jobShopEnv.nr_of_machines):
         intervals = intervals_per_resources[machine_id]
         if len(intervals) > 1:
             model.AddNoOverlap(intervals)

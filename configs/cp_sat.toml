@@ -1,5 +1,5 @@
 [instance]
-problem_instance = "/fjsp_sdst/1_Fattahi/Fattahi_setup_07.fjs" # configure problem instance to be scheduled
+problem_instance = "/fjsp/1_Brandimarte/Mk01.fjs" # configure problem instance to be scheduled
 
 [solver]
 time_limit = 3600 # time limit for the OR-tools CP-SAT solver, in seconds
