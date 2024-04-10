@@ -1,5 +1,11 @@
-"""Minimal jobshop example."""
+"""
+This file contains the OR-Tools model for the Job Shop Problem (JSP).
+This code has been adapted from the OR-Tools example for the JSP, which can be found at:
+https://developers.google.com/optimization/scheduling/job_shop
+"""
+
 import collections
+
 from ortools.sat.python import cp_model
 
 

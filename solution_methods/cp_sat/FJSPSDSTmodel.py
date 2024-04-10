@@ -1,8 +1,8 @@
 """
-This file contains the OR-Tools model for the Flexible Job Shop Problem (FJSP).
-This code has been adapted from the OR-Tools example for the FJSP, which can be found at:
-https://github.com/google/or-tools/blob/stable/examples/python/flexible_job_shop_sat.py
+This file contains the OR-Tools model for the Flexible Job Shop Problem with Sequence Dependent Setup TImes (FJSP-SDST)
+This code build upon the FJSPmodel, including the SDST constraints:
 """
+
 
 import collections
 
@@ -14,6 +14,8 @@ def update_env(jobShopEnv, vars, solver, status, solution_count, time_limit):
 
     # Map job operations to their processing times and machines (according to used OR-tools format)
     jobs_operations = [[[(value, key) for key, value in operation.processing_times.items()] for operation in job.operations] for job in jobShopEnv.jobs]
+    # Create unique identifier for each operation (to deal with OR-tools format)
+    operation_identifier = {(job_id, op_id): job_id * len(jobShopEnv.jobs[0].operations) + op_id for job_id, job in enumerate(jobShopEnv.jobs) for op_id, op in enumerate(job.operations)}
     starts, presences = vars["starts"], vars["presences"]
 
     # Check if a solution has been found
@@ -21,37 +23,34 @@ def update_env(jobShopEnv, vars, solver, status, solution_count, time_limit):
         print("Solution:")
 
         schedule = []
+        machine_schedule = {machine: {} for machine in jobShopEnv.machines}
         # Iterate through all jobs and tasks to construct the schedule
-        for job_id, job_operations in enumerate(jobs_operations):
-            job_info = {"job": job_id, "tasks": []}
+        for job_id in range(jobShopEnv.nr_of_jobs):
+            job_schedule = {"job": job_id, "tasks": []}
 
-            for task_id, alternatives in enumerate(job_operations):
+            for task_id, task in enumerate(jobs_operations[job_id]):
                 start_time = solver.Value(starts[(job_id, task_id)])
-                machine_id, processing_time = -1, -1  # Initialize as not found
 
-                # Identify the chosen machine and processing time for the task
-                for alt_id, (alt_time, alt_machine_id) in enumerate(alternatives):
+                for alt_id, (processing_time, machine_id) in enumerate(task):
                     if solver.Value(presences[(job_id, task_id, alt_id)]):
-                        processing_time, machine_id = alt_time, alt_machine_id
-                        break  # Exit the loop once the selected alternative is found
+                        machine = jobShopEnv.get_machine(machine_id)
+                        operation = jobShopEnv.get_operation(operation_identifier[(job_id, task_id)])
+                        machine_schedule[machine][operation] = start_time
+                        task_info = {"task": task_id, "start": start_time, "machine": machine_id,
+                                     "duration": processing_time}
+                        job_schedule["tasks"].append(task_info)
+                        break  # Exit loop after finding the assigned machine
 
-                # Append task information to the job schedule
-                task_info = {
-                    "task": task_id,
-                    "start": start_time,
-                    "machine": machine_id,
-                    "duration": processing_time,
-                }
-                job_info["tasks"].append(task_info)
+            schedule.append(job_schedule)
 
-                # Update the environment with the task's scheduling information
-                job = jobShopEnv.get_job(job_id)
-                machine = jobShopEnv.get_machine(machine_id)
-                operation = job.operations[task_id]
-                setup_time = 0  # No setup time required for FJSP
+        # Update the environment with the task's scheduling information
+        for machine, operations in machine_schedule.items():
+            sorted_operations = sorted(operations.items(), key=lambda x: x[1])
+            for idx, (operation, start_time) in enumerate(sorted_operations):
+                processing_time = operation.processing_times[machine.machine_id]
+                setup_time = 0 if idx == 0 else jobShopEnv._sequence_dependent_setup_times[machine.machine_id][
+                    sorted_operations[idx - 1][0].operation_id][operation.operation_id]
                 machine.add_operation_to_schedule_at_time(operation, start_time, processing_time, setup_time)
-
-            schedule.append(job_info)
 
         # Compile results
         results = {
@@ -65,7 +64,6 @@ def update_env(jobShopEnv, vars, solver, status, solution_count, time_limit):
             "solution_methods": solution_count,
             "Schedule": schedule,
         }
-
         print(f"Optimal Schedule Length: {solver.ObjectiveValue()}")
     else:
         print("No solution found.")
@@ -73,13 +71,16 @@ def update_env(jobShopEnv, vars, solver, status, solution_count, time_limit):
     return jobShopEnv, results
 
 
-def fjsp_cp_sat_model(jobShopEnv) -> tuple[cp_model.CpModel, dict]:
+def fjsp_sdst_cp_sat_model(jobShopEnv) -> tuple[cp_model.CpModel, dict]:
     """
-    Creates a flexible job shop scheduling model using the OR-Tools library.
+    Creates a flexible job shop scheduling with sequence dependent setup times model using the OR-Tools library.
     """
 
     # Map job operations to their processing times and machines (according to used OR-tools format)
     jobs_operations = [[[(value, key) for key, value in operation.processing_times.items()] for operation in job.operations] for job in jobShopEnv.jobs]
+    # Create unique identifier for each operation (to deal with OR-tools format)
+    operation_identifier = {(job_id, op_id): job_id * len(jobShopEnv.jobs[0].operations) + op_id for job_id, job in enumerate(jobShopEnv.jobs) for op_id, op in enumerate(job.operations)}
+    setup_times = jobShopEnv._sequence_dependent_setup_times
 
     # Computes horizon dynamically as the sum of all durations
     horizon = sum(max(alternative[0] for alternative in task) for job in jobs_operations for task in job)
@@ -93,6 +94,7 @@ def fjsp_cp_sat_model(jobShopEnv) -> tuple[cp_model.CpModel, dict]:
     starts = {}  # indexed by (job_id, task_id).
     presences = {}  # indexed by (job_id, task_id, alt_id).
     job_ends = []
+    machine_to_operations = collections.defaultdict(list)  # To keep track of transitions for setup time
 
     # Scan the jobs and create the relevant variables and intervals
     for job_id in range(jobShopEnv.nr_of_jobs):
@@ -140,6 +142,7 @@ def fjsp_cp_sat_model(jobShopEnv) -> tuple[cp_model.CpModel, dict]:
                     l_interval = model.NewOptionalIntervalVar(
                         l_start, l_duration, l_end, l_presence, "interval" + alt_suffix
                     )
+                    machine_to_operations[task[alt_id][1]].append((l_interval, job_id, task_id, alt_id, l_presence))
                     l_presences.append(l_presence)
 
                     # Link the primary/global variables with the local ones
@@ -156,19 +159,33 @@ def fjsp_cp_sat_model(jobShopEnv) -> tuple[cp_model.CpModel, dict]:
                 # Select exactly one presence variable
                 model.AddExactlyOne(l_presences)
             else:
-                intervals_per_resources[task[0][1]].append(interval)
+                alt_id = 0
                 presences[(job_id, task_id, 0)] = model.NewConstant(1)
+                intervals_per_resources[task[0][1]].append(interval)
+                pres = model.NewBoolVar(f"pres_j{job_id}_t{task_id}_a{alt_id}")
+                machine_to_operations[task[alt_id][1]].append((interval, job_id, task_id, alt_id, pres))
 
         job_ends.append(previous_end)
 
-    # Create machines constraints
-    for machine_id in range(jobShopEnv.nr_of_machines):
-        intervals = intervals_per_resources[machine_id]
+    # Machine constraints and sequence-dependent setup times
+    for machine_id, operations in machine_to_operations.items():
+        intervals = [op[0] for op in operations]
         if len(intervals) > 1:
             model.AddNoOverlap(intervals)
+
+        for i, op_i in enumerate(operations):
+            for j, op_j in enumerate(operations):
+                if i >= j: continue  # Prevent duplicate constraints and self-comparison
+                before_var = model.NewBoolVar(f"before_j{op_i[1]}_t{op_i[2]}_j{op_j[1]}_t{op_j[2]}_on_m{machine_id}")
+                setup_time_ij = setup_times[machine_id][operation_identifier[(op_i[1], op_i[2])]][operation_identifier[(op_j[1], op_j[2])]]
+                setup_time_ji = setup_times[machine_id][operation_identifier[(op_j[1], op_j[2])]][operation_identifier[(op_i[1], op_i[2])]]
+
+                model.Add(op_i[0].EndExpr() + setup_time_ij <= op_j[0].StartExpr()).OnlyEnforceIf(before_var)
+                model.Add(op_j[0].EndExpr() + setup_time_ji <= op_i[0].StartExpr()).OnlyEnforceIf(before_var.Not())
 
     # Makespan objective
     makespan = model.NewIntVar(0, horizon, "makespan")
     model.AddMaxEquality(makespan, job_ends)
     model.Minimize(makespan)
+
     return model, {"starts": starts, "presences": presences}
