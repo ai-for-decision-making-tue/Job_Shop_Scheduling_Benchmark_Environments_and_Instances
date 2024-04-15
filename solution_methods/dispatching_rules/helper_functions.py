@@ -5,7 +5,7 @@ def get_operations_remaining(simulationEnv, operation):
 
 
 def get_work_remaining(simulationEnv, operation):
-    """get amount of work remaining of the job"""
+    """get amount of work remaining of the job (average taken of different machine options)"""
     operations_remaining = [operation for operation in operation.job.operations if
                             operation not in simulationEnv.processed_operations]
     return sum([sum(operation.processing_times.values()) / len(operation.processing_times) for operation in
