@@ -1,10 +1,11 @@
 import random
+
 import numpy as np
 
 from scheduling_environment.jobShop import JobShop
 from scheduling_environment.operation import Operation
 from solution_methods.helper_functions import update_operations_available_for_scheduling
-from solution_methods.heuristics_scheduler.heuristics import (
+from solution_methods.genetic_algorithm.heuristics import (
     global_load_balancing_scheduler, local_load_balancing_scheduler, random_scheduler)
 
 

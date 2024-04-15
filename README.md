@@ -12,8 +12,7 @@ We aim to include a wide range of solution methods capable of solving machine sc
 
 | Solution methods | Job Shop (JSP) | Flow Show (FSP) | Flexible Job Shop (FJSP) | FJSP SDST | FAJSP | Online (F)JSP |
 | :---: | :---:| :---: | :---: | :---: | :---: | :---: |
-| Dispatching Rules | ✓ | ✓ | ✓ | | ✓ | ✓* | 
-| Load Balancing Heuristics | ✓ | ✓ | ✓ | ✓ | ✓ | |
+| Dispatching Rules | ✓ | ✓ | ✓ | | ✓ | ✓* |
 | Genetic Algorithm | ✓ | ✓ | ✓ | ✓ | ✓ | |
 | MILP | ✓ | ✓ | ✓ | ✓ | | | 
 | CP-SAT | ✓ | ✓ | ✓ | | | |
