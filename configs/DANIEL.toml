@@ -1,0 +1,78 @@
+[device]
+name = "cuda"  # Device name
+id = "0"  # Device id
+
+[model]
+suffix = ""  # Suffix of the model
+source = "SD2"  # Suffix of the data that the model was trained on
+
+[data]
+suffix = "mix"  # Suffix of the data
+source = "SD2"  # Suffix of test data
+
+[auto_experiment]
+cover_flag = true  # Whether covering test results of the model
+cover_data_flag = false  # Whether covering the generated data
+cover_heu_flag = false  # Whether covering test results of heuristics
+cover_train_flag = true  # Whether covering the trained model
+
+[SD2_data_generation]
+op_per_job = 0  # Number of operations per job, default 0, means the number equals m
+op_per_mch_min = 1  # Minimum number of compatible machines for each operation
+op_per_mch_max = 5  # Maximum number of compatible machines for each operation
+data_size = 100 # The number of instances for data generation
+data_type = "test" # Generated data type (test/vali)
+
+[seed]
+seed_datagen = 200  # Seed for data generation
+seed_train_vali_datagen = 100  # Seed for generate validation data
+seed_train = 300 # Seed for training
+seed_test = 50 # Seed for testing heuristics
+
+[env]
+n_j = 10  # Number of jobs of the instance
+n_m = 5  # Number of machines of the instance
+n_op = 50  # Number of operations of the instance
+low = 1  # Lower Bound of processing time(PT)
+high = 99  # Upper Bound of processing time
+
+[network]
+fea_j_input_dim = 10  # Dimension of operation raw feature vectors
+fea_m_input_dim = 8  # Dimension of machine raw feature vectors
+dropout_prob = 0.0  # Dropout rate (1 - keep probability).
+num_heads_OAB = [4, 4]  # Number of attention head of operation message attention block
+num_heads_MAB = [4, 4]  # Number of attention head of machine message attention block
+layer_fea_output_dim = [32, 8]  # Output dimension of the DAN layers
+num_mlp_layers_actor = 3  # Number of layers in Actor network
+hidden_dim_actor = 64  # Hidden dimension of Actor network
+num_mlp_layers_critic = 3  # Number of layers in Critic network
+hidden_dim_critic = 64  # Hidden dimension of Critic network
+
+[PPO_Algorithm]
+num_envs = 20  # Batch size for training environments
+max_updates = 100  # No. of episodes of each env for training
+lr = 3e-4 # Learning rate
+gamma = 1  # Discount factor used in training
+k_epochs = 4  # Update frequency of each episode
+eps_clip = 0.2  # Clip parameter
+vloss_coef = 0.5  # Critic loss coefficient
+ploss_coef = 1  # Policy loss coefficient
+entloss_coef = 0.01  # Entropy loss coefficient
+tau = 0  # Policy soft update coefficient
+gae_lambda = 0.98  # GAE parameter
+
+[training]
+train_size = "10x5"  # Size of training instances
+validate_timestep = 10  # Interval for validation and data log
+reset_env_timestep = 20  # Interval for reseting the environment
+minibatch_size = 1024  # Batch size for computing the gradient
+
+[testing]
+test_data = ['10x5+mix']  # List of data for testing
+sample = true  # Whether using the sampling strategy in testing
+sample_times = 100  # Sampling times for the sampling strategy
+test_model = '10x5+mix'  # model for testing
+test_method = []  # List of heuristic methods for testing
+seed = 3  # Set random seed for result replication
+problem_instance = "/fjsp/1_Brandimarte/Mk09.fjs"  # Problem instance for testing
+plotting = true  # Whether plotting the Gantt chart

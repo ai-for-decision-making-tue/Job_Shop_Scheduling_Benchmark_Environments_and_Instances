@@ -45,10 +45,16 @@ def set_seeds(seed_value=0):
         torch.cuda.manual_seed_all(seed_value)
 
 
-def initialize_device(parameters: dict) -> torch.device:
+def initialize_device(parameters: dict, method: str = "FJSP_DRL") -> torch.device:
     device_str = "cpu"
-    if parameters['test_parameters']['device'] == "cuda":
-        device_str = "cuda:0" if torch.cuda.is_available() else "cpu"
+    if method == "FJSP_DRL":
+        if parameters['test_parameters']['device'] == "cuda":
+            device_str = "cuda:0" if torch.cuda.is_available() else "cpu"
+    elif method == "DANIEL":
+        if parameters["device"]["name"] == "cuda":
+            device_str = (
+                f"cuda:{parameters['device']['id']}" if torch.cuda.is_available() else "cpu"
+            )
     return torch.device(device_str)
 
 
