@@ -19,7 +19,7 @@ We aim to include a wide range of solution methods capable of solving machine sc
 | CP-SAT | ✓ | ✓ | ✓ | | | |
 | FJSP-DRL | ✓ | ✓ | ✓ | |  | |
 | L2D | ✓ | ✓ | | | | |
-| DANIEL | | | ✓ | | | |  
+| DANIEL | ✓ | ✓ | ✓ | | | |  
 
 *Capable of online arrivals of FJSP problems 
 
