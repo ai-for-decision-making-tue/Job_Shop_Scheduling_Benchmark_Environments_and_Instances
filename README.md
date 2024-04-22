@@ -18,7 +18,8 @@ We aim to include a wide range of solution methods capable of solving machine sc
 | MILP | ✓ | ✓ | ✓ | ✓ | | | 
 | CP-SAT | ✓ | ✓ | ✓ | | | |
 | FJSP-DRL | ✓ | ✓ | ✓ | |  | |
-| L2D | ✓ | ✓ | | | | |  
+| L2D | ✓ | ✓ | | | | |
+| DANIEL | | | ✓ | | | |  
 
 *Capable of online arrivals of FJSP problems 
 
