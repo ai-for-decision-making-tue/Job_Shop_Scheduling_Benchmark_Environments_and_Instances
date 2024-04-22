@@ -15,7 +15,7 @@ We aim to include a wide range of solution methods capable of solving machine sc
 | Dispatching Rules | ✓ | ✓ | ✓ | | ✓ | ✓* |
 | Genetic Algorithm | ✓ | ✓ | ✓ | ✓ | ✓ | |
 | MILP | ✓ | ✓ | ✓ | ✓ | | | 
-| CP-SAT | ✓ | ✓ | ✓ | | | |
+| CP-SAT | ✓ | ✓ | ✓ | ✓ | | |
 | FJSP-DRL | ✓ | ✓ | ✓ | |  | |
 | L2D | ✓ | ✓ | | | | |
 | DANIEL | ✓ | ✓ | ✓ | | | |  
