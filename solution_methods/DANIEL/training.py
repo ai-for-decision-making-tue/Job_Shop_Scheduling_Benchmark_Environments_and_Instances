@@ -71,7 +71,6 @@ class Trainer:
 
         # seed
         self.seed_train = config["seed"]["seed_train"]
-        self.seed_test = config["seed"]["seed_test"]
         setup_seed(self.seed_train)
 
         self.env = FJSPEnvForSameOpNums(self.n_j, self.n_m, device)

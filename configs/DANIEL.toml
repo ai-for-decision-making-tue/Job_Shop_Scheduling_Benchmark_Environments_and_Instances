@@ -10,12 +10,6 @@ source = "SD2"  # Suffix of the data that the model was trained on
 suffix = "mix"  # Suffix of the data
 source = "SD2"  # Suffix of test data
 
-[auto_experiment]
-cover_flag = true  # Whether covering test results of the model
-cover_data_flag = false  # Whether covering the generated data
-cover_heu_flag = false  # Whether covering test results of heuristics
-cover_train_flag = true  # Whether covering the trained model
-
 [SD2_data_generation]
 op_per_job = 0  # Number of operations per job, default 0, means the number equals m
 op_per_mch_min = 1  # Minimum number of compatible machines for each operation
@@ -27,7 +21,6 @@ data_type = "test" # Generated data type (test/vali)
 seed_datagen = 200  # Seed for data generation
 seed_train_vali_datagen = 100  # Seed for generate validation data
 seed_train = 300 # Seed for training
-seed_test = 50 # Seed for testing heuristics
 
 [env]
 n_j = 10  # Number of jobs of the instance
@@ -68,8 +61,7 @@ reset_env_timestep = 20  # Interval for reseting the environment
 minibatch_size = 1024  # Batch size for computing the gradient
 
 [testing]
-test_data = ['10x5+mix']  # List of data for testing
-sample = true  # Whether using the sampling strategy in testing
+sample = false  # Whether using the sampling strategy in testing
 sample_times = 100  # Sampling times for the sampling strategy
 test_model = '10x5+mix'  # model for testing
 test_method = []  # List of heuristic methods for testing
