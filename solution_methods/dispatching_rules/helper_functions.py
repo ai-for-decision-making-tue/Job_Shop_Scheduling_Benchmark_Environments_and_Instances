@@ -22,7 +22,7 @@ def get_earliest_end_time_machines(simulationEnv, operation):
             finish_times[machine_option] = simulationEnv.simulator.now + operation.processing_times[machine_option]
         else:
             finish_times[machine_option] = operation.processing_times[machine_option] + max(
-                [operation['end_time'] for operation in machine._processed_operations])
+                [operation.scheduling_information['end_time'] for operation in machine._processed_operations])
     earliest_end_time = min(finish_times.values())  # Find the minimum value in the dictionary
     return [key for key, value in finish_times.items() if value == earliest_end_time]
 
