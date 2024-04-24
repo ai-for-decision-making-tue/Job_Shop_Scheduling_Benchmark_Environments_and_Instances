@@ -28,8 +28,8 @@ class Machine:
     @property
     def scheduled_operations(self) -> List[Operation]:
         """Return the list of scheduled operations on this machine."""
-        sorted_operations = sorted(self._processed_operations, key=lambda op: op['start_time'])
-        return [op['operation'] for op in sorted_operations]
+        sorted_operations = sorted(self._processed_operations, key=lambda op: op.scheduling_information['start_time'])
+        return [op for op in sorted_operations]
 
     @property
     def next_available_time(self):
@@ -51,15 +51,7 @@ class Machine:
         start_time = max(finishing_time_predecessors, finishing_time_machine + setup_time)
         operation.add_operation_scheduling_information(self.machine_id, start_time, setup_time, processing_time)
 
-        self._processed_operations.append({
-            'operation': operation,
-            'start_time': start_time,
-            'end_time': start_time + processing_time,
-            'processing_time': processing_time,
-            'start_setup': start_time-setup_time,
-            'end_setup': start_time,
-            'setup_time': setup_time
-        })
+        self._processed_operations.append(operation)
 
     def add_operation_to_schedule_at_time(self, operation, start_time, processing_time, setup_time):
         """Scheduled an operations at a certain time."""
@@ -67,15 +59,7 @@ class Machine:
         operation.add_operation_scheduling_information(
             self.machine_id, start_time, setup_time, processing_time)
 
-        self._processed_operations.append({
-            'operation': operation,
-            'start_time': start_time,
-            'end_time': start_time + processing_time,
-            'processing_time': processing_time,
-            'start_setup': start_time-setup_time,
-            'end_setup': start_time,
-            'setup_time': setup_time
-        })
+        self._processed_operations.append(operation)
 
     def add_operation_to_schedule_backfilling(self, operation: Operation, processing_time, sequence_dependent_setup_times):
         """Add an operation to the scheduled operations list of the machine using backfilling."""
@@ -106,15 +90,7 @@ class Machine:
         operation.add_operation_scheduling_information(
             self.machine_id, start_time, setup_time, processing_time)
 
-        self._processed_operations.append({
-            'operation': operation,
-            'start_time': start_time,
-            'end_time': start_time + processing_time,
-            'processing_time': processing_time,
-            'start_setup': start_time-setup_time,
-            'end_setup': start_time,
-            'setup_time': setup_time
-        })
+        self._processed_operations.append(operation)
 
     def find_backfilling_opportunity(self, operation, finishing_time_predecessors, duration,
                                      sequence_dependent_setup_times):

@@ -106,8 +106,9 @@ class Operation:
 
     def update_sequence_dependent_setup_times(self, start_time_setup, setup_duration):
         """Update the sequence dependent setup times of this operation."""
-        self._start_time_setup = start_time_setup
-        self._setup_duration = setup_duration
+        self._scheduling_information['start_setup'] = start_time_setup
+        self._scheduling_information['end_setup'] = start_time_setup + setup_duration
+        self._scheduling_information['setup_time'] = setup_duration
 
     def add_operation_scheduling_information(self, machine_id: int, start_time: int, setup_time: int, duration) -> None:
         """Add scheduling information to the current operation."""

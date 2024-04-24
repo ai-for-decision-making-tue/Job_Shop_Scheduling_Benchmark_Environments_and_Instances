@@ -43,16 +43,16 @@ def draw_gantt_chart(JobShop):
     colormap = create_colormap()
 
     for machine in JobShop.machines:
-        machine_operations = sorted(machine._processed_operations, key=lambda op: op['start_time'])
+        machine_operations = sorted(machine._processed_operations, key=lambda op: op.scheduling_information['start_time'])
         for operation in machine_operations:
-            operation_start = operation['start_time']
-            operation_end = operation['end_time']
+            operation_start = operation.scheduling_information['start_time']
+            operation_end = operation.scheduling_information['end_time']
             operation_duration = operation_end - operation_start
             # operation_label = f"J{operation['operation'].job_id}O{operation['operation'].operation_id}"
-            operation_label = f"{operation['operation'].operation_id}"
+            operation_label = f"{operation.operation_id}"
 
             # Set color based on job ID with color cycling for job_id 100
-            color_index = operation['operation'].job_id % len(JobShop.jobs)
+            color_index = operation.job_id % len(JobShop.jobs)
             if color_index >= colormap.N:
                 color_index = color_index % colormap.N
             color = colormap(color_index)
@@ -64,8 +64,8 @@ def draw_gantt_chart(JobShop):
                 edgecolor='black'
             )
 
-            setup_start = operation['start_setup']
-            setup_time = operation['setup_time']
+            setup_start = operation.scheduling_information['start_setup']
+            setup_time = operation.scheduling_information['setup_time']
             if setup_time != None:
                 ax.broken_barh(
                     [(setup_start, setup_time)],
