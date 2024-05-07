@@ -89,12 +89,17 @@ def load_feats_from_sim(jobShopEnv: JobShop, num_mas, num_opes):
                 matrix_cal_cumul[operation.operation_id][operation.operation_id + op] = 1
     for operation in jobShopEnv.operations:
         opes_appertain[operation.operation_id] = operation.job_id
-        for machine_id, duration in operation.processing_times.items():
-            matrix_proc_time[operation.operation_id][machine_id] = duration
-            matrix_ope_ma_adj[operation.operation_id][machine_id] = 1
-            for predecessor in operation.predecessors:
-                predecessor: Operation
-                matrix_pre_proc[predecessor.operation_id][operation.operation_id] = True
+        if operation.scheduling_information == {}:  # If the operation has not been scheduled
+            for machine_id, duration in operation.processing_times.items():
+                matrix_proc_time[operation.operation_id][machine_id] = duration
+                matrix_ope_ma_adj[operation.operation_id][machine_id] = 1
+        else:
+            scheduled_machine = operation.scheduling_information['machine_id']
+            matrix_proc_time[operation.operation_id][scheduled_machine] = operation.scheduling_information['processing_time']
+            matrix_ope_ma_adj[operation.operation_id][scheduled_machine] = 1
+        for predecessor in operation.predecessors:
+            predecessor: Operation
+            matrix_pre_proc[predecessor.operation_id][operation.operation_id] = True
 
     return matrix_proc_time, matrix_ope_ma_adj, matrix_pre_proc, matrix_pre_proc.t(), opes_appertain, num_ope_biases, \
            nums_ope, matrix_cal_cumul

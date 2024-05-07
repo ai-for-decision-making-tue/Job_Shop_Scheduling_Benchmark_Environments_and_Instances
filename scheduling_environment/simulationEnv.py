@@ -8,7 +8,6 @@ from scheduling_environment.jobShop import JobShop
 from scheduling_environment.machine import Machine
 from scheduling_environment.operation import Operation
 
-
 class SimulationEnv:
     """
     Main scheduling_environment class for the an online job shop
@@ -47,10 +46,8 @@ class SimulationEnv:
                 yield req
                 start_time = self.simulator.now
                 processing_time = operation.processing_times[machine.machine_id]
-                # print('scheduled job:', operation.job_id, 'operation:', operation.operation_id, 'at', start_time, 'taking', processing_time)
                 machine.add_operation_to_schedule_at_time(operation, start_time, processing_time, setup_time=0)
                 yield self.simulator.timeout(processing_time - 0.0001)
-                # print('machine', machine.machine_id, 'released at time', simulationEnv.simulator.now)
 
                 self.processed_operations.add(operation)
 
@@ -93,5 +90,6 @@ class SimulationEnv:
                 operation_id += 1
 
             self.JobShop.add_job(job)
+            self.JobShop.set_nr_of_jobs(self.JobShop.nr_of_jobs + 1)
             # print(f"Job {job_id} generated with {num_operations} operations")  # Debugging print statement
             job_id += 1
