@@ -10,7 +10,7 @@ np_seed_validation = 200            # Seed for numpy for validation
 torch_seed = 600                    # Seed for torch
 et_normalize_coef = 1000            # Normalizing constant for feature LBs (end time), normalization way: fea/constant
 wkr_normalize_coef = 100            # Normalizing constant for wkr, normalization way: fea/constant
-device = "cuda"                     # Device for training ("cpu" or "cuda")
+device = "cpu"                     # Device for training ("cpu" or "cuda")
 
 [network_parameters]
 num_layers = 3                      # No. of layers of feature extraction GNN including input layer
@@ -23,7 +23,7 @@ num_mlp_layers_actor = 2            # No. of layers in actor MLP
 hidden_dim_actor = 32               # hidden dim of MLP in actor
 num_mlp_layers_critic = 2           # No. of layers in critic MLP
 hidden_dim_critic = 32              # hidden dim of MLP in critic
-device = "cuda"                     # Device for training ("cpu" or "cuda")
+device = "cpu"                     # Device for training ("cpu" or "cuda")
 
 [train_parameters]
 num_envs = 4                        # No. of envs for training
@@ -38,7 +38,7 @@ eps_clip = 0.2                      # clip parameter for PPO
 vloss_coef = 1.0                    # critic loss coefficient
 ploss_coef = 2.0                    # policy loss coefficient
 entloss_coef = 0.01                 # entropy loss coefficient
-device = "cuda"                     # Device for training ("cpu" or "cuda")
+device = "cpu"                     # Device for training ("cpu" or "cuda")
 
 [test_parameters]
 seed = 1                            # Set random seed for result replication
@@ -46,4 +46,4 @@ instance_name = "/jsp/adams/abz5"   # instance to test if mode is benchmark
 trained_policy = "/solution_methods/L2D/save/30_20_1_99.pth" # Load pretrained policy
 sample = false                      # Sampling flag for testing
 plotting = true                     # Plot final gantt chart
-device = "cuda"                     # Device for test ("cpu" or "cuda")
+device = "cpu"                     # Device for test ("cpu" or "cuda")

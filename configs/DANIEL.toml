@@ -1,5 +1,5 @@
 [device]
-name = "cuda"  # Device name
+name = "cpu"  # Device name
 id = "0"  # Device id
 
 [model]

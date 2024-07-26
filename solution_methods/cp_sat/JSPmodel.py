@@ -11,63 +11,61 @@ from ortools.sat.python import cp_model
 
 def update_env(jobShopEnv, vars, solver, status, solution_count, time_limit):
     # Gather Final Schedule
+
+    # Map job operations to their processing times and machines (according to used OR-tools format)
+    jobs_operations = [[(k, v) for operation in job.operations for k, v in operation.processing_times.items()] for job in jobShopEnv.jobs]
     all_tasks = vars['all_tasks']
-    jobs_data = [[(k, v) for operation in job.operations for k, v in operation.processing_times.items()] for job in jobShopEnv.jobs]
-    num_machines = jobShopEnv.nr_of_machines
-    all_machines = range(num_machines)
 
-    # Named tuple to manipulate solution information.
-    assigned_task_type = collections.namedtuple(
-        "assigned_task_type", "start job index duration"
-    )
-
-    if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
+    # Check if a solution has been found
+    if status in [cp_model.OPTIMAL, cp_model.FEASIBLE]:
         print("Solution:")
-        # Create one list of assigned tasks per machine.
-        assigned_jobs = collections.defaultdict(list)
-        for job_id, job in enumerate(jobs_data):
-            for task_id, task in enumerate(job):
-                machine = task[0]
-                assigned_jobs[machine].append(
-                    assigned_task_type(
-                        start=solver.Value(all_tasks[job_id, task_id].start),
-                        job=job_id,
-                        index=task_id,
-                        duration=task[1],
-                    )
-                )
 
-        # Create per machine output lines.
-        output = ""
-        for machine in all_machines:
-            # Sort by starting time.
-            assigned_jobs[machine].sort()
-            sol_line_tasks = "Machine " + str(machine) + ": "
-            sol_line = "           "
+        schedule = []
+        # Iterate through all jobs and tasks to construct the schedule
+        for job_id, job_operations in enumerate(jobs_operations):
+            job_info = {"job": job_id, "tasks": []}
 
-            for assigned_task in assigned_jobs[machine]:
-                name = f"job_{assigned_task.job}_task_{assigned_task.index}"
-                # add spaces to output to align columns.
-                sol_line_tasks += f"{name:15}"
+            for task_id, task in enumerate(job_operations):
+                start_time = solver.Value(all_tasks[job_id, task_id].start)
+                machine_id, processing_time = task[0], task[1]
 
-                start = assigned_task.start
-                duration = assigned_task.duration
-                sol_tmp = f"[{start},{start + duration}]"
-                # add spaces to output to align columns.
-                sol_line += f"{sol_tmp:15}"
+                # Append task information to the job schedule
+                task_info = {
+                    "task": task_id,
+                    "start": start_time,
+                    "machine": machine_id,
+                    "duration": processing_time,
+                }
+                job_info["tasks"].append(task_info)
 
-            sol_line += "\n"
-            sol_line_tasks += "\n"
-            output += sol_line_tasks
-            output += sol_line
+                # Update the environment with the task's scheduling information
+                job = jobShopEnv.get_job(job_id)
+                machine = jobShopEnv.get_machine(machine_id)
+                operation = job.operations[task_id]
+                setup_time = 0  # No setup time required for JSP/FSP
+                machine.add_operation_to_schedule_at_time(operation, start_time, processing_time, setup_time)
+
+            schedule.append(job_info)
+
+        # Compile results
+        results = {
+            "time_limit": str(time_limit),
+            "status": status,
+            "statusString": solver.StatusName(status),
+            "objValue": solver.ObjectiveValue(),
+            "runtime": solver.WallTime(),
+            "numBranches": solver.NumBranches(),
+            "conflicts": solver.NumConflicts(),
+            "solution_methods": solution_count,
+            "Schedule": schedule
+        }
 
         # Finally print the solution found.
         print(f"Optimal Schedule Length: {solver.ObjectiveValue}")
-        print(output)
     else:
         print("No solution found.")
 
-    return jobShopEnv
+    return jobShopEnv, results
 
 
 def jsp_cp_sat_model(jobShopEnv) -> tuple[cp_model.CpModel, dict]:

@@ -38,7 +38,7 @@ def run_method(folder, exp_name, **kwargs):
         jobShopEnv, results = FJSPSDSTmodel.update_env(jobShopEnv, vars, solver, status, solution_count, kwargs["solver"]["time_limit"])
     elif 'fjsp' in str(kwargs['instance']['problem_instance']):
         jobShopEnv, results = FJSPmodel.update_env(jobShopEnv, vars, solver, status, solution_count, kwargs["solver"]["time_limit"])
-    elif 'jsp' in str(kwargs['instance']['problem_instance']):
+    elif 'fsp' or 'jsp' in str(kwargs['instance']['problem_instance']):
         jobShopEnv, results = JSPmodel.update_env(jobShopEnv, vars, solver, status, solution_count, kwargs["solver"]["time_limit"])
 
     # Plot the ganttchart of the solution

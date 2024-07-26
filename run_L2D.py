@@ -46,7 +46,7 @@ def run_method(**parameters):
               hidden_dim_critic=model_parameters["hidden_dim_critic"])
 
     trained_policy = os.getcwd() + test_parameters['trained_policy']
-    ppo.policy.load_state_dict(torch.load(trained_policy))
+    ppo.policy.load_state_dict(torch.load(trained_policy, map_location=torch.device(test_parameters['device'])))
     g_pool_step = g_pool_cal(graph_pool_type=model_parameters["graph_pool_type"],
                              batch_size=torch.Size([1, jobShopEnv.nr_of_jobs * jobShopEnv.nr_of_machines, jobShopEnv.nr_of_jobs * jobShopEnv.nr_of_machines]),
                              n_nodes=jobShopEnv.nr_of_jobs * jobShopEnv.nr_of_machines, device=device)

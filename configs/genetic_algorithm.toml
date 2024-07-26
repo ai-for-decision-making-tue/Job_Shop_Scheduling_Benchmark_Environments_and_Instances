@@ -1,5 +1,5 @@
 [instance]
-problem_instance = "/fjsp_sdst/1_Fattahi/Fattahi_setup_06.fjs"
+problem_instance = "/fjsp/1_Brandimarte/MK01.fjs"
 
 [algorithm]
 population_size = 100   # number of individuals in the population
@@ -10,4 +10,4 @@ cr = 0.7                # probability of mating
 
 [output]
 logbook = true          # display logbook during search
-plotting = true         # plot instance representation and ganttchart
+plotting = false         # plot instance representation and ganttchart
