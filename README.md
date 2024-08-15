@@ -16,7 +16,7 @@ We aim to include a wide range of solution methods capable of solving machine sc
 | Genetic Algorithm | ✓ | ✓ | ✓ | ✓ | ✓ | |
 | MILP | ✓ | ✓ | ✓ | ✓ | | | 
 | CP-SAT | ✓ | ✓ | ✓ | ✓ | | |
-| FJSP-DRL | ✓ | ✓ | ✓ | |  | |
+| FJSP-DRL | ✓ | ✓ | ✓ | |  | ✓ |
 | L2D | ✓ | ✓ | | | | |
 | DANIEL | ✓ | ✓ | ✓ | | | |  
 
