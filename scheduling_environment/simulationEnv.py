@@ -45,13 +45,15 @@ class SimulationEnv:
         if machine.machine_id in operation.processing_times:
             with self.machine_resources[machine.machine_id].request() as req:
                 yield req
-                start_time = self.simulator.now
+                if machine.scheduled_operations != []:
+                    setup_time = self.JobShop._sequence_dependent_setup_times[machine.machine_id][machine.scheduled_operations[-1].operation_id][
+                        operation.operation_id]
+                else:
+                    setup_time = 0
+                start_time = self.simulator.now + setup_time
                 processing_time = operation.processing_times[machine.machine_id]
-                # print('scheduled job:', operation.job_id, 'operation:', operation.operation_id, 'at', start_time, 'taking', processing_time)
-                machine.add_operation_to_schedule_at_time(operation, start_time, processing_time, setup_time=0)
-                yield self.simulator.timeout(processing_time - 0.0001)
-                # print('machine', machine.machine_id, 'released at time', simulationEnv.simulator.now)
-
+                machine.add_operation_to_schedule_at_time(operation, start_time, processing_time, setup_time)
+                yield self.simulator.timeout(processing_time + setup_time - 0.0001)
                 self.processed_operations.add(operation)
 
     def generate_online_job_arrivals(self):

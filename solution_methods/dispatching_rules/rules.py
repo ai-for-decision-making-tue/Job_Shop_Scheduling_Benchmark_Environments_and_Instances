@@ -6,6 +6,11 @@ def fifo_priority(operation):
     return operation.job_id
 
 
+def spt_priority(operation):
+    """ SPT Rule: Shortest Processing Time """
+    return min(operation.processing_times.values())
+
+
 def mor_priority(simulationEnv, operation):
     """ MOR Rule: Most Operations Remaining """
     return get_operations_remaining(simulationEnv, operation)

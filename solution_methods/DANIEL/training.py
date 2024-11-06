@@ -63,9 +63,9 @@ class Trainer:
                 f'{self.n_j}x{self.n_m}{strToSuffix(config["data"]["suffix"])}'
             )
 
-        self.vali_data_path = f"./solution_methods/DANIEL/data/data_train_vali/{self.data_source}/{self.data_name}"
+        self.vali_data_path = f"./data/data_train_vali/{self.data_source}/{self.data_name}"
         self.test_data_path = (
-            f"./solution_methods/DANIEL/data/{self.data_source}/{self.data_name}"
+            f"./data/{self.data_source}/{self.data_name}"
         )
         self.model_name = f'{self.data_name}{strToSuffix(config["model"]["suffix"])}'
 
