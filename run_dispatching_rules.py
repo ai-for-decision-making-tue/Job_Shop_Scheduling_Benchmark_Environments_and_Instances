@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from data_parsers import parser_fajsp, parser_fjsp, parser_jsp_fsp
+from data_parsers import parser_fajsp, parser_fjsp, parser_jsp_fsp, parser_fjsp_sdst
 from plotting.drawer import draw_gantt_chart, draw_precedence_relations
 from scheduling_environment.simulationEnv import SimulationEnv
 from solution_methods.helper_functions import load_parameters
@@ -12,6 +12,9 @@ PARAM_FILE = "configs/dispatching_rules.toml"
 
 def run_method(simulationEnv, dispatching_rule, machine_assignment_rule):
     """Schedule simulator and schedule operations with the dispatching rules"""
+
+    if dispatching_rule == 'SPT' and machine_assignment_rule != 'SPT':
+        raise ValueError("SPT dispatching rule requires SPT machine assignment rule.")
 
     if simulationEnv.online_arrivals:
         # Start the online job generation process
@@ -44,17 +47,20 @@ def main(param_file: str = PARAM_FILE):
 
     if not parameters['instance']['online_arrivals']:
         try:
-            if 'fjsp' in parameters['instance']['problem_instance']:
+            if 'fjsp_sdst' in parameters['instance']['problem_instance']:
+                simulationEnv.JobShop = parser_fjsp_sdst.parse(simulationEnv.JobShop,
+                                                          parameters['instance']['problem_instance'])
+            elif 'fjsp' in parameters['instance']['problem_instance']:
                 simulationEnv.JobShop = parser_fjsp.parse(simulationEnv.JobShop,
                                                           parameters['instance']['problem_instance'])
             elif 'fajsp' in parameters['instance']['problem_instance']:
                 simulationEnv.JobShop = parser_fajsp.parse(simulationEnv.JobShop,
                                                            parameters['instance']['problem_instance'])
-            elif 'jsp' in parameters['instance']['problem_instance']:
+            elif 'jsp' in parameters['instance']['problem_instance'] or 'fsp' in parameters['instance']['problem_instance']:
                 simulationEnv.JobShop = parser_jsp_fsp.parse(simulationEnv.JobShop,
                                                              parameters['instance']['problem_instance'])
         except Exception as e:
-            print(f"Only able to schedule '/fjsp/, '/fasjp/ or '/jsp/' jobs': {e}")
+            print(f"Only able to schedule '/fjsp/', '/fasjp/', '/fjsp_sdst/', '/fjs/' or '/jsp/' jobs': {e}")
 
         simulationEnv.simulator.process(
             run_method(simulationEnv, parameters['instance']['dispatching_rule'],
