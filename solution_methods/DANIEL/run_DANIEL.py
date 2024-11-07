@@ -16,7 +16,7 @@ from solution_methods.helper_functions import (
     set_seeds,
 )
 
-PARAM_FILE = "configs/DANIEL.toml"
+PARAM_FILE = "../../configs/DANIEL.toml"
 
 
 def run_method(**parameters):

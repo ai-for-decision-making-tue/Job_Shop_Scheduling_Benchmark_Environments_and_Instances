@@ -1,5 +1,5 @@
 import numpy as np
-from uniform_instance_gen import uni_instance_gen
+from solution_methods.L2D.generated_data.uniform_instance_gen import uni_instance_gen
 
 j = 20
 m = 10

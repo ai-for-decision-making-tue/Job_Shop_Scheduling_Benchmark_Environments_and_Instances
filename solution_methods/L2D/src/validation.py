@@ -5,9 +5,9 @@ import numpy as np
 import torch
 
 from solution_methods.helper_functions import load_parameters
-from solution_methods.L2D.agent_utils import greedy_select_action
-from solution_methods.L2D.JSSP_Env import SJSSP
-from solution_methods.L2D.mb_agg import g_pool_cal
+from solution_methods.L2D.src.agent_utils import greedy_select_action
+from solution_methods.L2D.src.JSSP_Env import SJSSP
+from solution_methods.L2D.src.mb_agg import g_pool_cal
 
 base_path = Path(__file__).resolve().parents[2]
 sys.path.append(str(base_path))

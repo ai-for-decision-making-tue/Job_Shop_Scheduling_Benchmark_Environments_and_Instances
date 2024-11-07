@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from solution_methods.L2D.models.mlp import MLP
+from solution_methods.L2D.network.mlp import MLP
 
 class GraphCNN(nn.Module):
     def __init__(self,

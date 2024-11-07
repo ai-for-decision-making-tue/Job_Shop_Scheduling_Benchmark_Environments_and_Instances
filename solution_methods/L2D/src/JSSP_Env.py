@@ -1,15 +1,15 @@
 import sys
 from pathlib import Path
 
-import gym
+import gymnasium as gym
 import numpy as np
-from gym.utils import EzPickle
+from gymnasium.utils import EzPickle
 
 from solution_methods.helper_functions import load_parameters
-from solution_methods.L2D.permissibleLS import permissibleLeftShift
-from solution_methods.L2D.uniform_instance_gen import override
-from solution_methods.L2D.updateAdjMat import getActionNbghs
-from solution_methods.L2D.updateEntTimeLB import calEndTimeLB
+from solution_methods.L2D.src.permissibleLS import permissibleLeftShift
+from solution_methods.L2D.generated_data.uniform_instance_gen import override
+from solution_methods.L2D.src.updateAdjMat import getActionNbghs
+from solution_methods.L2D.src.updateEntTimeLB import calEndTimeLB
 
 base_path = Path(__file__).resolve().parents[2]
 sys.path.append(str(base_path))

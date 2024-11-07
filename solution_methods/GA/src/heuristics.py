@@ -1,9 +1,7 @@
 import random
-
 import numpy as np
 
 from scheduling_environment.jobShop import JobShop
-from solution_methods.helper_functions import update_operations_available_for_scheduling
 
 
 def random_scheduler(jobShop: JobShop) -> JobShop:
@@ -114,3 +112,17 @@ def global_load_balancing_scheduler(jobShop: JobShop) -> JobShop:
         jobs_to_be_scheduled.remove(job.job_id)
 
     return jobShop
+
+
+def update_operations_available_for_scheduling(env):
+    scheduled_operations = set(env.scheduled_operations)
+    precedence_relations = env.precedence_relations_operations
+    operations_available = [
+        operation
+        for operation in env.operations
+        if operation not in scheduled_operations and all(
+            prec_operation in scheduled_operations
+            for prec_operation in precedence_relations[operation.operation_id]
+        )
+    ]
+    env.set_operations_available_for_scheduling(operations_available)

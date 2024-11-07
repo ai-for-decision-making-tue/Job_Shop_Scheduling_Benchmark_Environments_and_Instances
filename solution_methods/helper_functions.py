@@ -56,17 +56,3 @@ def initialize_device(parameters: dict, method: str = "FJSP_DRL") -> torch.devic
                 f"cuda:{parameters['device']['id']}" if torch.cuda.is_available() else "cpu"
             )
     return torch.device(device_str)
-
-
-def update_operations_available_for_scheduling(env):
-    scheduled_operations = set(env.scheduled_operations)
-    precedence_relations = env.precedence_relations_operations
-    operations_available = [
-        operation
-        for operation in env.operations
-        if operation not in scheduled_operations and all(
-            prec_operation in scheduled_operations
-            for prec_operation in precedence_relations[operation.operation_id]
-        )
-    ]
-    env.set_operations_available_for_scheduling(operations_available)

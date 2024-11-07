@@ -6,7 +6,7 @@ import numpy as np
 from scheduling_environment.jobShop import JobShop
 from solution_methods.helper_functions import load_parameters
 
-base_path = Path(__file__).resolve().parents[2]
+base_path = Path(__file__).resolve().parents[3]
 sys.path.append(str(base_path))
 
 param_file = str(base_path) + "/configs/L2D.toml"

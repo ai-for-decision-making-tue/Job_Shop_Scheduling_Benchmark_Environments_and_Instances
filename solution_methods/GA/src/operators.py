@@ -4,9 +4,7 @@ import numpy as np
 
 from scheduling_environment.jobShop import JobShop
 from scheduling_environment.operation import Operation
-from solution_methods.helper_functions import update_operations_available_for_scheduling
-from solution_methods.genetic_algorithm.heuristics import (
-    global_load_balancing_scheduler, local_load_balancing_scheduler, random_scheduler)
+from solution_methods.GA.src.heuristics import global_load_balancing_scheduler, local_load_balancing_scheduler, random_scheduler, update_operations_available_for_scheduling
 
 
 def select_next_operation_from_job(jobShopEnv: JobShop, job_id) -> Operation:
@@ -49,7 +47,7 @@ def mutate_sequence_exchange(individual, indpb):
 
 
 # Initialize an individual for the genetic algorithm (with random actions selection heuristic)
-def init_individual(ind_class, params, jobShopEnv):
+def init_individual(ind_class, jobShopEnv):
     """create individual, indivial is a list of machine selection (ix of options) and operation sequence (ix of job)"""
 
     rand = random.random()
@@ -96,7 +94,7 @@ def evaluate_individual(individual, jobShopEnv: JobShop, reset=True):
     return makespan, jobShopEnv
 
 
-def evaluate_population(toolbox, population, logging):
+def evaluate_population(toolbox, population):
     # start_time = time.time()
 
     # sequential evaluation of population
@@ -109,13 +107,12 @@ def evaluate_population(toolbox, population, logging):
     fitnesses = toolbox.map(toolbox.evaluate_individual, population)
     fitnesses = [(fit[0],) for fit in fitnesses]
 
-    # logging.info("--- %s seconds ---" % (time.time() - start_time))
     return fitnesses
 
 
-def variation(population, toolbox, lambda_, cr, indpb):
+def variation(population, toolbox, pop_size, cr, indpb):
     offspring = []
-    for _ in range(int(lambda_)):
+    for _ in range(int(pop_size)):
         op_choice = random.random()
         if op_choice < cr:  # Apply crossover
             ind1, ind2 = list(map(toolbox.clone, random.sample(population, 2)))

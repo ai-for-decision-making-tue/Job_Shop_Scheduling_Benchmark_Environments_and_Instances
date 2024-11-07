@@ -5,11 +5,11 @@ from pathlib import Path
 import torch.nn as nn
 
 from solution_methods.helper_functions import load_parameters
-from solution_methods.L2D.models.actor_critic import ActorCritic
-from solution_methods.L2D.agent_utils import eval_actions
-from solution_methods.L2D.mb_agg import *
+from solution_methods.L2D.network.actor_critic import ActorCritic
+from solution_methods.L2D.src.agent_utils import eval_actions
+from solution_methods.L2D.src.mb_agg import *
 
-base_path = Path(__file__).resolve().parents[2]
+base_path = Path(__file__).resolve().parents[3]
 sys.path.append(str(base_path))
 
 param_file = str(base_path) + "/configs/L2D.toml"

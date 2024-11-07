@@ -1,29 +1,16 @@
-[env_parameters]
-n_j = 15                            # Number of jobs of instance
-n_m = 15                            # Number of machines of instance
-rewardscale = 0.0                   # Reward scale for positive rewards
-init_quality_flag = false           # Flag of whether init state quality is 0, True for 0
-low = 1                             # LB of duration
-high = 99                           # UB of duration
-np_seed_train = 200                 # Seed for numpy for training
-np_seed_validation = 200            # Seed for numpy for validation
-torch_seed = 600                    # Seed for torch
-et_normalize_coef = 1000            # Normalizing constant for feature LBs (end time), normalization way: fea/constant
-wkr_normalize_coef = 100            # Normalizing constant for wkr, normalization way: fea/constant
-device = "cpu"                     # Device for training ("cpu" or "cuda")
-
-[network_parameters]
-num_layers = 3                      # No. of layers of feature extraction GNN including input layer
-neighbor_pooling_type = "sum"       # neighbour pooling type
-graph_pool_type = "average"         # graph pooling type
-input_dim = 2                       # number of dimension of raw node features
-hidden_dim = 64                     # hidden dim of MLP in fea extract GNN
-num_mlp_layers_feature_extract = 2  # No. of layers of MLP in fea extract GNN
-num_mlp_layers_actor = 2            # No. of layers in actor MLP
-hidden_dim_actor = 32               # hidden dim of MLP in actor
-num_mlp_layers_critic = 2           # No. of layers in critic MLP
-hidden_dim_critic = 32              # hidden dim of MLP in critic
-device = "cpu"                     # Device for training ("cpu" or "cuda")
+[test_parameters]
+seed = 1                            # Set random seed for result replication
+device = "cpu"                      # Device for test ("cpu" or "cuda")
+problem_instance = "/jsp/adams/abz5" # instance to test if mode is benchmark
+trained_policy = "/saved_models/30_20_1_99.pth" # Load pretrained policy
+sample = false                      # sample from policy if true, else use argmax (greedy)
+show_gantt = true                   # draw ganttchart of found solution
+save_gantt = true                   # save ganttchart to file
+save_results = true                 # save results to file
+exp_name = ""                       # name of the experiment, used for saving results.
+                                    # If empty (""), the name of the problem instance is used
+folder = ""                         # folder to save results, used for saving results.
+                                    # If empty (""), the results are saved to the current working directory.
 
 [train_parameters]
 num_envs = 4                        # No. of envs for training
@@ -38,12 +25,31 @@ eps_clip = 0.2                      # clip parameter for PPO
 vloss_coef = 1.0                    # critic loss coefficient
 ploss_coef = 2.0                    # policy loss coefficient
 entloss_coef = 0.01                 # entropy loss coefficient
-device = "cpu"                     # Device for training ("cpu" or "cuda")
+device = "cpu"                      # Device for training ("cpu" or "cuda")
 
-[test_parameters]
-seed = 1                            # Set random seed for result replication
-instance_name = "/jsp/adams/abz5"   # instance to test if mode is benchmark
-trained_policy = "/solution_methods/L2D/save/30_20_1_99.pth" # Load pretrained policy
-sample = false                      # Sampling flag for testing
-plotting = true                     # Plot final gantt chart
-device = "cpu"                     # Device for test ("cpu" or "cuda")
+[env_parameters]
+n_j = 15                            # Number of jobs of instance
+n_m = 15                            # Number of machines of instance
+rewardscale = 0.0                   # Reward scale for positive rewards
+init_quality_flag = false           # Flag of whether init state quality is 0, True for 0
+low = 1                             # LB of duration
+high = 99                           # UB of duration
+np_seed_train = 200                 # Seed for numpy for training
+np_seed_validation = 200            # Seed for numpy for validation
+torch_seed = 600                    # Seed for torch
+et_normalize_coef = 1000            # Normalizing constant for feature LBs (end time), normalization way: fea/constant
+wkr_normalize_coef = 100            # Normalizing constant for wkr, normalization way: fea/constant
+device = "cpu"                      # Device for training ("cpu" or "cuda")
+
+[network_parameters]
+num_layers = 3                      # No. of layers of feature extraction GNN including input layer
+neighbor_pooling_type = "sum"       # neighbour pooling type
+graph_pool_type = "average"         # graph pooling type
+input_dim = 2                       # number of dimension of raw node features
+hidden_dim = 64                     # hidden dim of MLP in fea extract GNN
+num_mlp_layers_feature_extract = 2  # No. of layers of MLP in fea extract GNN
+num_mlp_layers_actor = 2            # No. of layers in actor MLP
+hidden_dim_actor = 32               # hidden dim of MLP in actor
+num_mlp_layers_critic = 2           # No. of layers in critic MLP
+hidden_dim_critic = 32              # hidden dim of MLP in critic
+device = "cpu"                      # Device for training ("cpu" or "cuda")

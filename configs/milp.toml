@@ -1,9 +1,15 @@
 [instance]
-problem_instance = "/fjsp_sdst/1_Fattahi/Fattahi_setup_15.fjs" # configure problem instance to be scheduled
+problem_instance = "/jsp/adams/abz5"
 
 [solver]
-time_limit = 64800 # time limit for the gurobi solver, in seconds
+time_limit = 3600       # time limit for the gurobi solver, in seconds
 
 [output]
-plotting = true # draw ganttchart of found solution
+show_gantt = true       # draw ganttchart of found solution
+save_gantt = true       # save ganttchart to file
+save_results = true     # save results to file
+exp_name = ""           # name of the experiment, used for saving results.
+                        # If empty (""), the name of the problem instance is used
+folder = ""             # folder to save results, used for saving results.
+                        # If empty (""), the results are saved to the current working directory.
 

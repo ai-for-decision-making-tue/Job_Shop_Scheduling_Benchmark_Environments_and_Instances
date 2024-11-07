@@ -7,7 +7,7 @@ from scheduling_environment.simulationEnv import SimulationEnv
 from solution_methods.helper_functions import load_parameters
 from solution_methods.dispatching_rules.scheduler import schedule_operations
 
-PARAM_FILE = "configs/dispatching_rules.toml"
+PARAM_FILE = "../../configs/dispatching_rules.toml"
 
 
 def run_method(simulationEnv, dispatching_rule, machine_assignment_rule):

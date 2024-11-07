@@ -97,7 +97,7 @@ if __name__ == "__main__":
     import time
 
     from JSSP_Env import SJSSP
-    from uniform_instance_gen import uni_instance_gen
+    from solution_methods.L2D.generated_data.uniform_instance_gen import uni_instance_gen
 
     n_j = 3
     n_m = 3

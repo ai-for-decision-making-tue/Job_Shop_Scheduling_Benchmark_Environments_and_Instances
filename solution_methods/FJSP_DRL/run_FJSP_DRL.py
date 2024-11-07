@@ -10,7 +10,7 @@ from solution_methods.FJSP_DRL.env_test import FJSPEnv_test
 from solution_methods.FJSP_DRL.PPO import HGNNScheduler
 from solution_methods.helper_functions import load_job_shop_env, load_parameters, initialize_device, set_seeds
 
-PARAM_FILE = "configs/FJSP_DRL.toml"
+PARAM_FILE = "../../configs/FJSP_DRL.toml"
 
 
 def run_method(**parameters):

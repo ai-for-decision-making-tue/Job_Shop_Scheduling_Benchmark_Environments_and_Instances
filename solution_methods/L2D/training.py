@@ -4,12 +4,12 @@ from pathlib import Path
 import numpy as np
 
 from solution_methods.helper_functions import load_parameters
-from solution_methods.L2D.agent_utils import select_action
-from solution_methods.L2D.JSSP_Env import SJSSP
-from solution_methods.L2D.mb_agg import *
-from solution_methods.L2D.PPO_model import PPO, Memory
-from solution_methods.L2D.uniform_instance_gen import uni_instance_gen
-from solution_methods.L2D.validation import validate
+from solution_methods.L2D.src.agent_utils import select_action
+from solution_methods.L2D.src.JSSP_Env import SJSSP
+from solution_methods.L2D.src.mb_agg import *
+from solution_methods.L2D.src.PPO_model import PPO, Memory
+from solution_methods.L2D.generated_data.uniform_instance_gen import uni_instance_gen
+from solution_methods.L2D.src.validation import validate
 
 base_path = Path(__file__).resolve().parents[2]
 sys.path.append(str(base_path))
