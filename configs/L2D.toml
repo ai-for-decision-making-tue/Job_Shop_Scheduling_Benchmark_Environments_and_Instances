@@ -14,7 +14,7 @@ folder = ""                         # folder to save results, used for saving re
 
 [train_parameters]
 num_envs = 4                        # No. of envs for training
-max_updates = 10000                 # No. of episodes of each env for training
+max_updates = 201                 # No. of episodes of each env for training
 lr = 2e-5                           # learning rate
 decayflag = false                   # lr decayflag
 decay_step_size = 2000              # decay_step_size
@@ -28,8 +28,8 @@ entloss_coef = 0.01                 # entropy loss coefficient
 device = "cpu"                      # Device for training ("cpu" or "cuda")
 
 [env_parameters]
-n_j = 15                            # Number of jobs of instance
-n_m = 15                            # Number of machines of instance
+n_j = 6                            # Number of jobs of instance
+n_m = 6                            # Number of machines of instance
 rewardscale = 0.0                   # Reward scale for positive rewards
 init_quality_flag = false           # Flag of whether init state quality is 0, True for 0
 low = 1                             # LB of duration

@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from solution_methods.helper_functions import load_parameters
-from solution_methods.L2D.network.graphcnn_congForSJSSP import GraphCNN
+from solution_methods.L2D.network.graphCNN import GraphCNN
 from solution_methods.L2D.network.mlp import MLPActor, MLPCritic
 
 # from solutions.save.Params import configs

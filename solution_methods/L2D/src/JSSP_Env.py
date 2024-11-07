@@ -7,11 +7,11 @@ from gymnasium.utils import EzPickle
 
 from solution_methods.helper_functions import load_parameters
 from solution_methods.L2D.src.permissibleLS import permissibleLeftShift
-from solution_methods.L2D.generated_data.uniform_instance_gen import override
+from solution_methods.L2D.generated_data.instance_generator import override
 from solution_methods.L2D.src.updateAdjMat import getActionNbghs
 from solution_methods.L2D.src.updateEntTimeLB import calEndTimeLB
 
-base_path = Path(__file__).resolve().parents[2]
+base_path = Path(__file__).resolve().parents[3]
 sys.path.append(str(base_path))
 
 param_file = str(base_path) + "/configs/L2D.toml"

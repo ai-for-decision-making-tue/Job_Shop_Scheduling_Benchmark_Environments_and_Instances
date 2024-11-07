@@ -20,7 +20,7 @@ def run_L2D(jobShopEnv, **parameters):
     device = initialize_device(parameters)
     set_seeds(parameters["test_parameters"]["seed"])
 
-    # Configure default tensor type for device #TODO
+    # Configure default tensor type for device
     torch.set_default_tensor_type('torch.cuda.FloatTensor' if device.type == 'cuda' else 'torch.FloatTensor')
     if device.type == 'cuda':
         torch.cuda.set_device(device)

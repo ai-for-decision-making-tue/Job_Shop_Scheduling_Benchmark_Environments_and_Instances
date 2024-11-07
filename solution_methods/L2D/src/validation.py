@@ -9,7 +9,7 @@ from solution_methods.L2D.src.agent_utils import greedy_select_action
 from solution_methods.L2D.src.JSSP_Env import SJSSP
 from solution_methods.L2D.src.mb_agg import g_pool_cal
 
-base_path = Path(__file__).resolve().parents[2]
+base_path = Path(__file__).resolve().parents[3]
 sys.path.append(str(base_path))
 
 param_file = str(base_path) + "/configs/L2D.toml"

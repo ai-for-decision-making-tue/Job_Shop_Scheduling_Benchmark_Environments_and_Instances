@@ -80,11 +80,8 @@ class PPO:
                                   num_mlp_layers_critic=num_mlp_layers_critic,
                                   hidden_dim_critic=hidden_dim_critic,
                                   device=device)
+
         self.policy_old = deepcopy(self.policy)
-
-        '''self.policy.load_state_dict(
-            torch.load(path='./{}.pth'.format(str(n_j) + '_' + str(n_m) + '_' + str(1) + '_' + str(99))))'''
-
         self.policy_old.load_state_dict(self.policy.state_dict())
         self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=lr)
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer,
@@ -106,6 +103,7 @@ class PPO:
         mask_mb_t_all_env = []
         a_mb_t_all_env = []
         old_logprobs_mb_t_all_env = []
+
         # store data for all env
         for i in range(len(memories)):
             rewards = []
@@ -118,8 +116,6 @@ class PPO:
             rewards = torch.tensor(rewards, dtype=torch.float).to(device)
             rewards = (rewards - rewards.mean()) / (rewards.std() + 1e-5)
             rewards_all_env.append(rewards)
-            # print('reward', len(memories[i].r_mb), rewards.shape)
-            # process each env data
             adj_mb_t_all_env.append(aggr_obs(torch.stack(memories[i].adj_mb).to(device), n_tasks))
             fea_mb_t = torch.stack(memories[i].fea_mb).to(device)
             fea_mb_t = fea_mb_t.reshape(-1, fea_mb_t.size(-1))
@@ -137,15 +133,12 @@ class PPO:
             loss_sum = 0
             vloss_sum = 0
             for i in range(len(memories)):
-                # print(len(memories[i].adj_mb))
-                # print('update', candidate_mb_t_all_env[i].shape, mask_mb_t_all_env[i].shape)
                 pis, vals = self.policy(x=fea_mb_t_all_env[i],
                                         graph_pool=mb_g_pool,
                                         adj=adj_mb_t_all_env[i],
                                         candidate=candidate_mb_t_all_env[i],
                                         mask=mask_mb_t_all_env[i],
                                         padded_nei=None)
-                # print('update', pis.shape, vals.shape)
                 logprobs, ent_loss = eval_actions(pis.squeeze(), a_mb_t_all_env[i])
                 ratios = torch.exp(logprobs - old_logprobs_mb_t_all_env[i].detach())
                 advantages = rewards_all_env[i] - vals.view(-1).detach()
@@ -159,7 +152,7 @@ class PPO:
                 loss_sum += loss
                 vloss_sum += v_loss
             self.optimizer.zero_grad()
-            print('loss_sum', loss_sum)
+            #print('loss_sum', loss_sum)
             loss_sum.mean().backward()
             self.optimizer.step()
 
