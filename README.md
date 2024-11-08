@@ -1,3 +1,8 @@
+![python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20-blue)
+![Testing](https://github.com/ai-for-decision-making-tue/Job_Shop_Scheduling_Benchmark_Environments_and_Instances/actions/workflows/testing.yml/badge.svg)
+[![License: GPLv3](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/ai-for-decision-making-tue/Job_Shop_Scheduling_Benchmark_Environments_and_Instances/blob/main/LICENSE)
+
+
 # Job Shop Scheduling Benchmark: Environments and Instances for Learning and Non-learning Methods 
 Welcome to the **Job Shop Scheduling Benchmark**
 

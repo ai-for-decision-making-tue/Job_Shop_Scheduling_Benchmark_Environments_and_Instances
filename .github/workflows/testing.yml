@@ -1,0 +1,85 @@
+name: Testing
+
+on: [push]
+
+jobs:
+  linting:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10 
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip' # caching pip dependencie
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements_dev.txt
+      - name: Lint with flake8
+        continue-on-error: true
+        run: |
+          flake8 . --count --max-complexity=15 --max-line-length=127 --statistics 
+      - name: Lint with pylint
+        continue-on-error: true
+        run: |
+          find . -type f -name "*.py" | xargs pylint
+      - name: Lint with black
+        continue-on-error: true
+        run: |
+          black --check .
+      - name: Lint with isort
+        continue-on-error: true
+        run: |
+          isort . --check-only
+      - name: Check typing
+        continue-on-error: true
+        run: |
+          mypy .
+
+  testing:
+    # add needs to create sequence
+    needs: [linting]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10 
+    strategy:
+      matrix:
+        python-version: ["3.10","3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip' # caching pip dependencie
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+      - name: Run Basic Heuristic
+        run: |
+          #python run_basic_heuristics.py
+      - name: Run FJSP DRL
+        run: |
+          python run_FJSP_DRL.py          
+      - name: Run GA
+        run: |
+          python run_genetic_algorithm.py      
+      - name: Run MILP
+        run: |
+          python run_milp.py      
+      - name: Run OR-tools
+        run: |
+          python run_or_tools.py                                    
+      - name: Run Dispatching rules
+        run: |
+          python run_dispatching_rules.py   
+
+          
