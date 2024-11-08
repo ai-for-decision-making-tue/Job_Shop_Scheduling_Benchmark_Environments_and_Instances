@@ -1,3 +1,4 @@
+import numpy as np
 from typing import Dict, List
 
 from scheduling_environment.job import Job
@@ -162,6 +163,32 @@ class JobShop:
     def max_workload(self) -> float:
         """Return the max workload of machines (sum of processing times of all scheduled operations on a machine)"""
         return max(sum(op.scheduled_duration for op in machine.scheduled_operations) for machine in self.machines)
+
+    @property
+    def average_workload(self) -> float:
+        """Return the max workload of machines (sum of processing times of all scheduled operations on a machine)"""
+        return np.mean([sum(op.scheduled_duration for op in machine.scheduled_operations) for machine in self.machines])
+
+    @property
+    def balanced_workload(self) -> float:
+        """Return the max workload of machines (sum of processing times of all scheduled operations on a machine)"""
+        return max(sum(op.scheduled_duration for op in machine.scheduled_operations) for machine in self.machines) - min(sum(op.scheduled_duration for op in machine.scheduled_operations) for machine in self.machines)
+
+    @property
+    def average_flowtime(self) -> float:
+        total_flowtime = 0
+        for job in self._jobs:
+            total_flowtime += job.flow_time
+        return total_flowtime / self._nr_of_jobs
+
+    @property
+    def max_flowtime(self) -> float:
+        max_flowtime = 0
+        for job in self._jobs:
+            flow_time = job.flow_time
+            if flow_time > max_flowtime:
+                max_flowtime = flow_time
+        return max_flowtime
 
     def schedule_operation_with_backfilling(self, operation: Operation, machine_id, duration) -> None:
         """Schedule an operation"""
