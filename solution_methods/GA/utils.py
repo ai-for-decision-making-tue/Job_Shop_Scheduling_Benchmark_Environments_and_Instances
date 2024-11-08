@@ -40,11 +40,12 @@ def output_dir_exp_name(parameters):
     if 'experiment_name' in parameters['output'] is not None:
         exp_name = parameters['output']['experiment_name']
     else:
-        instance_name = parameters['instance']['problem_instance'].split('/')[-1].split('.')[0]
+        instance_name = parameters['instance']['problem_instance'].replace('/', '_')[1:]
+        instance_name = instance_name.split('.')[0] if '.' in instance_name else instance_name
         population_size = parameters['algorithm'].get('population_size')
         ngen = parameters['algorithm'].get('ngen')
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        exp_name = f"{instance_name}_pop_{population_size}_ngen_{ngen}{timestamp}"
+        exp_name = f"{instance_name}_pop_{population_size}_ngen_{ngen}_{timestamp}"
 
     if 'folder_name' in parameters['output'] is not None:
         output_dir = parameters['output']['folder_name']

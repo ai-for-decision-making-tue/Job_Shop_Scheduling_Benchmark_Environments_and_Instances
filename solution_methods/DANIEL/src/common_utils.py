@@ -7,10 +7,6 @@ import numpy as np
 import torch
 from torch.distributions.categorical import Categorical
 
-"""
-    agent utils
-"""
-
 
 def sample_action(p):
     """

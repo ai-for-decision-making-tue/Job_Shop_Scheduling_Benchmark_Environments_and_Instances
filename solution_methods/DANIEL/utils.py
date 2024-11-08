@@ -2,7 +2,7 @@ import os
 import datetime
 import json
 
-DEFAULT_RESULTS_ROOT = os.getcwd() + "/results/L2D"
+DEFAULT_RESULTS_ROOT = os.getcwd() + "/results/DANIEL"
 
 
 def output_dir_exp_name(parameters):
@@ -41,6 +41,6 @@ def results_saving(makespan, path, parameters):
     os.makedirs(path, exist_ok=True)
 
     # Save results to JSON
-    file_path = os.path.join(path, "L2D_results.json")
+    file_path = os.path.join(path, "DANIEL_results.json")
     with open(file_path, "w") as outfile:
         json.dump(results, outfile, indent=4)

@@ -389,25 +389,25 @@ class CaseGenerator:
         return job_length, op_pt, self.num_options / self.num_opes
 
 
-def main():
-    if configs.data_type == "test":
-        generate_data_to_files(
-            configs.seed_datagen, f"./data/{configs.data_source}/", configs
-        )
-    elif configs.data_type == "vali":
-        # generate validation instances
-        generate_data_to_files(
-            configs.seed_train_vali_datagen,
-            f"./data/data_train_vali/{configs.data_source}/",
-            configs,
-        )
-    else:
-        print(
-            f"Error from Instance Generation: incorrect data type {configs.data_type}"
-        )
-        sys.exit()
-
-
-if __name__ == "__main__":
-    main()
-    print("success!")
+# def main():
+#     if configs.data_type == "test":
+#         generate_data_to_files(
+#             configs.seed_datagen, f"./data/{configs.data_source}/", configs
+#         )
+#     elif configs.data_type == "vali":
+#         # generate validation instances
+#         generate_data_to_files(
+#             configs.seed_train_vali_datagen,
+#             f"./data/data_train_vali/{configs.data_source}/",
+#             configs,
+#         )
+#     else:
+#         print(
+#             f"Error from Instance Generation: incorrect data type {configs.data_type}"
+#         )
+#         sys.exit()
+#
+#
+# if __name__ == "__main__":
+#     main()
+#     print("success!")

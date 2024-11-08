@@ -1,5 +1,5 @@
-from solution_methods.DANIEL.model.main_model import DANIEL
-from solution_methods.DANIEL.common_utils import eval_actions
+from solution_methods.DANIEL.network.main_model import DANIEL
+from solution_methods.DANIEL.src.common_utils import eval_actions
 import torch.nn as nn
 import torch
 from copy import deepcopy

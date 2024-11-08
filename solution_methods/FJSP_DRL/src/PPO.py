@@ -1,11 +1,3 @@
-# GITHUB REPO: https://github.com/songwenas12/fjsp-drl
-
-# Code based on the paper:
-# "Flexible Job Shop Scheduling via Graph Neural Network and Deep Reinforcement Learning"
-# by Wen Song, Xinyang Chen, Qiqiang Li and Zhiguang Cao
-# Presented in IEEE Transactions on Industrial Informatics, 2023.
-# Paper URL: https://ieeexplore.ieee.org/document/9826438
-
 import copy
 import math
 
@@ -14,8 +6,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Categorical
 
-from solution_methods.FJSP_DRL.hgnn import GATedge, MLPsim
-from solution_methods.FJSP_DRL.mlp import MLPActor, MLPCritic
+from solution_methods.FJSP_DRL.network.hgnn import GATedge, MLPsim
+from solution_methods.FJSP_DRL.network.mlp import MLPActor, MLPCritic
 
 
 class Memory:

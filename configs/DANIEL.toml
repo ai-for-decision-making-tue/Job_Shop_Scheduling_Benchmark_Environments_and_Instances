@@ -1,3 +1,17 @@
+[test_parameters]
+seed = 2024                 # Set random seed for result replication
+problem_instance = "/fjsp/1_Brandimarte/Mk09.fjs"  # Problem instance for testing
+trained_policy = '10x5+mix'     # model for testing
+sample = false              # sample from policy if true, else use argmax (greedy)
+sample_times = 100          # Sampling times for the sampling strategy
+show_gantt = true           # draw ganttchart of found solution
+save_gantt = true           # save ganttchart to file
+save_results = true         # save results to file
+exp_name = ""               # name of the experiment, used for saving results.
+                            # If empty (""), the name of the problem instance is used
+folder = ""                 # folder to save results, used for saving results.
+                            # If empty (""), the results are saved to the current working directory.
+
 [device]
 name = "cpu"  # Device name
 id = "0"  # Device id
@@ -59,12 +73,3 @@ train_size = "10x5"  # Size of training instances
 validate_timestep = 10  # Interval for validation and data log
 reset_env_timestep = 20  # Interval for reseting the environment
 minibatch_size = 1024  # Batch size for computing the gradient
-
-[testing]
-sample = false  # Whether using the sampling strategy in testing
-sample_times = 100  # Sampling times for the sampling strategy
-test_model = '10x5+mix'  # model for testing
-test_method = []  # List of heuristic methods for testing
-seed = 3  # Set random seed for result replication
-problem_instance = "/fjsp/1_Brandimarte/Mk09.fjs"  # Problem instance for testing
-plotting = true  # Whether plotting the Gantt chart

@@ -1,6 +1,6 @@
-from solution_methods.DANIEL.common_utils import nonzero_averaging
-from solution_methods.DANIEL.model.attention_layer import *
-from solution_methods.DANIEL.model.sub_layers import *
+from solution_methods.DANIEL.src.common_utils import nonzero_averaging
+from solution_methods.DANIEL.network.attention_layer import *
+from solution_methods.DANIEL.network.sub_layers import *
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

@@ -8,8 +8,8 @@ from plotting.drawer import draw_gantt_chart
 from models import JSPmodel, FJSPmodel, FJSPSDSTmodel
 from utils import retrieve_decision_variables, results_saving, output_dir_exp_name
 
-logging.basicConfig(level=logging.INFO)
 PARAM_FILE = os.path.abspath("../../configs/milp.toml")
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 MODEL_MAP = {
     'fjsp_sdst': FJSPSDSTmodel,

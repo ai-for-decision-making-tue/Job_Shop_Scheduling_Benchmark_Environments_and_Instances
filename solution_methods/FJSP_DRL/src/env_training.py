@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 import torch
 
-from solution_methods.FJSP_DRL.load_data import load_feats_from_case, nums_detec
+from solution_methods.FJSP_DRL.src.load_data import load_feats_from_case, nums_detec
 
 
 @dataclass

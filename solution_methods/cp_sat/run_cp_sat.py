@@ -9,8 +9,8 @@ from models import FJSPSDSTmodel, FJSPmodel, JSPmodel
 from utils import solve_model
 from plotting.drawer import draw_gantt_chart
 
-logging.basicConfig(level=logging.INFO)
 PARAM_FILE = os.path.abspath("../../configs/cp_sat.toml")
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 
 def run_CP_SAT(jobShopEnv, **kwargs):

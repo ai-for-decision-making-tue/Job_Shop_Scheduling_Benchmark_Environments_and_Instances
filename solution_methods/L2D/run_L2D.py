@@ -1,3 +1,11 @@
+# GITHUB REPO: https://github.com/zcaicaros/L2D
+
+# Code based on the paper:
+# Learning to Dispatch for Job Shop Scheduling via Deep Reinforcement Learning"
+# by Cong Zhang, Wen Song, Zhiguang Cao, Jie Zhang, Puay Tan and Xu Chi
+# Presented in 34th Conference on Neural Information Processing Systems (NeurIPS), 2020.
+# Paper URL: https://papers.nips.cc/paper_files/paper/2020/file/11958dfee29b6709f48a9ba0387a2431-Paper.pdf
+
 import argparse
 import logging
 import os
@@ -13,6 +21,7 @@ from solution_methods.L2D.src.PPO_model import PPO
 from utils import output_dir_exp_name, results_saving
 
 PARAM_FILE = "../../configs/L2D.toml"
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 
 def run_L2D(jobShopEnv, **parameters):
@@ -25,7 +34,7 @@ def run_L2D(jobShopEnv, **parameters):
     if device.type == 'cuda':
         torch.cuda.set_device(device)
 
-    # Configure environment and load instance
+    # Configure test environment
     env_test = Env_test(n_j=jobShopEnv.nr_of_jobs, n_m=jobShopEnv.nr_of_machines)
 
     # Initialize PPO model with network and training parameters

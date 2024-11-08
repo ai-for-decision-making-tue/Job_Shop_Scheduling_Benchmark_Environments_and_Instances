@@ -1,6 +1,6 @@
 import numpy as np
 
-from solution_methods.DANIEL.fjsp_env_same_op_nums import FJSPEnvForSameOpNums
+from solution_methods.DANIEL.src.fjsp_env_same_op_nums import FJSPEnvForSameOpNums
 from solution_methods.helper_functions import initialize_device
 
 

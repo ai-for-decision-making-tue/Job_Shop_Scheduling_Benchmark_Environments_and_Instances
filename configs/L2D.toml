@@ -1,7 +1,7 @@
 [test_parameters]
-seed = 1                            # Set random seed for result replication
+seed = 2024                         # Set random seed for result replication
 device = "cpu"                      # Device for test ("cpu" or "cuda")
-problem_instance = "/jsp/adams/abz5" # instance to test if mode is benchmark
+problem_instance = "/jsp/adams/abz5" # instance to test (in testing mode)
 trained_policy = "/saved_models/30_20_1_99.pth" # Load pretrained policy
 sample = false                      # sample from policy if true, else use argmax (greedy)
 show_gantt = true                   # draw ganttchart of found solution
@@ -14,7 +14,7 @@ folder = ""                         # folder to save results, used for saving re
 
 [train_parameters]
 num_envs = 4                        # No. of envs for training
-max_updates = 201                 # No. of episodes of each env for training
+max_updates = 10000                 # No. of episodes of each env for training
 lr = 2e-5                           # learning rate
 decayflag = false                   # lr decayflag
 decay_step_size = 2000              # decay_step_size
@@ -28,12 +28,12 @@ entloss_coef = 0.01                 # entropy loss coefficient
 device = "cpu"                      # Device for training ("cpu" or "cuda")
 
 [env_parameters]
-n_j = 6                            # Number of jobs of instance
-n_m = 6                            # Number of machines of instance
+n_j = 6                             # Number of jobs of instance
+n_m = 6                             # Number of machines of instance
 rewardscale = 0.0                   # Reward scale for positive rewards
 init_quality_flag = false           # Flag of whether init state quality is 0, True for 0
 low = 1                             # LB of duration
-high = 99                           # UB of duration
+high = 100                          # UB of duration
 np_seed_train = 200                 # Seed for numpy for training
 np_seed_validation = 200            # Seed for numpy for validation
 torch_seed = 600                    # Seed for torch

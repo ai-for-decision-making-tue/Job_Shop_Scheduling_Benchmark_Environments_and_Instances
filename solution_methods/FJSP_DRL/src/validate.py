@@ -1,11 +1,3 @@
-# GITHUB REPO: https://github.com/songwenas12/fjsp-drl
-
-# Code based on the paper:
-# "Flexible Job Shop Scheduling via Graph Neural Network and Deep Reinforcement Learning"
-# by Wen Song, Xinyang Chen, Qiqiang Li and Zhiguang Cao
-# Presented in IEEE Transactions on Industrial Informatics, 2023.
-# Paper URL: https://ieeexplore.ieee.org/document/9826438
-
 import copy
 import os
 import time
@@ -13,8 +5,8 @@ from pathlib import Path
 
 import torch
 
-import solution_methods.FJSP_DRL.PPO as PPO_model
-from solution_methods.FJSP_DRL.env_training import FJSPEnv_training
+import solution_methods.FJSP_DRL.src.PPO as PPO_model
+from solution_methods.FJSP_DRL.src.env_training import FJSPEnv_training
 
 base_path = Path(__file__).resolve().parents[2]
 
@@ -23,7 +15,7 @@ def get_validate_env(env_paras, train_paras):
     """
     Generate and return the validation environment from the validation set ()
     """
-    file_path = str(base_path) + "/data/" + train_paras["validation_folder"]
+    file_path = str(base_path) + "/FJSP_DRL/data" + train_paras["validation_folder"]
     valid_data_files = os.listdir(file_path)
     for i in range(len(valid_data_files)):
         valid_data_files[i] = file_path + valid_data_files[i]

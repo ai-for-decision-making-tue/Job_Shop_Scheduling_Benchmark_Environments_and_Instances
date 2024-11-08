@@ -2,9 +2,9 @@ import random
 
 
 class CaseGenerator:
-    '''
+    """
     FJSP instance generator
-    '''
+    """
     def __init__(self, job_init, num_mas, opes_per_job_min, opes_per_job_max, nums_ope=None, path='../data/',
                  flag_same_opes=True, flag_doc=False):
         if nums_ope is None:
@@ -25,10 +25,10 @@ class CaseGenerator:
         self.proctime_dev = 0.2
 
     def get_case(self, idx=0):
-        '''
+        """
         Generate FJSP instance
         :param idx: The instance number
-        '''
+        """
         self.num_jobs = self.job_init
         if not self.flag_same_opes:
             self.nums_ope = [random.randint(self.opes_per_job_min, self.opes_per_job_max) for _ in range(self.num_jobs)]

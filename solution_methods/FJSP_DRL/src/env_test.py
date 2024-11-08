@@ -1,11 +1,3 @@
-# GITHUB REPO: https://github.com/songwenas12/fjsp-drl
-
-# Code based on the paper:
-# "Flexible Job Shop Scheduling via Graph Neural Network and Deep Reinforcement Learning"
-# by Wen Song, Xinyang Chen, Qiqiang Li and Zhiguang Cao
-# Presented in IEEE Transactions on Industrial Informatics, 2023.
-# Paper URL: https://ieeexplore.ieee.org/document/9826438
-
 import copy
 import sys
 from dataclasses import dataclass
@@ -14,7 +6,7 @@ from pathlib import Path
 import torch
 
 from scheduling_environment.jobShop import JobShop
-from solution_methods.FJSP_DRL.load_data import load_feats_from_sim
+from solution_methods.FJSP_DRL.src.load_data import load_feats_from_sim
 
 # Add the base path to the Python module search path
 base_path = Path(__file__).resolve().parents[2]

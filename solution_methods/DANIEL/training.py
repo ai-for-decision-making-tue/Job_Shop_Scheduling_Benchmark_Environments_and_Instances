@@ -1,30 +1,31 @@
 import argparse
-import logging
 import os
 import random
 import sys
 import time
 from copy import deepcopy
+import logging
 from pathlib import Path
-
 import numpy as np
-from common_utils import greedy_select_action, sample_action, setup_seed, strToSuffix
-from data_utils import CaseGenerator, SD2_instance_generator, load_data_from_files
-from fjsp_env_same_op_nums import FJSPEnvForSameOpNums
-from fjsp_env_various_op_nums import FJSPEnvForVariousOpNums
-from model.PPO import Memory, PPO_initialize
+import torch
+
 from tqdm import tqdm
 
-# Add the base path to the Python module search path
+from src.common_utils import greedy_select_action, sample_action, setup_seed, strToSuffix
+from src.data_utils import CaseGenerator, SD2_instance_generator, load_data_from_files
+from solution_methods.DANIEL.src.fjsp_env_same_op_nums import FJSPEnvForSameOpNums
+from solution_methods.DANIEL.src.fjsp_env_various_op_nums import FJSPEnvForVariousOpNums
+from solution_methods.DANIEL.network.PPO import Memory, PPO_initialize
+from solution_methods.helper_functions import load_parameters, initialize_device
+
 base_path = Path(__file__).resolve().parents[2]
 sys.path.append(str(base_path))
 
-from solution_methods.helper_functions import load_parameters, initialize_device
+PARAM_FILE = str(base_path) + "/configs/DANIEL.toml"
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+
 
 str_time = time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time()))
-import torch
-
-PARAM_FILE = str(base_path) + "/configs/DANIEL.toml"
 
 
 class Trainer:
@@ -356,7 +357,7 @@ class Trainer:
         self.ppo.policy.load_state_dict(torch.load(model_path, map_location="cuda"))
 
 
-def train_DANIEL(param_file: str = PARAM_FILE):
+def main(param_file: str = PARAM_FILE):
     try:
         parameters = load_parameters(param_file)
     except FileNotFoundError:
@@ -379,4 +380,4 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    train_DANIEL(param_file=args.config_file)
+    main(param_file=args.config_file)

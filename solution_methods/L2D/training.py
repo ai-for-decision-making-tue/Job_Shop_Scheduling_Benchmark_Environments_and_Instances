@@ -1,3 +1,11 @@
+# GITHUB REPO: https://github.com/zcaicaros/L2D
+
+# Code based on the paper:
+# Learning to Dispatch for Job Shop Scheduling via Deep Reinforcement Learning"
+# by Cong Zhang, Wen Song, Zhiguang Cao, Jie Zhang, Puay Tan and Xu Chi
+# Presented in 34th Conference on Neural Information Processing Systems (NeurIPS), 2020.
+# Paper URL: https://papers.nips.cc/paper_files/paper/2020/file/11958dfee29b6709f48a9ba0387a2431-Paper.pdf
+
 import os
 import sys
 import argparse
@@ -11,7 +19,7 @@ from solution_methods.L2D.src.agent_utils import select_action
 from solution_methods.L2D.src.JSSP_Env import SJSSP
 from solution_methods.L2D.src.mb_agg import g_pool_cal
 from solution_methods.L2D.src.PPO_model import PPO, Memory
-from solution_methods.L2D.generated_data.instance_generator import uniform_instance_generator
+from solution_methods.L2D.data.instance_generator import uniform_instance_generator
 from solution_methods.L2D.src.validation import validate
 
 base_path = Path(__file__).resolve().parents[2]
@@ -24,7 +32,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 def train_L2D(**parameters):
     logging.info("Training started.")  # Log the start of training
 
-    # Unpack parameter sets for environment, model, and training
+    # retrieve parameters for environment, model, and training
     env_parameters = parameters["env_parameters"]
     model_parameters = parameters["network_parameters"]
     train_parameters = parameters["train_parameters"]
@@ -49,7 +57,7 @@ def train_L2D(**parameters):
 
     # Load validation data
     data_generator = uniform_instance_generator
-    file_path = str(base_path) + '/solution_methods/L2D/generated_data/'
+    file_path = str(base_path) + '/solution_methods/L2D/data/'
     dataLoaded = np.load(f"{file_path}generatedData{n_job}_{n_machine}_Seed{env_parameters['np_seed_validation']}.npy")
     vali_data = [(dataLoaded[i][0], dataLoaded[i][1]) for i in range(dataLoaded.shape[0])]
 
@@ -184,7 +192,7 @@ def train_L2D(**parameters):
                 f'Episode {i_update + 1}\t Last reward: {mean_rewards_all_env:.2f}\t Mean_Vloss: {v_loss:.8f}\t Validation quality: {validation_result:.2f}')
 
 
-def main(param_file=PARAM_FILE):
+def main(param_file: str = PARAM_FILE):
     try:
         parameters = load_parameters(param_file)
     except FileNotFoundError:
@@ -195,7 +203,7 @@ def main(param_file=PARAM_FILE):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Training L2D")
+    parser = argparse.ArgumentParser(description="Train L2D")
     parser.add_argument(
         "config_file",
         metavar='-f',
