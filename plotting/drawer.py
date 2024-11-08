@@ -1,6 +1,7 @@
 import copy
 import os
 import random
+import logging
 from statistics import mean
 
 import matplotlib.colors as mcolors
@@ -38,7 +39,7 @@ def create_colormap():
 
 
 # Plot the Gantt chart of the job shop schedule
-def draw_gantt_chart(JobShop):
+def draw_gantt_chart(JobShop, save=False, filename=None):
     fig, ax = plt.subplots()
     colormap = create_colormap()
 
@@ -92,7 +93,7 @@ def draw_gantt_chart(JobShop):
     ax.set_title('Job Shop Scheduling Gantt Chart')
     ax.grid(True)
 
-    plt.show()
+    return plt
 
 
 def draw_precedence_relations(JobShop: JobShop):

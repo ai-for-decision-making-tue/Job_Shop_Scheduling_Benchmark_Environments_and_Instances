@@ -1,10 +1,16 @@
 [instance]
-problem_instance = "/fjsp/1_Brandimarte/Mk01.fjs"
+problem_instance = "/fjsp/1_Brandimarte/MK01.fjs"
 
-[solver]
-time_limit = 3600       # time limit for the OR-tools CP-SAT solver, in seconds
+[algorithm]
+population_size = 100   # number of individuals in the population
+ngen = 10               # number of generations
+seed = 5                # random seed
+indpb = 0.2             # probability of mutating each gene
+cr = 0.7                # probability of mating
+multiprocessing = true  # use multiprocessing for parallel evaluation of individuals (default uses all threads)
 
 [output]
+logbook = true          # display logbook during search
 show_gantt = true       # draw ganttchart of found solution
 save_gantt = true       # save ganttchart to file
 save_results = true     # save results to file

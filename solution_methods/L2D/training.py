@@ -1,50 +1,74 @@
+# GITHUB REPO: https://github.com/zcaicaros/L2D
+
+# Code based on the paper:
+# Learning to Dispatch for Job Shop Scheduling via Deep Reinforcement Learning"
+# by Cong Zhang, Wen Song, Zhiguang Cao, Jie Zhang, Puay Tan and Xu Chi
+# Presented in 34th Conference on Neural Information Processing Systems (NeurIPS), 2020.
+# Paper URL: https://papers.nips.cc/paper_files/paper/2020/file/11958dfee29b6709f48a9ba0387a2431-Paper.pdf
+
+import os
 import sys
+import argparse
+import logging
 from pathlib import Path
-
 import numpy as np
+import torch
 
-from solution_methods.helper_functions import load_parameters
-from solution_methods.L2D.agent_utils import select_action
-from solution_methods.L2D.JSSP_Env import SJSSP
-from solution_methods.L2D.mb_agg import *
-from solution_methods.L2D.PPO_model import PPO, Memory
-from solution_methods.L2D.uniform_instance_gen import uni_instance_gen
-from solution_methods.L2D.validation import validate
+from solution_methods.helper_functions import load_parameters, initialize_device, set_seeds
+from solution_methods.L2D.src.agent_utils import select_action
+from solution_methods.L2D.src.JSSP_Env import SJSSP
+from solution_methods.L2D.src.mb_agg import g_pool_cal
+from solution_methods.L2D.src.PPO_model import PPO, Memory
+from solution_methods.L2D.data.instance_generator import uniform_instance_generator
+from solution_methods.L2D.src.validation import validate
 
 base_path = Path(__file__).resolve().parents[2]
 sys.path.append(str(base_path))
 
-param_file = str(base_path) + "/configs/L2D.toml"
-parameters = load_parameters(param_file)
-env_parameters = parameters["env_parameters"]
-model_parameters = parameters["network_parameters"]
-train_parameters = parameters["train_parameters"]
-device = torch.device(env_parameters["device"])
+PARAM_FILE = str(base_path) + "/configs/L2D.toml"
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 
-def main():
+def train_L2D(**parameters):
+    logging.info("Training started.")  # Log the start of training
+
+    # retrieve parameters for environment, model, and training
+    env_parameters = parameters["env_parameters"]
+    model_parameters = parameters["network_parameters"]
+    train_parameters = parameters["train_parameters"]
+
+    # Set up device and seeds
+    device = initialize_device(parameters)
+    set_seeds(parameters["test_parameters"]["seed"])
+
+    # Create directories for logging and saving models
+    os.makedirs('./training_log', exist_ok=True)
+    os.makedirs('./saved_models', exist_ok=True)
+
+    # Configure default tensor type for device
+    torch.set_default_tensor_type('torch.cuda.FloatTensor' if device.type == 'cuda' else 'torch.FloatTensor')
+    if device.type == 'cuda':
+        torch.cuda.set_device(device)
+
+    # Initialize multiple job shop scheduling environments for training
     n_job = env_parameters["n_j"]
     n_machine = env_parameters["n_m"]
-
     envs = [SJSSP(n_j=n_job, n_m=n_machine) for _ in range(train_parameters["num_envs"])]
 
-    data_generator = uni_instance_gen
-    file_path = str(base_path) + '/solution_methods/L2D/generated_data/'
-    dataLoaded = np.load(file_path+'generatedData' + str(env_parameters["n_j"]) + '_' + str(env_parameters["n_m"])
-                         + '_Seed' + str(env_parameters["np_seed_validation"]) + '.npy')
-    vali_data = []
-    for i in range(dataLoaded.shape[0]):
-        vali_data.append((dataLoaded[i][0], dataLoaded[i][1]))
+    # Load validation data
+    data_generator = uniform_instance_generator
+    file_path = str(base_path) + '/solution_methods/L2D/data/'
+    dataLoaded = np.load(f"{file_path}generatedData{n_job}_{n_machine}_Seed{env_parameters['np_seed_validation']}.npy")
+    vali_data = [(dataLoaded[i][0], dataLoaded[i][1]) for i in range(dataLoaded.shape[0])]
 
-    torch.manual_seed(env_parameters["torch_seed"])
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(env_parameters["torch_seed"])
-    np.random.seed(env_parameters["np_seed_train"])
-
+    # Initialize memories for each environment instance
     memories = [Memory() for _ in range(train_parameters["num_envs"])]
 
-    ppo = PPO(train_parameters["lr"], train_parameters["gamma"], train_parameters["k_epochs"],
-              train_parameters["eps_clip"],
+    # Instantiate the PPO model
+    ppo = PPO(lr=train_parameters["lr"],
+              gamma=train_parameters["gamma"],
+              k_epochs=train_parameters["k_epochs"],
+              eps_clip=train_parameters["eps_clip"],
               n_j=n_job,
               n_m=n_machine,
               num_layers=model_parameters["num_layers"],
@@ -56,23 +80,27 @@ def main():
               hidden_dim_actor=model_parameters["hidden_dim_actor"],
               num_mlp_layers_critic=model_parameters["num_mlp_layers_critic"],
               hidden_dim_critic=model_parameters["hidden_dim_critic"])
+
+    # Initialize graph pooling setup
     g_pool_step = g_pool_cal(graph_pool_type=model_parameters["graph_pool_type"],
                              batch_size=torch.Size([1, n_job * n_machine, n_job * n_machine]),
-                             n_nodes=n_job * n_machine, device=device)
+                             n_nodes=n_job * n_machine,
+                             device=device)
     # training loop
     log = []
     validation_log = []
     record = 100000
+
     for i_update in range(train_parameters["max_updates"]):
 
+        # Initialize reward tracking for each environment
         ep_rewards = [0 for _ in range(train_parameters["num_envs"])]
-        adj_envs = []
-        fea_envs = []
-        candidate_envs = []
-        mask_envs = []
+        adj_envs, fea_envs, candidate_envs, mask_envs = [], [], [], []
 
         for i, env in enumerate(envs):
-            adj, fea, candidate, mask = env.reset(data_generator(n_j=n_job, n_m=n_machine, low=env_parameters['low'],
+            adj, fea, candidate, mask = env.reset(data_generator(n_j=n_job,
+                                                                 n_m=n_machine,
+                                                                 low=env_parameters['low'],
                                                                  high=env_parameters["high"]))
             adj_envs.append(adj)
             fea_envs.append(fea)
@@ -80,34 +108,32 @@ def main():
             mask_envs.append(mask)
             ep_rewards[i] = - env.initQuality
 
-        # rollout the env
+        # Rollout: interact with envs until all environments are done
         while True:
+            # Convert environment states to tensors
             fea_tensor_envs = [torch.from_numpy(np.copy(fea)).to(device) for fea in fea_envs]
             adj_tensor_envs = [torch.from_numpy(np.copy(adj)).to(device).to_sparse() for adj in adj_envs]
             candidate_tensor_envs = [torch.from_numpy(np.copy(candidate)).to(device) for candidate in candidate_envs]
             mask_tensor_envs = [torch.from_numpy(np.copy(mask)).to(device) for mask in mask_envs]
 
             with torch.no_grad():
-                action_envs = []
-                a_idx_envs = []
+                action_envs, a_idx_envs = [], []
                 for i in range(train_parameters["num_envs"]):
-
-                    pi, xxx = ppo.policy_old(x=fea_tensor_envs[i],
-                                             graph_pool=g_pool_step,
-                                             padded_nei=None,
-                                             adj=adj_tensor_envs[i],
-                                             candidate=candidate_tensor_envs[i].unsqueeze(0),
-                                             mask=mask_tensor_envs[i].unsqueeze(0))
-                    # print('old', pi.shape,xxx.shape)
+                    # Compute action probabilities and select actions
+                    pi, _ = ppo.policy_old(x=fea_tensor_envs[i],
+                                           graph_pool=g_pool_step,
+                                           padded_nei=None,
+                                           adj=adj_tensor_envs[i],
+                                           candidate=candidate_tensor_envs[i].unsqueeze(0),
+                                           mask=mask_tensor_envs[i].unsqueeze(0))
                     action, a_idx = select_action(pi, candidate_envs[i], memories[i])
                     action_envs.append(action)
                     a_idx_envs.append(a_idx)
 
-            adj_envs = []
-            fea_envs = []
-            candidate_envs = []
-            mask_envs = []
-            # Saving episode data
+            # Reset states
+            adj_envs, fea_envs, candidate_envs, mask_envs = [], [], [], []
+
+            # Perform actions in each environment and record transitions
             for i in range(train_parameters["num_envs"]):
                 memories[i].adj_mb.append(adj_tensor_envs[i])
                 memories[i].fea_mb.append(fea_tensor_envs[i])
@@ -116,7 +142,6 @@ def main():
                 memories[i].a_mb.append(a_idx_envs[i])
 
                 adj, fea, reward, done, candidate, mask = envs[i].step(action_envs[i].item())
-                # print('returned raw feature shape', fea)
                 adj_envs.append(adj)
                 fea_envs.append(fea)
                 candidate_envs.append(candidate)
@@ -124,40 +149,69 @@ def main():
                 ep_rewards[i] += reward
                 memories[i].r_mb.append(reward)
                 memories[i].done_mb.append(done)
+
+            # Break if environments are done
             if envs[0].done():
                 break
+
+        # Post-episode reward adjustment
         for j in range(train_parameters["num_envs"]):
             ep_rewards[j] -= envs[j].posRewards
 
+        # Update PPO policy and clear memories
         loss, v_loss = ppo.update(memories, n_job * n_machine, model_parameters["graph_pool_type"])
         for memory in memories:
             memory.clear_memory()
+
+        # Logging
         mean_rewards_all_env = sum(ep_rewards) / len(ep_rewards)
         log.append([i_update, mean_rewards_all_env])
+
+        # Periodic logging and validation
         if (i_update + 1) % 100 == 0:
-            file_writing_obj = open(
-                './' + 'log_' + str(n_job) + '_' + str(n_machine) + '_' + str(env_parameters["low"]) + '_' + str(
-                    env_parameters["high"]) + '.txt', 'w')
-            file_writing_obj.write(str(log))
+            validation_result = -validate(vali_data, ppo.policy).mean()
+            validation_log.append(validation_result)
 
-        # log results
-        print('Episode {}\t Last reward: {:.2f}\t Mean_Vloss: {:.8f}'.format(
-            i_update + 1, mean_rewards_all_env, v_loss))
+            # Save training log
+            log_file = f'./training_log/log_{n_job}_{n_machine}_{env_parameters["low"]}_{env_parameters["high"]}.txt'
 
-        # validate and save use mean performance
-        if (i_update + 1) % 100 == 0:
-            vali_result = - validate(vali_data, ppo.policy).mean()
-            validation_log.append(vali_result)
-            if vali_result < record:
-                torch.save(ppo.policy.state_dict(), './{}.pth'.format(
-                    str(n_job) + '_' + str(n_machine) + '_' + str(env_parameters["low"]) + '_' + str(env_parameters["high"])))
-                record = vali_result
-            print('The validation quality is:', vali_result)
-            file_writing_obj1 = open(
-                './' + 'vali_' + str(n_job) + '_' + str(n_machine) + '_' + str(env_parameters["low"]) + '_' + str(
-                    env_parameters["high"]) + '.txt', 'w')
-            file_writing_obj1.write(str(validation_log))
+            with open(log_file, 'w') as file_writing_obj:
+                file_writing_obj.write(str(log))
+
+            # Save validation log
+            validation_file = f'./training_log/vali_{n_job}_{n_machine}_{env_parameters["low"]}_{env_parameters["high"]}.txt'
+            with open(validation_file, 'w') as file_writing_obj1:
+                file_writing_obj1.write(str(validation_log))
+
+            # Save model if current validation result is the best so fa
+            if validation_result < record:
+                torch.save(ppo.policy.state_dict(), f'./saved_models/{n_job}_{n_machine}_{env_parameters["low"]}_{env_parameters["high"]}.pth')
+                record = validation_result
+
+            logging.info(
+                f'Episode {i_update + 1}\t Last reward: {mean_rewards_all_env:.2f}\t Mean_Vloss: {v_loss:.8f}\t Validation quality: {validation_result:.2f}')
 
 
-if __name__ == '__main__':
-    main()
+def main(param_file: str = PARAM_FILE):
+    try:
+        parameters = load_parameters(param_file)
+    except FileNotFoundError:
+        logging.error(f"Parameter file {param_file} not found.")
+        return
+
+    train_L2D(**parameters)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Train L2D")
+    parser.add_argument(
+        "config_file",
+        metavar='-f',
+        type=str,
+        nargs="?",
+        default=PARAM_FILE,
+        help="path to config file",
+    )
+
+    args = parser.parse_args()
+    main(param_file=args.config_file)
