@@ -3,7 +3,7 @@ import sys
 
 import numpy as np
 import numpy.ma as ma
-from fjsp_env_same_op_nums import EnvState
+from .fjsp_env_same_op_nums import EnvState
 
 
 class FJSPEnvForVariousOpNums:

@@ -5,7 +5,7 @@ import sys
 import time
 
 import numpy as np
-from common_utils import strToSuffix
+from .common_utils import strToSuffix
 
 
 def SD2_instance_generator(config):

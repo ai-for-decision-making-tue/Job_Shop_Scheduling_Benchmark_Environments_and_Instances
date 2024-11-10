@@ -46,7 +46,7 @@ def train_L2D(**parameters):
     os.makedirs('./saved_models', exist_ok=True)
 
     # Configure default tensor type for device
-    torch.set_default_tensor_type('torch.cuda.FloatTensor' if device.type == 'cuda' else 'torch.FloatTensor')
+    torch.set_default_device('cuda' if device.type == 'cuda' else 'cpu')
     if device.type == 'cuda':
         torch.cuda.set_device(device)
 

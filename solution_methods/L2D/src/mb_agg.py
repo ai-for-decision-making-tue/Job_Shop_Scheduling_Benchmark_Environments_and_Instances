@@ -10,7 +10,7 @@ def aggr_obs(obs_mb, n_node):
     idx_mb = torch.stack((new_idx_row, new_idx_col))
     # print(idx_mb)
     # print(obs_mb.shape[0])
-    adj_batch = torch.sparse.FloatTensor(indices=idx_mb,
+    adj_batch = torch.sparse_coo_tensor(indices=idx_mb,
                                          values=vals,
                                          size=torch.Size([obs_mb.shape[0] * n_node,
                                                           obs_mb.shape[0] * n_node]),
@@ -43,7 +43,7 @@ def g_pool_cal(graph_pool_type, batch_size, n_nodes, device):
                          device=device,
                          dtype=torch.long)
     idx = torch.stack((idx_0, idx_1))
-    graph_pool = torch.sparse.FloatTensor(idx, elem,
+    graph_pool = torch.sparse_coo_tensor(idx, elem,
                                           torch.Size([batch_size[0],
                                                       n_nodes*batch_size[0]])
                                           ).to(device)
