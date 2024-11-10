@@ -20,7 +20,7 @@ def run_DANIEL_FJSP(jobShopEnv, **parameters):
     set_seeds(parameters["test_parameters"]["seed"])
 
     # Configure default device
-    torch.set_default_tensor_type("torch.cuda.FloatTensor" if device.type == "cuda" else "torch.FloatTensor")
+    torch.set_default_device('cuda' if device.type == 'cuda' else 'cpu')
     if device.type == "cuda":
         torch.cuda.set_device(device)
 
@@ -32,7 +32,7 @@ def run_DANIEL_FJSP(jobShopEnv, **parameters):
 
     # load trained policy
     trained_policy = (os.getcwd() + f"/save/{parameters['model']['source']}" f"/{parameters['test_parameters']['trained_policy']}.pth")
-    policy = torch.load(trained_policy, map_location=device.type)
+    policy = torch.load(trained_policy, map_location=device.type, weights_only=True)
     ppo.policy.load_state_dict(policy)
     ppo.policy.eval()
     logging.info(f"Trained policy loaded from {parameters['test_parameters']['trained_policy']}.")

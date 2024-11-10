@@ -45,12 +45,12 @@ class Trainer:
         self.num_envs = config["PPO_Algorithm"]["num_envs"]
         self.device = device
 
-        if not os.path.exists(f"./solution_methods/DANIEL/save/{self.data_source}"):
-            os.makedirs(f"./solution_methods/DANIEL/save/{self.data_source}")
+        if not os.path.exists(f"./save/{self.data_source}"):
+            os.makedirs(f"./save/{self.data_source}")
         if not os.path.exists(
-            f"./solution_methods/DANIEL/train_log/{self.data_source}"
+            f"./train_log/{self.data_source}"
         ):
-            os.makedirs(f"./solution_methods/DANIEL/train_log/{self.data_source}")
+            os.makedirs(f"./train_log/{self.data_source}")
 
         if device.type == "cuda":
             torch.set_default_tensor_type("torch.cuda.FloatTensor")
@@ -208,7 +208,7 @@ class Trainer:
         save reward data & validation makespan data (during training) and the entire training time
         """
         file_writing_obj = open(
-            f"./solution_methods/DANIEL/train_log/{self.data_source}/"
+            f"./train_log/{self.data_source}/"
             + "reward_"
             + self.model_name
             + ".txt",
@@ -217,7 +217,7 @@ class Trainer:
         file_writing_obj.write(str(self.log))
 
         file_writing_obj1 = open(
-            f"./solution_methods/DANIEL/train_log/{self.data_source}/"
+            f"./train_log/{self.data_source}/"
             + "valiquality_"
             + self.model_name
             + ".txt",
@@ -230,7 +230,7 @@ class Trainer:
         save the results of validation
         """
         file_writing_obj1 = open(
-            f"./solution_methods/DANIEL/train_log/{self.data_source}/"
+            f"./train_log/{self.data_source}/"
             + "valiquality_"
             + self.model_name
             + ".txt",
@@ -343,7 +343,7 @@ class Trainer:
         """
         torch.save(
             self.ppo.policy.state_dict(),
-            f"./solution_methods/DANIEL/save/{self.data_source}"
+            f"./save/{self.data_source}"
             f"/{self.model_name}.pth",
         )
 
@@ -352,7 +352,7 @@ class Trainer:
         load the trained model
         """
         model_path = (
-            f"./solution_methods/DANIEL/save/{self.data_source}/{self.model_name}.pth"
+            f"./save/{self.data_source}/{self.model_name}.pth"
         )
         self.ppo.policy.load_state_dict(torch.load(model_path, map_location="cuda"))
 

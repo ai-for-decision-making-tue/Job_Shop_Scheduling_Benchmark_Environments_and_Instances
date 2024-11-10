@@ -30,7 +30,7 @@ def run_L2D(jobShopEnv, **parameters):
     set_seeds(parameters["test_parameters"]["seed"])
 
     # Configure default tensor type for device
-    torch.set_default_tensor_type('torch.cuda.FloatTensor' if device.type == 'cuda' else 'torch.FloatTensor')
+    torch.set_default_device('cuda' if device.type == 'cuda' else 'cpu')
     if device.type == 'cuda':
         torch.cuda.set_device(device)
 
@@ -58,7 +58,7 @@ def run_L2D(jobShopEnv, **parameters):
 
     # Load trained policy
     trained_policy = os.getcwd() + parameters['test_parameters'].get('trained_policy')
-    ppo.policy.load_state_dict(torch.load(trained_policy, map_location=torch.device(parameters['test_parameters']['device'])))
+    ppo.policy.load_state_dict(torch.load(trained_policy, map_location=torch.device(parameters['test_parameters']['device']), weights_only=True))
     logging.info(f"Trained policy loaded from {parameters['test_parameters'].get('trained_policy')}.")
 
     # Initialize graph pooling step
@@ -97,7 +97,7 @@ def run_L2D(jobShopEnv, **parameters):
         if done:
             break
 
-    makespan = -ep_reward + env_test.posRewards
+    makespan = float(-ep_reward + env_test.posRewards)
     logging.info(f"Makespan: {makespan}")
 
     return makespan, jobShopEnv
@@ -131,7 +131,7 @@ def main(param_file=PARAM_FILE):
             plt = draw_gantt_chart(jobShopEnv)
 
             if save_gantt:
-                plt.savefig(output_dir + "/gantt.png")
+                plt.savefig(output_dir + "\gantt.png")
                 logging.info(f"Gantt chart saved to {output_dir}")
 
             if show_gantt:

@@ -28,7 +28,7 @@ def run_FJSP_DRL(jobShopEnv, **parameters):
     set_seeds(parameters["test_parameters"]["seed"])
 
     # Configure default tensor type for device
-    torch.set_default_tensor_type('torch.cuda.FloatTensor' if device.type == 'cuda' else 'torch.FloatTensor')
+    torch.set_default_device('cuda' if device.type == 'cuda' else 'cpu')
     if device.type == 'cuda':
         torch.cuda.set_device(device)
 
@@ -43,7 +43,7 @@ def run_FJSP_DRL(jobShopEnv, **parameters):
         if device.type == 'cuda':
             policy = torch.load(trained_policy)
         else:
-            policy = torch.load(trained_policy, map_location='cpu')
+            policy = torch.load(trained_policy, map_location='cpu', weights_only=True)
 
         logging.info(f"Trained policy loaded from {test_parameters.get('trained_policy')}.")
         model_parameters["actor_in_dim"] = model_parameters["out_size_ma"] * 2 + model_parameters["out_size_ope"] * 2
