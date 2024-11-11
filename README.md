@@ -10,15 +10,15 @@ We aim to include a wide range of solution methods capable of solving machine sc
 
 
 
-| Solution methods | Job Shop (JSP) | Flow Show (FSP) | Flexible Job Shop (FJSP) | FJSP SDST | FAJSP | Online (F)JSP |
-| :---: | :---:| :---: | :---: | :---: | :---: | :---: |
-| Dispatching Rules | ✓ | ✓ | ✓ | | ✓ | ✓* |
-| Genetic Algorithm | ✓ | ✓ | ✓ | ✓ | ✓ | |
-| MILP | ✓ | ✓ | ✓ | ✓ | | | 
-| CP-SAT | ✓ | ✓ | ✓ | ✓ | | |
-| FJSP-DRL | ✓ | ✓ | ✓ | |  | |
-| L2D | ✓ | ✓ | | | | |
-| DANIEL | ✓ | ✓ | ✓ | | | |  
+| Solution methods | Type | Job Shop (JSP) | Flow Show (FSP) | Flexible Job Shop (FJSP) | FJSP SDST | FAJSP | Online (F)JSP |
+| :---: | :---:| :---:| :---: | :---: | :---: | :---: | :---: |
+| Dispatching Rules | Heuristic | ✓ | ✓ | ✓ | | ✓ | ✓* |
+| Genetic Algorithm | Heuristic |✓ | ✓ | ✓ | ✓ | ✓ | |
+| MILP | Exact | ✓ | ✓ | ✓ | ✓ | | | 
+| CP-SAT | Exact | ✓ | ✓ | ✓ | ✓ | | |
+| FJSP-DRL | DRL | ✓ | ✓ | ✓ | |  | |
+| L2D | DRL |✓ | ✓ | | | | |
+| DANIEL | DRL | ✓ | ✓ | ✓ | | | |  
 
 *Capable of online arrivals of FJSP problems 
 

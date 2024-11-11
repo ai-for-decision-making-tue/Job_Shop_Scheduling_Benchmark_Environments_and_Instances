@@ -178,14 +178,14 @@ class JobShop:
     def average_flowtime(self) -> float:
         total_flowtime = 0
         for job in self._jobs:
-            total_flowtime += job.flow_time
+            total_flowtime += job._operations[-1].scheduled_end_time - job._operations[0].scheduled_start_time
         return total_flowtime / self._nr_of_jobs
 
     @property
     def max_flowtime(self) -> float:
         max_flowtime = 0
         for job in self._jobs:
-            flow_time = job.flow_time
+            flow_time = job._operations[-1].scheduled_end_time - job._operations[0].scheduled_start_time
             if flow_time > max_flowtime:
                 max_flowtime = flow_time
         return max_flowtime
