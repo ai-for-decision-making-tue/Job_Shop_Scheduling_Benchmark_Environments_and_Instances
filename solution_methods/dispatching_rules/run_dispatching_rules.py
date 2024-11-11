@@ -2,7 +2,7 @@ import argparse
 import logging
 
 from data_parsers import parser_fajsp, parser_fjsp, parser_jsp_fsp, parser_fjsp_sdst
-from plotting.drawer import draw_gantt_chart, draw_precedence_relations
+from plotting.drawer import plot_gantt_chart, draw_precedence_relations
 from scheduling_environment.simulationEnv import SimulationEnv
 from solution_methods.helper_functions import load_parameters
 from solution_methods.dispatching_rules.scheduler import schedule_operations
@@ -48,17 +48,17 @@ def main(param_file: str = PARAM_FILE):
     if not parameters['instance']['online_arrivals']:
         try:
             if 'fjsp_sdst' in parameters['instance']['problem_instance']:
-                simulationEnv.JobShop = parser_fjsp_sdst.parse(simulationEnv.JobShop,
-                                                          parameters['instance']['problem_instance'])
+                simulationEnv.JobShop = parser_fjsp_sdst.parse_fjsp_sdst(simulationEnv.JobShop,
+                                                                         parameters['instance']['problem_instance'])
             elif 'fjsp' in parameters['instance']['problem_instance']:
-                simulationEnv.JobShop = parser_fjsp.parse(simulationEnv.JobShop,
-                                                          parameters['instance']['problem_instance'])
+                simulationEnv.JobShop = parser_fjsp.parse_fjsp(simulationEnv.JobShop,
+                                                               parameters['instance']['problem_instance'])
             elif 'fajsp' in parameters['instance']['problem_instance']:
-                simulationEnv.JobShop = parser_fajsp.parse(simulationEnv.JobShop,
-                                                           parameters['instance']['problem_instance'])
+                simulationEnv.JobShop = parser_fajsp.parse_fajsp(simulationEnv.JobShop,
+                                                                 parameters['instance']['problem_instance'])
             elif 'jsp' in parameters['instance']['problem_instance'] or 'fsp' in parameters['instance']['problem_instance']:
-                simulationEnv.JobShop = parser_jsp_fsp.parse(simulationEnv.JobShop,
-                                                             parameters['instance']['problem_instance'])
+                simulationEnv.JobShop = parser_jsp_fsp.parse_jsp_fsp(simulationEnv.JobShop,
+                                                                     parameters['instance']['problem_instance'])
         except Exception as e:
             print(f"Only able to schedule '/fjsp/', '/fasjp/', '/fjsp_sdst/', '/fjs/' or '/jsp/' jobs': {e}")
 
@@ -77,7 +77,7 @@ def main(param_file: str = PARAM_FILE):
 
     if parameters['output']['plotting']:
         draw_precedence_relations(simulationEnv.JobShop)
-        draw_gantt_chart(simulationEnv.JobShop)
+        plot_gantt_chart(simulationEnv.JobShop)
 
 
 if __name__ == "__main__":

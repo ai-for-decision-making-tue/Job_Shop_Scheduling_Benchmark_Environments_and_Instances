@@ -9,11 +9,13 @@ class Machine:
         self._machine_name = machine_name
         self._processed_operations = []
 
+    def __repr__(self):
+        return (
+            f"<Machine(machine_id={self._machine_id})>"
+        )
+
     def reset(self):
         self._processed_operations = []
-
-    def __str__(self):
-        return f"Machine {self._machine_id}, {len(self._processed_operations)} scheduled operations"
 
     @property
     def machine_id(self):

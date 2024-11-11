@@ -11,11 +11,13 @@ class Operation:
         self._predecessors: List = []
         self._scheduling_information = {}
 
+    def __repr__(self):
+        return (
+            f"<Operation(job_id={self._job_id}, operation_id={self._operation_id})>"
+        )
+
     def reset(self):
         self._scheduling_information = {}
-
-    def __str__(self):
-        return f"Job {self.job_id}, Operation {self.operation_id}"
 
     @property
     def job(self):
@@ -47,7 +49,8 @@ class Operation:
         """Return the scheduled start time of the operation."""
         if 'start_time' in self._scheduling_information:
             return self._scheduling_information['start_time']
-        return None
+        else:
+            return None
 
     @property
     def scheduled_end_time(self) -> int:

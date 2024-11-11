@@ -20,13 +20,13 @@ def load_parameters(config_toml):
 def load_job_shop_env(problem_instance: str, from_absolute_path=False) -> JobShop:
     jobShopEnv = JobShop()
     if '/fsp/' in problem_instance or '/jsp/' in problem_instance:
-        jobShopEnv = parser_jsp_fsp.parse(jobShopEnv, problem_instance, from_absolute_path)
+        jobShopEnv = parser_jsp_fsp.parse_jsp_fsp(jobShopEnv, problem_instance, from_absolute_path)
     elif '/fjsp/' in problem_instance:
-        jobShopEnv = parser_fjsp.parse(jobShopEnv, problem_instance, from_absolute_path)
+        jobShopEnv = parser_fjsp.parse_fjsp(jobShopEnv, problem_instance, from_absolute_path)
     elif '/fjsp_sdst/' in problem_instance:
-        jobShopEnv = parser_fjsp_sdst.parse(jobShopEnv, problem_instance, from_absolute_path)
+        jobShopEnv = parser_fjsp_sdst.parse_fjsp_sdst(jobShopEnv, problem_instance, from_absolute_path)
     elif '/fajsp/' in problem_instance:
-        jobShopEnv = parser_fajsp.parse(jobShopEnv, problem_instance, from_absolute_path)
+        jobShopEnv = parser_fajsp.parse_fajsp(jobShopEnv, problem_instance, from_absolute_path)
     else:
         raise NotImplementedError(
             f"""Problem instance {

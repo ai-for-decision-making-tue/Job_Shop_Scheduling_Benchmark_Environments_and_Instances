@@ -2,15 +2,14 @@ import argparse
 import logging
 import os
 
-import multiprocessing
 from deap import tools
 
-from solution_methods.helper_functions import load_parameters, load_job_shop_env, set_seeds
-from src.operators import (evaluate_individual, evaluate_population, repair_precedence_constraints, variation)
-from utils import record_stats, output_dir_exp_name, results_saving
-from src.initialization import initialize_run
+from solution_methods.helper_functions import load_parameters, load_job_shop_env
+from solution_methods.GA.src.operators import (evaluate_individual, evaluate_population, repair_precedence_constraints, variation)
+from solution_methods.GA.utils import record_stats, output_dir_exp_name, results_saving
+from solution_methods.GA.src.initialization import initialize_run
 
-from plotting.drawer import draw_gantt_chart
+from plotting.drawer import plot_gantt_chart
 
 logging.basicConfig(level=logging.INFO)
 PARAM_FILE = "../../configs/GA.toml"
@@ -88,15 +87,9 @@ def main(param_file=PARAM_FILE):
         logging.error(f"Parameter file {param_file} not found.")
         return
 
-    # Initialize the multiprocessing pool
-    if parameters['algorithm']['population_size'] < 2:
-        pool = multiprocessing.Pool()
-    else:
-        pool = None
-
     # Load the job shop environment, and initialize the genetic algorithm
     jobShopEnv = load_job_shop_env(parameters['instance'].get('problem_instance'))
-    population, toolbox, stats, hof = initialize_run(jobShopEnv, pool, **parameters)
+    population, toolbox, stats, hof = initialize_run(jobShopEnv, **parameters)
     makespan, jobShopEnv = run_GA(jobShopEnv, population, toolbox, stats, hof, **parameters)
 
     if makespan is not None:
@@ -114,7 +107,7 @@ def main(param_file=PARAM_FILE):
         # Plot Gantt chart if required
         if show_gantt or save_gantt:
             logging.info("Generating Gantt chart.")
-            plt = draw_gantt_chart(jobShopEnv)
+            plt = plot_gantt_chart(jobShopEnv)
 
             if save_gantt:
                 plt.savefig(output_dir + "/gantt.png")

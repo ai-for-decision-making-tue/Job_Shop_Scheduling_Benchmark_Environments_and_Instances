@@ -11,15 +11,14 @@ import logging
 import os
 import torch
 
-from plotting.drawer import draw_gantt_chart
+from plotting.drawer import plot_gantt_chart
 from solution_methods.helper_functions import load_job_shop_env, load_parameters, initialize_device, set_seeds
 from solution_methods.FJSP_DRL.src.env_test import FJSPEnv_test
 from solution_methods.FJSP_DRL.src.PPO import HGNNScheduler
-
-from utils import output_dir_exp_name, results_saving
+from solution_methods.FJSP_DRL.utils import output_dir_exp_name, results_saving
 
 PARAM_FILE = "../../configs/FJSP_DRL.toml"
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(level=logging.INFO)
 
 
 def run_FJSP_DRL(jobShopEnv, **parameters):
@@ -94,7 +93,7 @@ def main(param_file=PARAM_FILE):
         # Plot Gantt chart if required
         if show_gantt or save_gantt:
             logging.info("Generating Gantt chart.")
-            plt = draw_gantt_chart(jobShopEnv)
+            plt = plot_gantt_chart(jobShopEnv)
 
             if save_gantt:
                 plt.savefig(output_dir + "/gantt.png")

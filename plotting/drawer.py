@@ -39,7 +39,7 @@ def create_colormap():
 
 
 # Plot the Gantt chart of the job shop schedule
-def draw_gantt_chart(JobShop, save=False, filename=None):
+def plot_gantt_chart(JobShop, save=False, filename=None):
     fig, ax = plt.subplots()
     colormap = create_colormap()
 
@@ -84,10 +84,10 @@ def draw_gantt_chart(JobShop, save=False, filename=None):
             )
 
     fig = ax.figure
-    fig.set_size_inches(16, 8)
+    fig.set_size_inches(12, 6)
 
     ax.set_yticks(range(JobShop.nr_of_machines))
-    ax.set_yticklabels([f'M{machine_id}' for machine_id in range(JobShop.nr_of_machines)])
+    ax.set_yticklabels([f'M{machine_id+1}' for machine_id in range(JobShop.nr_of_machines)])
     ax.set_xlabel('Time')
     ax.set_ylabel('Machine')
     ax.set_title('Job Shop Scheduling Gantt Chart')

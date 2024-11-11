@@ -1,5 +1,8 @@
 import logging
-from multiprocessing.pool import Pool
+
+import multiprocessing
+
+# from multiprocessing.pool import Pool
 
 import numpy as np
 from deap import base, creator, tools
@@ -10,7 +13,7 @@ from solution_methods.GA.src.operators import (
 from solution_methods.helper_functions import set_seeds
 
 
-def initialize_run(jobShopEnv, pool: Pool, **kwargs):
+def initialize_run(jobShopEnv, **kwargs):
     """
     Initializes the GA run by setting up the DEAP toolbox, statistics, hall of fame, and initial population.
 
@@ -42,8 +45,9 @@ def initialize_run(jobShopEnv, pool: Pool, **kwargs):
     # Define and register operators and functions in the DEAP toolbox
     toolbox = base.Toolbox()
 
-    # Register parallel map function (multiprocessing pool)
-    if pool is not None:
+    # Initialize the multiprocessing pool
+    if kwargs['algorithm']['multiprocessing']:
+        pool = multiprocessing.Pool()
         toolbox.register("map", pool.map)
 
     # Register individual and genetic operators

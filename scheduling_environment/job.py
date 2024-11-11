@@ -7,6 +7,11 @@ class Job:
         self._job_id: int = job_id
         self._operations: List[Operation] = []
 
+    def __repr__(self):
+        return (
+            f"<Job(job_id={self._job_id})>"
+        )
+
     def add_operation(self, operation: Operation):
         """Add an operation to the job."""
         self._operations.append(operation)
