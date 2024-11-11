@@ -3,6 +3,7 @@ problem_instance = "/fjsp/1_Brandimarte/Mk01.fjs"
 
 [solver]
 time_limit = 3600       # time limit for the OR-tools CP-SAT solver, in seconds
+model = "fjsp"          # model to use, either 'jsp', 'fsp', fjsp' or 'fjsp_sdst'
 
 [output]
 show_gantt = true       # draw ganttchart of found solution

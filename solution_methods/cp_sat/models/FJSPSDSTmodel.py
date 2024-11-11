@@ -84,7 +84,6 @@ def fjsp_sdst_cp_sat_model(jobShopEnv) -> tuple[cp_model.CpModel, dict]:
 
     # Computes horizon dynamically as the sum of all durations
     horizon = sum(max(alternative[0] for alternative in task) for job in jobs_operations for task in job)
-    print(f"Horizon = {horizon}")
 
     # Create the model
     model = cp_model.CpModel()

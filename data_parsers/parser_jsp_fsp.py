@@ -6,7 +6,8 @@ from scheduling_environment.machine import Machine
 from scheduling_environment.operation import Operation
 
 
-def parse(JobShop, instance, from_absolute_path=False):
+def parse_jsp_fsp(JobShop, instance, from_absolute_path=False):
+    JobShop.set_instance_name(instance)
     if not from_absolute_path:
         base_path = Path(__file__).parent.parent.absolute()
         data_path = base_path.joinpath('data' + instance)

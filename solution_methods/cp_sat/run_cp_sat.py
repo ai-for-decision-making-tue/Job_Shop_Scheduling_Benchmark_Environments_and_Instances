@@ -2,62 +2,40 @@ import argparse
 import logging
 import os
 
+from plotting.drawer import plot_gantt_chart
 from solution_methods.helper_functions import load_parameters, load_job_shop_env
 from solution_methods.CP_SAT.utils import results_saving, output_dir_exp_name
-
-from models import FJSPSDSTmodel, FJSPmodel, JSPmodel
-from utils import solve_model
-from plotting.drawer import draw_gantt_chart
+from solution_methods.CP_SAT.models import FJSPSDSTmodel, FJSPmodel, JSPmodel
+from solution_methods.CP_SAT.utils import solve_model
 
 PARAM_FILE = os.path.abspath("../../configs/cp_sat.toml")
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(level=logging.INFO)
 
 
 def run_CP_SAT(jobShopEnv, **kwargs):
     """
     Solve the scheduling problem for the provided input file.
     """
-
-    if "fjsp_sdst" in str(kwargs["instance"]["problem_instance"]):
-        jobShopEnv = load_job_shop_env(kwargs['instance']['problem_instance'])
+    if kwargs["solver"]["model"] == "fjsp_sdst":
         model, vars = FJSPSDSTmodel.fjsp_sdst_cp_sat_model(jobShopEnv)
-    elif "fjsp" in str(kwargs["instance"]["problem_instance"]):
-        jobShopEnv = load_job_shop_env(kwargs['instance']['problem_instance'])
+    elif kwargs["solver"]["model"] == "fjsp":
         model, vars = FJSPmodel.fjsp_cp_sat_model(jobShopEnv)
-    elif any(
-        scheduling_problem in str(kwargs["instance"]["problem_instance"])
-        for scheduling_problem in ["jsp", "fsp"]
-    ):
-        jobShopEnv = load_job_shop_env(kwargs['instance']['problem_instance'])
+    elif kwargs["solver"]["model"] == "jsp" or kwargs["solver"]["model"] == "fsp":
         model, vars = JSPmodel.jsp_cp_sat_model(jobShopEnv)
+    else:
+        raise ValueError(f"Unknown model type: {kwargs['algorithm']['model']}")
 
     solver, status, solution_count = solve_model(model, kwargs["solver"]["time_limit"])
 
     # Update jobShopEnv with found solution
-    if 'fjsp_sdst' in str(kwargs['instance']['problem_instance']):
+    if kwargs["solver"]["model"] == "fjsp_sdst":
         jobShopEnv, results = FJSPSDSTmodel.update_env(jobShopEnv, vars, solver, status, solution_count, kwargs["solver"]["time_limit"])
-    elif 'fjsp' in str(kwargs['instance']['problem_instance']):
+    elif kwargs["solver"]["model"] == "fjsp":
         jobShopEnv, results = FJSPmodel.update_env(jobShopEnv, vars, solver, status, solution_count, kwargs["solver"]["time_limit"])
-    elif 'fsp' or 'jsp' in str(kwargs['instance']['problem_instance']):
+    elif kwargs["solver"]["model"] == "jsp" or kwargs["solver"]["model"] == "fsp":
         jobShopEnv, results = JSPmodel.update_env(jobShopEnv, vars, solver, status, solution_count, kwargs["solver"]["time_limit"])
 
     return results, jobShopEnv
-
-    # # Plot the ganttchart of the solution
-    # if kwargs['output']['plotting']:
-    #     draw_gantt_chart(jobShopEnv)
-    #
-    # # Ensure the directory exists; create if not
-    # dir_path = os.path.join(folder, exp_name)
-    # if not os.path.exists(dir_path):
-    #     os.makedirs(dir_path)
-    #
-    # # Specify the full path for the file
-    # file_path = os.path.join(dir_path, "CP_results.json")
-    #
-    # # Save results to JSON (will create or overwrite the file)
-    # with open(file_path, "w") as outfile:
-    #     json.dump(results, outfile, indent=4)
 
 
 def main(param_file=PARAM_FILE):
@@ -86,7 +64,7 @@ def main(param_file=PARAM_FILE):
         # Plot Gantt chart if required
         if show_gantt or save_gantt:
             logging.info("Generating Gantt chart.")
-            plt = draw_gantt_chart(jobShopEnv)
+            plt = plot_gantt_chart(jobShopEnv)
 
             if save_gantt:
                 plt.savefig(output_dir + "/gantt.png")

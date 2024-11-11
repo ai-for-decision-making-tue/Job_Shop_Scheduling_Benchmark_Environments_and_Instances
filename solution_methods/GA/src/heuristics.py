@@ -11,13 +11,13 @@ def random_scheduler(jobShop: JobShop) -> JobShop:
     :return: The environment after jobs have been assigned.
     """
 
-    update_operations_available_for_scheduling(jobShop)
+    jobShop.update_operations_available_for_scheduling()
     while len(jobShop.operations_to_be_scheduled) > 0:
         operation = random.choice(jobShop.operations_available_for_scheduling)
         machine_id = random.choice(list(operation.processing_times.keys()))
         duration = operation.processing_times[machine_id]
         jobShop.schedule_operation_with_backfilling(operation, machine_id, duration)
-        update_operations_available_for_scheduling(jobShop)
+        jobShop.update_operations_available_for_scheduling()
     return jobShop
 
 
@@ -28,7 +28,7 @@ def greedy_scheduler(jobShop: JobShop) -> JobShop:
     :return: The environment after jobs have been assigned.
     """
 
-    update_operations_available_for_scheduling(jobShop)
+    jobShop.update_operations_available_for_scheduling()
     while len(jobShop.operations_to_be_scheduled) > 0:
         best_operation = None
         best_machine_id = None
@@ -41,7 +41,7 @@ def greedy_scheduler(jobShop: JobShop) -> JobShop:
                 best_machine_id = machine_id
                 best_duration = duration
         jobShop.schedule_operation_with_backfilling(best_operation, best_machine_id, best_duration)
-        update_operations_available_for_scheduling(jobShop)
+        jobShop.update_operations_available_for_scheduling()
     return jobShop
 
 
@@ -52,7 +52,7 @@ def local_load_balancing_scheduler(jobShop: JobShop) -> JobShop:
     :return: The environment after jobs have been assigned.
     """
     jobs_to_be_scheduled = [job_id for job_id in range(jobShop.nr_of_jobs)]
-    update_operations_available_for_scheduling(jobShop)
+    jobShop.update_operations_available_for_scheduling()
 
     while jobs_to_be_scheduled != []:
         jobs_available_for_scheduling = list(
@@ -73,7 +73,7 @@ def local_load_balancing_scheduler(jobShop: JobShop) -> JobShop:
             jobShop.schedule_operation_with_backfilling(operation, machine_id, duration)
 
             machine_occupation_times[machine_id] += duration
-            update_operations_available_for_scheduling(jobShop)
+            jobShop.update_operations_available_for_scheduling()
 
         jobs_to_be_scheduled.remove(job.job_id)
 
@@ -88,7 +88,7 @@ def global_load_balancing_scheduler(jobShop: JobShop) -> JobShop:
     """
     jobs_to_be_scheduled = [job_id for job_id in range(jobShop.nr_of_jobs)]
     machine_occupation_times = {machine.machine_id: 0 for machine in jobShop.machines}
-    update_operations_available_for_scheduling(jobShop)
+    jobShop.update_operations_available_for_scheduling()
 
     while jobs_to_be_scheduled != []:
         jobs_available_for_scheduling = list(
@@ -107,22 +107,8 @@ def global_load_balancing_scheduler(jobShop: JobShop) -> JobShop:
             jobShop.schedule_operation_with_backfilling(operation, machine_id, duration)
 
             machine_occupation_times[machine_id] += duration
-            update_operations_available_for_scheduling(jobShop)
+            jobShop.update_operations_available_for_scheduling()
 
         jobs_to_be_scheduled.remove(job.job_id)
 
     return jobShop
-
-
-def update_operations_available_for_scheduling(env):
-    scheduled_operations = set(env.scheduled_operations)
-    precedence_relations = env.precedence_relations_operations
-    operations_available = [
-        operation
-        for operation in env.operations
-        if operation not in scheduled_operations and all(
-            prec_operation in scheduled_operations
-            for prec_operation in precedence_relations[operation.operation_id]
-        )
-    ]
-    env.set_operations_available_for_scheduling(operations_available)

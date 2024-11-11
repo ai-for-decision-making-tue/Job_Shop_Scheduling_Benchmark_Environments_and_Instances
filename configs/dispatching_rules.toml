@@ -7,7 +7,7 @@ machine_assignment_rule = "EET" #SPT: Shortest Processing Time, EET: Earliest En
 [online_arrival_details]
 number_total_machines = 5  # number of machines
 inter_arrival_time = 15  # inter_arrival_time between jobs
-simulation_time = 1000  # simulation duration time
+simulation_time = 500  # simulation duration time
 min_nr_operations_per_job = 2 # min number of operations per online arrived job
 max_nr_operations_per_job = 7 # max number of operations per online arrived job
 min_duration_per_operation = 2 # min duration of online arrived operation

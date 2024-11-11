@@ -4,7 +4,7 @@ import numpy as np
 
 from scheduling_environment.jobShop import JobShop
 from scheduling_environment.operation import Operation
-from solution_methods.GA.src.heuristics import global_load_balancing_scheduler, local_load_balancing_scheduler, random_scheduler, update_operations_available_for_scheduling
+from solution_methods.GA.src.heuristics import global_load_balancing_scheduler, local_load_balancing_scheduler, random_scheduler
 
 
 def select_next_operation_from_job(jobShopEnv: JobShop, job_id) -> Operation:
@@ -76,7 +76,7 @@ def init_population(toolbox, population_size):
 
 def evaluate_individual(individual, jobShopEnv: JobShop, reset=True):
     jobShopEnv.reset()
-    update_operations_available_for_scheduling(jobShopEnv)
+    jobShopEnv.update_operations_available_for_scheduling()
     for i in range(len(individual[0])):
         job_id = individual[1][i]
         operation = select_next_operation_from_job(jobShopEnv, job_id)
@@ -85,7 +85,7 @@ def evaluate_individual(individual, jobShopEnv: JobShop, reset=True):
         duration = operation.processing_times[machine_id]
 
         jobShopEnv.schedule_operation_with_backfilling(operation, machine_id, duration)
-        update_operations_available_for_scheduling(jobShopEnv)
+        jobShopEnv.update_operations_available_for_scheduling()
 
     makespan = jobShopEnv.makespan
 

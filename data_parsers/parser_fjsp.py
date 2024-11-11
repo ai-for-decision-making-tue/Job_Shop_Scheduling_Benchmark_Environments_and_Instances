@@ -6,7 +6,9 @@ from scheduling_environment.machine import Machine
 from scheduling_environment.operation import Operation
 
 
-def parse(JobShop, instance, from_absolute_path=False):
+def parse_fjsp(JobShop, instance, from_absolute_path=False):
+    JobShop.set_instance_name(instance)
+
     if not from_absolute_path:
         base_path = Path(__file__).parent.parent.absolute()
         data_path = base_path.joinpath('data' + instance)
@@ -60,7 +62,7 @@ def parse(JobShop, instance, from_absolute_path=False):
             JobShop.add_job(job)
             job_id += 1
 
-    # add also the operations without precedence operations to the precendence relations dictionary
+    # add also the operations without precedence operations to the precedence relations dictionary
     for operation in JobShop.operations:
         if operation.operation_id not in precedence_relations.keys():
             precedence_relations[operation.operation_id] = []
@@ -81,12 +83,9 @@ def parse(JobShop, instance, from_absolute_path=False):
     return JobShop
 
 
-if __name__ == "__main__":
-    # add the following to top:
-
-    # for running this code locally
-    import sys
-
-    sys.path.append("../Machine_scheduling_benchmarking/")
-
-    JobShop = parse(r"\fjsp\6_Fattahi\MFJS1.fjs", )
+# if __name__ == "__main__":
+#     from scheduling_environment.jobShop import JobShop
+#     jobShopEnv = JobShop()
+#     jobShopEnv = parse_fjsp(jobShopEnv, '/fjsp/1_brandimarte/Mk01.fjs')
+#     jobShopEnv.update_operations_available_for_scheduling()
+#     print(jobShopEnv.operations_available_for_scheduling)

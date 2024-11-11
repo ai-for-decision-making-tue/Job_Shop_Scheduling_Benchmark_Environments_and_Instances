@@ -19,7 +19,14 @@ class JobShop:
         self._operations_to_be_scheduled: List[Operation] = []
         self._operations_available_for_scheduling: List[Operation] = []
         self._scheduled_operations: List[Operation] = []
-        self._name: str = ""
+        self._instance_name: str = ""
+
+    def __repr__(self):
+        return (
+            f"<JobShop(instance={self._instance_name!r}, "
+            f"jobs={self.nr_of_jobs}, operations={self.nr_of_operations}, "
+            f"machines={self.nr_of_machines})>"
+        )
 
     def reset(self):
         self._scheduled_operations = []
@@ -33,8 +40,11 @@ class JobShop:
         for operation in self._operations:
             operation.reset()
 
-    def __str__(self):
-        return f"Instance {self._name}, {self.nr_of_jobs} jobs, {len(self.operations)} operations, {len(self.machines)} machines"
+        self.update_operations_available_for_scheduling()
+
+    def set_instance_name(self, name: str) -> None:
+        """Set the name of the instance."""
+        self._instance_name = name
 
     def set_nr_of_jobs(self, nr_of_jobs: int) -> None:
         """Set the number of jobs."""
@@ -69,23 +79,26 @@ class JobShop:
         """Add sequence dependent setup times."""
         self._sequence_dependent_setup_times = sequence_dependent_setup_times
 
-    def set_operations_available_for_scheduling(self, operations_available_for_scheduling: List) -> None:
-        """Set the operations that are available for scheduling."""
-        self._operations_available_for_scheduling = operations_available_for_scheduling
-
     def get_job(self, job_id):
-        """Return operation object with operation id."""
-        return next((job for job in self.jobs if job.job_id == job_id), None)
+        """Return operation object with operation id, or None if not found."""
+        job = next((job for job in self.jobs if job.job_id == job_id), None)
+        if job is None:
+            raise ValueError(f"No job found with job_id: {job_id}")
+        return job
 
     def get_operation(self, operation_id):
-        """Return operation object with operation id."""
-        return next((operation for operation in self.operations if operation.operation_id == operation_id), None)
+        """Return operation object with operation id, or None if not found."""
+        operation = next((operation for operation in self.operations if operation.operation_id == operation_id), None)
+        if operation is None:
+            raise ValueError(f"No operation found with operation_id: {operation_id}")
+        return operation
 
     def get_machine(self, machine_id):
-        """Return machine object with machine id."""
-        for machine in self._machines:
-            if machine.machine_id == machine_id:
-                return machine
+        """Return machine object with machine id, or None if not found."""
+        machine = next((machine for machine in self._machines if machine.machine_id == machine_id), None)
+        if machine is None:
+            raise ValueError(f"No machine found with machine_id: {machine_id}")
+        return machine
 
     @property
     def jobs(self) -> List[Job]:
@@ -145,7 +158,7 @@ class JobShop:
     @property
     def instance_name(self) -> str:
         """Return the name of the instance."""
-        return self._name
+        return self._instance_name
 
     @property
     def makespan(self) -> float:
@@ -190,6 +203,14 @@ class JobShop:
                 max_flowtime = flow_time
         return max_flowtime
 
+    def schedule_operation_on_machine(self, operation: Operation, machine_id, duration) -> None:
+        """Schedule an operation on a specific machine."""
+        machine = self.get_machine(machine_id)
+        if machine is None:
+            raise ValueError(
+                f"Invalid machine ID {machine_id}")
+        machine.add_operation_to_schedule(operation, duration, self._sequence_dependent_setup_times)
+
     def schedule_operation_with_backfilling(self, operation: Operation, machine_id, duration) -> None:
         """Schedule an operation"""
         if operation not in self.operations_available_for_scheduling:
@@ -208,15 +229,6 @@ class JobShop:
         machine.unschedule_operation(operation)
         self.mark_operation_as_available(operation)
 
-    def schedule_operation_on_machine(self, operation: Operation, machine_id, duration) -> None:
-        """Schedule an operation on a specific machine."""
-        machine = self.get_machine(machine_id)
-        if machine is None:
-            raise ValueError(
-                f"Invalid machine ID {machine_id}")
-
-        machine.add_operation_to_schedule(operation, duration, self._sequence_dependent_setup_times)
-
     def mark_operation_as_scheduled(self, operation: Operation) -> None:
         """Mark an operation as scheduled."""
         if operation not in self.operations_available_for_scheduling:
@@ -234,3 +246,16 @@ class JobShop:
         self.scheduled_operations.remove(operation)
         self.operations_available_for_scheduling.append(operation)
         self.operations_to_be_scheduled.append(operation)
+
+    def update_operations_available_for_scheduling(self) -> None:
+        """Update the list of operations available for scheduling."""
+        scheduled_operations = set(self.scheduled_operations)
+        operations_available_for_scheduling = [
+            operation
+            for operation in self.operations
+            if operation not in scheduled_operations and all(
+                prec_operation in scheduled_operations
+                for prec_operation in self._precedence_relations_operations[operation.operation_id]
+            )
+        ]
+        self._operations_available_for_scheduling = operations_available_for_scheduling

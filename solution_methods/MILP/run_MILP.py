@@ -3,13 +3,13 @@ import logging
 import os
 
 from solution_methods.helper_functions import load_parameters, load_job_shop_env
-from plotting.drawer import draw_gantt_chart
+from plotting.drawer import plot_gantt_chart
 
-from models import JSPmodel, FJSPmodel, FJSPSDSTmodel
-from utils import retrieve_decision_variables, results_saving, output_dir_exp_name
+from solution_methods.MILP.models import JSPmodel, FJSPmodel, FJSPSDSTmodel
+from solution_methods.MILP.utils import retrieve_decision_variables, results_saving, output_dir_exp_name
 
 PARAM_FILE = os.path.abspath("../../configs/milp.toml")
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(level=logging.INFO)
 
 MODEL_MAP = {
     'fjsp_sdst': FJSPSDSTmodel,
@@ -83,7 +83,7 @@ def main(param_file: str = PARAM_FILE):
         # Plot Gantt chart if required
         if show_gantt or save_gantt:
             logging.info("Generating Gantt chart.")
-            plt = draw_gantt_chart(jobShopEnv)
+            plt = plot_gantt_chart(jobShopEnv)
 
             if save_gantt:
                 plt.savefig(output_dir + "/gantt.png")

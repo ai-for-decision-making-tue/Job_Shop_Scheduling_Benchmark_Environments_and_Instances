@@ -12,7 +12,7 @@ import os
 import numpy as np
 import torch
 
-from plotting.drawer import draw_gantt_chart
+from plotting.drawer import plot_gantt_chart
 from solution_methods.helper_functions import load_job_shop_env, load_parameters, initialize_device, set_seeds
 from solution_methods.L2D.src.agent_utils import sample_select_action, greedy_select_action
 from solution_methods.L2D.src.env_test import NipsJSPEnv_test as Env_test
@@ -21,7 +21,7 @@ from solution_methods.L2D.src.PPO_model import PPO
 from utils import output_dir_exp_name, results_saving
 
 PARAM_FILE = "../../configs/L2D.toml"
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(level=logging.INFO)
 
 
 def run_L2D(jobShopEnv, **parameters):
@@ -57,7 +57,7 @@ def run_L2D(jobShopEnv, **parameters):
               hidden_dim_critic=model_parameters["hidden_dim_critic"])
 
     # Load trained policy
-    trained_policy = os.getcwd() + parameters['test_parameters'].get('trained_policy')
+    trained_policy = os.path.dirname(os.path.abspath(__file__)) + parameters['test_parameters'].get('trained_policy')
     ppo.policy.load_state_dict(torch.load(trained_policy, map_location=torch.device(parameters['test_parameters']['device']), weights_only=True))
     logging.info(f"Trained policy loaded from {parameters['test_parameters'].get('trained_policy')}.")
 
@@ -128,7 +128,7 @@ def main(param_file=PARAM_FILE):
         # Plot Gantt chart if required
         if show_gantt or save_gantt:
             logging.info("Generating Gantt chart.")
-            plt = draw_gantt_chart(jobShopEnv)
+            plt = plot_gantt_chart(jobShopEnv)
 
             if save_gantt:
                 plt.savefig(output_dir + "\gantt.png")

@@ -21,9 +21,15 @@ def get_earliest_end_time_machines(simulationEnv, operation):
         if machine.scheduled_operations == []:
             finish_times[machine_option] = simulationEnv.simulator.now + operation.processing_times[machine_option]
         else:
-            finish_times[machine_option] = operation.processing_times[machine_option] + machine._processed_operations[-1].scheduling_information['end_time'] + simulationEnv.JobShop._sequence_dependent_setup_times[machine.machine_id][
-                machine.scheduled_operations[-1].operation_id][
-                operation.operation_id]
+            if simulationEnv.JobShop._sequence_dependent_setup_times != []:
+                finish_times[machine_option] = operation.processing_times[machine_option] \
+                                               + machine._processed_operations[-1].scheduling_information['end_time'] \
+                                               + simulationEnv.JobShop._sequence_dependent_setup_times[machine.machine_id][
+                                                machine.scheduled_operations[-1].operation_id][operation.operation_id]
+            else:
+                finish_times[machine_option] = operation.processing_times[machine_option] \
+                                               + machine._processed_operations[-1].scheduling_information['end_time']
+
     earliest_end_time = min(finish_times.values())  # Find the minimum value in the dictionary
     return [key for key, value in finish_times.items() if value == earliest_end_time]
 

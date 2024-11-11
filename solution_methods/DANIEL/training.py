@@ -11,8 +11,8 @@ import torch
 
 from tqdm import tqdm
 
-from src.common_utils import greedy_select_action, sample_action, setup_seed, strToSuffix
-from src.data_utils import CaseGenerator, SD2_instance_generator, load_data_from_files
+from solution_methods.DANIEL.src.common_utils import greedy_select_action, sample_action, setup_seed, strToSuffix
+from solution_methods.DANIEL.src.data_utils import CaseGenerator, SD2_instance_generator, load_data_from_files
 from solution_methods.DANIEL.src.fjsp_env_same_op_nums import FJSPEnvForSameOpNums
 from solution_methods.DANIEL.src.fjsp_env_various_op_nums import FJSPEnvForVariousOpNums
 from solution_methods.DANIEL.network.PPO import Memory, PPO_initialize
