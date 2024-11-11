@@ -7,6 +7,7 @@ from scheduling_environment.simulationEnv import SimulationEnv
 from solution_methods.helper_functions import load_parameters
 from solution_methods.dispatching_rules.scheduler import schedule_operations
 
+logging.basicConfig(level=logging.INFO)
 PARAM_FILE = "../../configs/dispatching_rules.toml"
 
 
@@ -77,7 +78,8 @@ def main(param_file: str = PARAM_FILE):
 
     if parameters['output']['plotting']:
         draw_precedence_relations(simulationEnv.JobShop)
-        plot_gantt_chart(simulationEnv.JobShop)
+        plt = plot_gantt_chart(simulationEnv.JobShop)
+        plt.show()
 
 
 if __name__ == "__main__":

@@ -72,7 +72,7 @@ def plot_gantt_chart(JobShop, save=False, filename=None):
                     [(setup_start, setup_time)],
                     (machine.machine_id - 0.4, 0.8),
                     facecolors='grey',
-                    edgecolor='black', linewidth=0.5, hatch='/')
+                    edgecolor='black', hatch='/')
             middle_of_operation = operation_start + operation_duration / 2
             ax.text(
                 middle_of_operation,

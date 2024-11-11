@@ -46,8 +46,11 @@ class SimulationEnv:
             with self.machine_resources[machine.machine_id].request() as req:
                 yield req
                 if machine.scheduled_operations != []:
-                    setup_time = self.JobShop._sequence_dependent_setup_times[machine.machine_id][machine.scheduled_operations[-1].operation_id][
-                        operation.operation_id]
+                    if self.JobShop._sequence_dependent_setup_times != []:
+                        setup_time = self.JobShop._sequence_dependent_setup_times[machine.machine_id][machine.scheduled_operations[-1].operation_id][
+                            operation.operation_id]
+                    else:
+                        setup_time = 0
                 else:
                     setup_time = 0
                 start_time = self.simulator.now + setup_time
@@ -86,8 +89,8 @@ class SimulationEnv:
                 job.add_operation(operation)
                 if counter != 0:
                     self.JobShop.precedence_relations_operations[operation_id] = [
-                        job.get_operation(operation_id - 1)]
-                    operation.add_predecessors([job.get_operation(operation_id - 1)])
+                        self.JobShop.get_operation(operation_id - 1)]
+                    operation.add_predecessors([eslf.JobShop.get_operation(operation_id - 1)])
                 else:
                     self.JobShop.precedence_relations_operations[operation_id] = []
 

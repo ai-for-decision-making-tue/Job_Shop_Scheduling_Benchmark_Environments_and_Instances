@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 class Operation:
@@ -45,33 +45,24 @@ class Operation:
         return self._processing_times
 
     @property
-    def scheduled_start_time(self) -> int:
+    def scheduled_start_time(self) -> Optional[int]:
         """Return the scheduled start time of the operation."""
-        if 'start_time' in self._scheduling_information:
-            return self._scheduling_information['start_time']
-        else:
-            return None
+        return self._scheduling_information.get('start_time', None)
 
     @property
-    def scheduled_end_time(self) -> int:
+    def scheduled_end_time(self) -> Optional[int]:
         """Return the scheduled end time of the operation."""
-        if 'end_time' in self._scheduling_information:
-            return self._scheduling_information['end_time']
-        return None
+        return self._scheduling_information.get('end_time', None)
 
     @property
-    def scheduled_duration(self) -> int:
+    def scheduled_duration(self) -> Optional[int]:
         """Return the scheduled duration of the operation."""
-        if 'processing_time' in self._scheduling_information:
-            return self._scheduling_information['processing_time']
-        return None
+        return self._scheduling_information.get('processing_time', None)
 
     @property
-    def scheduled_machine(self) -> None:
+    def scheduled_machine(self) -> Optional[int]:
         """Return the machine id that the operation is scheduled on."""
-        if 'machine_id' in self._scheduling_information:
-            return self._scheduling_information['machine_id']
-        return None
+        return self._scheduling_information.get('machine_id', None)
 
     @property
     def predecessors(self) -> List:
@@ -107,8 +98,8 @@ class Operation:
         """Add an machine option to the current operation."""
         self._processing_times[machine_id] = duration
 
-    def update_sequence_dependent_setup_times(self, start_time_setup, setup_duration):
-        """Update the sequence dependent setup times of this operation."""
+    def update_scheduled_sequence_dependent_setup_times(self, start_time_setup, setup_duration):
+        """Update the sequence dependent setup times of this operation (used for backfilling logic)."""
         self._scheduling_information['start_setup'] = start_time_setup
         self._scheduling_information['end_setup'] = start_time_setup + setup_duration
         self._scheduling_information['setup_time'] = setup_duration

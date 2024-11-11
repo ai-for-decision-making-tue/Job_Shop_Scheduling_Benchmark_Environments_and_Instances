@@ -31,7 +31,7 @@ def run_DANIEL_FJSP(jobShopEnv, **parameters):
     ppo = PPO_initialize(parameters)
 
     # load trained policy
-    trained_policy = (os.getcwd() + f"/save/{parameters['model']['source']}" f"/{parameters['test_parameters']['trained_policy']}.pth")
+    trained_policy = (os.path.dirname(os.path.abspath(__file__)) + f"/save/{parameters['model']['source']}" f"/{parameters['test_parameters']['trained_policy']}.pth")
     policy = torch.load(trained_policy, map_location=device.type, weights_only=True)
     ppo.policy.load_state_dict(policy)
     ppo.policy.eval()

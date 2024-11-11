@@ -37,7 +37,7 @@ def run_FJSP_DRL(jobShopEnv, **parameters):
     # Load trained policy
     model_parameters = parameters["model_parameters"]
     test_parameters = parameters["test_parameters"]
-    trained_policy = os.getcwd() + test_parameters['trained_policy']
+    trained_policy = os.path.dirname(os.path.abspath(__file__)) + test_parameters['trained_policy']
     if trained_policy.endswith('.pt'):
         if device.type == 'cuda':
             policy = torch.load(trained_policy)
@@ -65,7 +65,7 @@ def run_FJSP_DRL(jobShopEnv, **parameters):
     makespan = env_test.JSP_instance.makespan
     logging.info(f"Makespan: {makespan}")
 
-    return makespan, jobShopEnv #env_test.JSP_instance
+    return makespan, jobShopEnv
 
 
 def main(param_file=PARAM_FILE):

@@ -255,8 +255,12 @@ class FJSPEnv_test():
         JSM_mask_jp_list = []
         JSM_mask_jf_list = []
         JSM_mask_mp_list = []
-        JSM_mask_jp_list.append([True if this_job.next_ope_earliest_begin_time > self.JSM_time else False
+        # JSM_mask_jp_list.append([True if this_job.next_ope_earliest_begin_time > self.JSM_time else False
+        #                          for this_job in self.JSP_instance.jobs])
+
+        JSM_mask_jp_list.append([True if max([operation.scheduled_end_time for operation in this_job.scheduled_operations], default=0) > self.JSM_time else False
                                  for this_job in self.JSP_instance.jobs])
+
         JSM_mask_jf_list.append([True if this_job.operations.__len__() == this_job.scheduled_operations.__len__() else False for this_job in self.JSP_instance.jobs])
         JSM_mask_mp_list.append([True if this_mach.next_available_time > self.JSM_time else False for this_mach in self.JSP_instance.machines])
         self.JSM_mask_job_procing_batch = torch.tensor(JSM_mask_jp_list, dtype=torch.bool)

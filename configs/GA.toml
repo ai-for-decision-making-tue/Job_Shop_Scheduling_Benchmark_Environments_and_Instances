@@ -1,8 +1,9 @@
 [instance]
-problem_instance = "/fjsp/1_Brandimarte/MK01.fjs"
+# problem_instance = "/fjsp/1_Brandimarte/MK01.fjs"
+problem_instance = "/fjsp_sdst/1_Fattahi/Fattahi_setup_20.fjs"
 
 [algorithm]
-population_size = 100   # number of individuals in the population
+population_size = 10   # number of individuals in the population
 ngen = 10               # number of generations
 seed = 5                # random seed
 indpb = 0.2             # probability of mutating each gene

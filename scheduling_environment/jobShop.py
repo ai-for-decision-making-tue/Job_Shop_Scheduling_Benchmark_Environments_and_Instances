@@ -42,6 +42,10 @@ class JobShop:
 
         self.update_operations_available_for_scheduling()
 
+    def set_instance_name(self, name: str) -> None:
+        """Set the name of the instance."""
+        self._instance_name = name
+
     def set_nr_of_jobs(self, nr_of_jobs: int) -> None:
         """Set the number of jobs."""
         self._nr_of_jobs = nr_of_jobs
@@ -49,10 +53,6 @@ class JobShop:
     def set_nr_of_machines(self, nr_of_machines: int) -> None:
         """Set the number of jobs."""
         self._nr_of_machines = nr_of_machines
-
-    def set_instance_name(self, name: str) -> None:
-        """Set the name of the instance."""
-        self._instance_name = name
 
     def add_operation(self, operation) -> None:
         """Add an operation to the environment."""
@@ -78,10 +78,6 @@ class JobShop:
     def add_sequence_dependent_setup_times(self, sequence_dependent_setup_times: List) -> None:
         """Add sequence dependent setup times."""
         self._sequence_dependent_setup_times = sequence_dependent_setup_times
-
-    def set_operations_available_for_scheduling(self, operations_available_for_scheduling: List) -> None:
-        """Set the operations that are available for scheduling."""
-        self._operations_available_for_scheduling = operations_available_for_scheduling
 
     def get_job(self, job_id):
         """Return operation object with operation id, or None if not found."""
@@ -195,14 +191,14 @@ class JobShop:
     def average_flowtime(self) -> float:
         total_flowtime = 0
         for job in self._jobs:
-            total_flowtime += job.flow_time
+            total_flowtime += job._operations[-1].scheduled_end_time - job._operations[0].scheduled_start_time
         return total_flowtime / self._nr_of_jobs
 
     @property
     def max_flowtime(self) -> float:
         max_flowtime = 0
         for job in self._jobs:
-            flow_time = job.flow_time
+            flow_time = job._operations[-1].scheduled_end_time - job._operations[0].scheduled_start_time
             if flow_time > max_flowtime:
                 max_flowtime = flow_time
         return max_flowtime
@@ -254,7 +250,7 @@ class JobShop:
     def update_operations_available_for_scheduling(self) -> None:
         """Update the list of operations available for scheduling."""
         scheduled_operations = set(self.scheduled_operations)
-        operations_available = [
+        operations_available_for_scheduling = [
             operation
             for operation in self.operations
             if operation not in scheduled_operations and all(
@@ -262,4 +258,4 @@ class JobShop:
                 for prec_operation in self._precedence_relations_operations[operation.operation_id]
             )
         ]
-        self.set_operations_available_for_scheduling(operations_available)
+        self._operations_available_for_scheduling = operations_available_for_scheduling
