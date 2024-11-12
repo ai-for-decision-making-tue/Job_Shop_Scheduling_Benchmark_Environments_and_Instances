@@ -1,4 +1,4 @@
-from solution_methods.dispatching_rules.helper_functions import *
+from solution_methods.dispatching_rules.src.helper_functions import *
 
 
 def fifo_priority(operation):

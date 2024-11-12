@@ -17,14 +17,14 @@ def get_earliest_end_time_machines(simulationEnv, operation):
     finish_times = {}
     machine_options = operation.processing_times.keys()
     for machine_option in machine_options:
-        machine = simulationEnv.JobShop.get_machine(machine_option)
+        machine = simulationEnv.jobShopEnv.get_machine(machine_option)
         if machine.scheduled_operations == []:
             finish_times[machine_option] = simulationEnv.simulator.now + operation.processing_times[machine_option]
         else:
-            if simulationEnv.JobShop._sequence_dependent_setup_times != []:
+            if simulationEnv.jobShopEnv._sequence_dependent_setup_times != []:
                 finish_times[machine_option] = operation.processing_times[machine_option] \
                                                + machine._processed_operations[-1].scheduling_information['end_time'] \
-                                               + simulationEnv.JobShop._sequence_dependent_setup_times[machine.machine_id][
+                                               + simulationEnv.jobShopEnv._sequence_dependent_setup_times[machine.machine_id][
                                                 machine.scheduled_operations[-1].operation_id][operation.operation_id]
             else:
                 finish_times[machine_option] = operation.processing_times[machine_option] \

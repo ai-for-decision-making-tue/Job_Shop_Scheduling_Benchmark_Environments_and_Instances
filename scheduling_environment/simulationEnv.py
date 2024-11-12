@@ -1,5 +1,5 @@
 import random
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 import simpy
 
@@ -11,12 +11,12 @@ from scheduling_environment.operation import Operation
 
 class SimulationEnv:
     """
-    Main scheduling_environment class for the an online job shop
+    Main scheduling_environment class for the an online job shop (with online job arrivals)
     """
 
     def __init__(self, online_arrivals: bool):
         self.simulator = simpy.Environment()
-        self.JobShop = JobShop()
+        self.jobShopEnv = JobShop()
         self.online_arrivals = online_arrivals
         self.machine_resources = []
         self.processed_operations = set()
@@ -46,8 +46,8 @@ class SimulationEnv:
             with self.machine_resources[machine.machine_id].request() as req:
                 yield req
                 if machine.scheduled_operations != []:
-                    if self.JobShop._sequence_dependent_setup_times != []:
-                        setup_time = self.JobShop._sequence_dependent_setup_times[machine.machine_id][machine.scheduled_operations[-1].operation_id][
+                    if self.jobShopEnv._sequence_dependent_setup_times != []:
+                        setup_time = self.jobShopEnv._sequence_dependent_setup_times[machine.machine_id][machine.scheduled_operations[-1].operation_id][
                             operation.operation_id]
                     else:
                         setup_time = 0
@@ -64,8 +64,8 @@ class SimulationEnv:
         job_id = 0
         operation_id = 0
 
-        for id_machine in range(0, self.JobShop.nr_of_machines):
-            self.JobShop.add_machine((Machine(id_machine)))
+        for id_machine in range(0, self.jobShopEnv.nr_of_machines):
+            self.jobShopEnv.add_machine((Machine(id_machine)))
             self.add_machine_resources()
 
         while True:
@@ -81,22 +81,22 @@ class SimulationEnv:
                                             self.max_nr_operations_per_job)
             for i in range(num_operations):
                 operation = Operation(job, job_id, operation_id)
-                self.JobShop.add_operation(operation)
-                for machine_id in range(self.JobShop.nr_of_machines):
+                self.jobShopEnv.add_operation(operation)
+                for machine_id in range(self.jobShopEnv.nr_of_machines):
                     duration = random.randint(self.min_duration_per_operation,
                                               self.max_duration_per_operation)
                     operation.add_operation_option(machine_id, duration)
                 job.add_operation(operation)
                 if counter != 0:
-                    self.JobShop.precedence_relations_operations[operation_id] = [
-                        self.JobShop.get_operation(operation_id - 1)]
-                    operation.add_predecessors([eslf.JobShop.get_operation(operation_id - 1)])
+                    self.jobShopEnv.precedence_relations_operations[operation_id] = [
+                        self.jobShopEnv.get_operation(operation_id - 1)]
+                    operation.add_predecessors([self.jobShopEnv.get_operation(operation_id - 1)])
                 else:
-                    self.JobShop.precedence_relations_operations[operation_id] = []
+                    self.jobShopEnv.precedence_relations_operations[operation_id] = []
 
                 counter += 1
                 operation_id += 1
 
-            self.JobShop.add_job(job)
+            self.jobShopEnv.add_job(job)
             # print(f"Job {job_id} generated with {num_operations} operations")  # Debugging print statement
             job_id += 1

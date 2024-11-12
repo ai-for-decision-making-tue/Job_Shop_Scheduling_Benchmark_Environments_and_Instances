@@ -1,40 +1,39 @@
 import argparse
 import logging
+import os
 
-from data_parsers import parser_fajsp, parser_fjsp, parser_jsp_fsp, parser_fjsp_sdst
-from plotting.drawer import plot_gantt_chart, draw_precedence_relations
-from scheduling_environment.simulationEnv import SimulationEnv
-from solution_methods.helper_functions import load_parameters
-from solution_methods.dispatching_rules.scheduler import schedule_operations
+from plotting.drawer import plot_gantt_chart
+from scheduling_environment.jobShop import JobShop
+from solution_methods.dispatching_rules.utils import configure_simulation_env, output_dir_exp_name, results_saving
+from solution_methods.helper_functions import load_parameters, load_job_shop_env
+from solution_methods.dispatching_rules.src.scheduling_functions import scheduler
 
 logging.basicConfig(level=logging.INFO)
 PARAM_FILE = "../../configs/dispatching_rules.toml"
 
 
-def run_method(simulationEnv, dispatching_rule, machine_assignment_rule):
-    """Schedule simulator and schedule operations with the dispatching rules"""
+def run_dispatching_rules(jobShopEnv, **kwargs):
+    dispatching_rule = kwargs['instance']['dispatching_rule']
+    machine_assignment_rule = kwargs['instance']['machine_assignment_rule']
 
     if dispatching_rule == 'SPT' and machine_assignment_rule != 'SPT':
         raise ValueError("SPT dispatching rule requires SPT machine assignment rule.")
 
-    if simulationEnv.online_arrivals:
-        # Start the online job generation process
-        simulationEnv.simulator.process(simulationEnv.generate_online_job_arrivals())
+    # Configure simulation environment
+    simulationEnv = configure_simulation_env(jobShopEnv, **kwargs)
+    simulationEnv.simulator.process(scheduler(simulationEnv, **kwargs))
 
-        # Run the scheduling_environment until all operations are processed
-        while True:
-            schedule_operations(simulationEnv, dispatching_rule, machine_assignment_rule)
-            yield simulationEnv.simulator.timeout(1)
-
+    # For online arrivals, run the simulation until the configured end time
+    if kwargs['instance']['online_arrivals']:
+        simulationEnv.simulator.run(until=kwargs['online_arrival_details']['simulation_time'])
+    # For static instances, run until all operations are scheduled
     else:
-        # add machine resources to the environment
-        for _ in simulationEnv.JobShop.machines:
-            simulationEnv.add_machine_resources()
+        simulationEnv.simulator.run()
 
-        # Run the scheduling env and schedule operations until all operations are processed from the data instance
-        while len(simulationEnv.processed_operations) < sum([len(job.operations) for job in simulationEnv.JobShop.jobs]):
-            schedule_operations(simulationEnv, dispatching_rule, machine_assignment_rule)
-            yield simulationEnv.simulator.timeout(1)
+    makespan = simulationEnv.jobShopEnv.makespan
+    logging.info(f"Makespan: {makespan}")
+
+    return makespan, simulationEnv.jobShopEnv
 
 
 def main(param_file: str = PARAM_FILE):
@@ -44,46 +43,46 @@ def main(param_file: str = PARAM_FILE):
         logging.error(f"Parameter file {param_file} not found.")
         return
 
-    simulationEnv = SimulationEnv(online_arrivals=parameters['instance']['online_arrivals'])
-
-    if not parameters['instance']['online_arrivals']:
-        try:
-            if 'fjsp_sdst' in parameters['instance']['problem_instance']:
-                simulationEnv.JobShop = parser_fjsp_sdst.parse_fjsp_sdst(simulationEnv.JobShop,
-                                                                         parameters['instance']['problem_instance'])
-            elif 'fjsp' in parameters['instance']['problem_instance']:
-                simulationEnv.JobShop = parser_fjsp.parse_fjsp(simulationEnv.JobShop,
-                                                               parameters['instance']['problem_instance'])
-            elif 'fajsp' in parameters['instance']['problem_instance']:
-                simulationEnv.JobShop = parser_fajsp.parse_fajsp(simulationEnv.JobShop,
-                                                                 parameters['instance']['problem_instance'])
-            elif 'jsp' in parameters['instance']['problem_instance'] or 'fsp' in parameters['instance']['problem_instance']:
-                simulationEnv.JobShop = parser_jsp_fsp.parse_jsp_fsp(simulationEnv.JobShop,
-                                                                     parameters['instance']['problem_instance'])
-        except Exception as e:
-            print(f"Only able to schedule '/fjsp/', '/fasjp/', '/fjsp_sdst/', '/fjs/' or '/jsp/' jobs': {e}")
-
-        simulationEnv.simulator.process(
-            run_method(simulationEnv, parameters['instance']['dispatching_rule'],
-                           parameters['instance']['machine_assignment_rule']))
-        simulationEnv.simulator.run()
-        logging.info(f"Makespan: {simulationEnv.JobShop.makespan}")
-
+    # Configure the simulation environment
+    if parameters['instance']['online_arrivals']:
+        jobShopEnv = JobShop()
+        makespan, jobShopEnv = run_dispatching_rules(jobShopEnv, **parameters)
+        logging.warning(f"Makespan objective is irrelevant for problems configured with 'online arrivals'.")
     else:
-        simulationEnv.set_online_arrival_details(parameters['online_arrival_details'])
-        simulationEnv.JobShop.set_nr_of_machines(parameters['online_arrival_details']['number_total_machines'])
-        simulationEnv.simulator.process(run_method(simulationEnv, parameters['instance']['dispatching_rule'],
-                                        parameters['instance']['machine_assignment_rule']))
-        simulationEnv.simulator.run(until=parameters['online_arrival_details']['simulation_time'])
+        jobShopEnv = load_job_shop_env(parameters['instance'].get('problem_instance'))
+        makespan, jobShopEnv = run_dispatching_rules(jobShopEnv, **parameters)
 
-    if parameters['output']['plotting']:
-        draw_precedence_relations(simulationEnv.JobShop)
-        plt = plot_gantt_chart(simulationEnv.JobShop)
-        plt.show()
+    if makespan is not None:
+        # Check output configuration and prepare output paths if needed
+        output_config = parameters['output']
+        save_gantt = output_config.get('save_gantt')
+        save_results = output_config.get('save_results')
+        show_gantt = output_config.get('show_gantt')
+
+        if save_gantt or save_results:
+            output_dir, exp_name = output_dir_exp_name(parameters)
+            output_dir = os.path.join(output_dir, f"{exp_name}")
+            os.makedirs(output_dir, exist_ok=True)
+
+        if show_gantt or save_gantt:
+            logging.info("Generating Gantt chart.")
+            plt = plot_gantt_chart(jobShopEnv)
+
+            if save_gantt:
+                plt.savefig(output_dir + "/gantt.png")
+                logging.info(f"Gantt chart saved to {output_dir}")
+
+            if show_gantt:
+                plt.show()
+
+        # Save results if enabled
+        if save_results:
+            results_saving(makespan, output_dir, parameters)
+            logging.info(f"Results saved to {output_dir}")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run (Online) Job Shop Simulation Model")
+    parser = argparse.ArgumentParser(description="Run Dispatching Rules.")
     parser.add_argument(
         "-f",
         "--config_file",

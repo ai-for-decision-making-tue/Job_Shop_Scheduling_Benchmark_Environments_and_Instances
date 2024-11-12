@@ -1,5 +1,5 @@
-from solution_methods.dispatching_rules.rules import *
-from solution_methods.dispatching_rules.helper_functions import *
+from solution_methods.dispatching_rules.src.rules import *
+from solution_methods.dispatching_rules.src.helper_functions import *
 
 
 def select_operation(simulationEnv, machine, dispatching_rule, machine_assignment_rule):
@@ -20,12 +20,12 @@ def select_operation(simulationEnv, machine, dispatching_rule, machine_assignmen
     operation_priorities = {}
 
     # Iterate over all jobs in the simulation environment
-    for job in simulationEnv.JobShop.jobs:
+    for job in simulationEnv.jobShopEnv.jobs:
         # Iterate over all operations in the job
         for operation in job.operations:
 
             # Check if the operation has not been processed or scheduled on a machine
-            if operation not in simulationEnv.processed_operations and operation not in simulationEnv.JobShop.scheduled_operations and machine.machine_id in operation.processing_times:
+            if operation not in simulationEnv.processed_operations and operation not in simulationEnv.jobShopEnv.scheduled_operations and machine.machine_id in operation.processing_times:
                 if check_precedence_relations(simulationEnv, operation):
 
                     # Check if the machine assignment rule is 'SPT' and the operation has the shortest processing time
@@ -68,14 +68,43 @@ def select_operation(simulationEnv, machine, dispatching_rule, machine_assignmen
 
 
 def schedule_operations(simulationEnv, dispatching_rule, machine_assignment_rule):
-    """Schedule operations on the machines based on the priority values"""
-    machines_available = [machine for machine in simulationEnv.JobShop.machines if
-                          simulationEnv.machine_resources[machine.machine_id].count == 0]
+    """Schedule operations on the machines based on the priority values."""
+    machines_available = [
+        machine for machine in simulationEnv.jobShopEnv.machines
+        if simulationEnv.machine_resources[machine.machine_id].count == 0
+    ]
     machines_available.sort(key=lambda m: m.machine_id)
 
     for machine in machines_available:
-        operation_to_schedule = select_operation(simulationEnv, machine, dispatching_rule,
-                                                 machine_assignment_rule)
+        operation_to_schedule = select_operation(simulationEnv, machine, dispatching_rule, machine_assignment_rule)
         if operation_to_schedule is not None:
-            simulationEnv.JobShop._scheduled_operations.append(operation_to_schedule)
+            simulationEnv.jobShopEnv._scheduled_operations.append(operation_to_schedule)
             simulationEnv.simulator.process(simulationEnv.perform_operation(operation_to_schedule, machine))
+
+
+def scheduler(simulationEnv, **kwargs):
+    """Scheduler for batch mode or online arrivals."""
+    dispatching_rule = kwargs['instance']['dispatching_rule']
+    machine_assignment_rule = kwargs['instance']['machine_assignment_rule']
+
+    if dispatching_rule == 'SPT' and machine_assignment_rule != 'SPT':
+        raise ValueError("SPT dispatching rule requires SPT machine assignment rule.")
+
+    if not simulationEnv.online_arrivals:
+        # Add machine resources to the environment
+        for _ in simulationEnv.jobShopEnv.machines:
+            simulationEnv.add_machine_resources()
+
+        # Run the scheduling environment until all operations are processed
+        while len(simulationEnv.processed_operations) < sum(len(job.operations) for job in simulationEnv.jobShopEnv.jobs):
+            schedule_operations(simulationEnv, dispatching_rule, machine_assignment_rule)
+            yield simulationEnv.simulator.timeout(1)
+
+    else:
+        # Start the online job generation process
+        simulationEnv.simulator.process(simulationEnv.generate_online_job_arrivals())
+
+        # Run the scheduling environment continuously
+        while True:
+            schedule_operations(simulationEnv, dispatching_rule, machine_assignment_rule)
+            yield simulationEnv.simulator.timeout(1)
