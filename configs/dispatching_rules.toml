@@ -1,5 +1,5 @@
 [instance]
-online_arrivals = true         # false for static instance (from data) or true for online job arrivals
+online_arrivals = false         # false for static instance (from data) or true for online job arrivals
 problem_instance = "/fjsp_sdst/1_Fattahi/Fattahi_setup_20.fjs"  # static instance (no online arrivals)
 dispatching_rule = "MOR"        # FIFO: First In First Out, MOR: Most Operation Remaining, LOR: Least Operations Remaining,
                                 # MWR: Most Work Remaining, LWR: Least Work Remaining
