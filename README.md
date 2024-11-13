@@ -33,10 +33,10 @@ Here we provide some short examples on how to use the solution methods in this r
 
 2. **Genetic Algorithm:**  
   ```python
-  from solution_methods.GA.src.initialization import initialize_run
   from solution_methods.helper_functions import load_job_shop_env, load_parameters
   from solution_methods.GA.run_GA import run_GA
-
+  from solution_methods.GA.src.initialization import initialize_run
+  
   parameters = load_parameters("configs/genetic_algorithm.toml")
   jobShopEnv = load_job_shop_env(parameters['instance'].get('problem_instance'))
 
@@ -46,8 +46,7 @@ Here we provide some short examples on how to use the solution methods in this r
 
 3. **L2D (DRL-based):**
   ```python
-  from solution_methods.L2D.src.train import train
-  from solution_methods.L2D.src.test import test
+  from solution_methods.L2D.src.run_L2D import run_L2D
   from solution_methods.helper_functions import load_job_shop_env, load_parameters
    
   parameters = load_parameters("configs/L2D.toml")
