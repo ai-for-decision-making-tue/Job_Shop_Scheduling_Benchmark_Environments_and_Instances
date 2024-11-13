@@ -52,6 +52,7 @@ Here we provide some short examples on how to use the solution methods in this r
    
   parameters = load_parameters("configs/L2D.toml")
   jobShopEnv = load_job_shop_env(parameters['instance'].get('problem_instance'))
+  makespan, jobShopEnv = run_L2D(jobShopEnv, **parameters)
   ```
   
 
