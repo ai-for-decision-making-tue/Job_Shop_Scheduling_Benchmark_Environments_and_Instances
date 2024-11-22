@@ -2,27 +2,19 @@ PRINTS = False
 OUTPUT = False
 
 import os
-os.chdir("/home/cole/madrid/sites")
-import frappe
-frappe.connect("test", db_name="cole")
-
-def cd_site():
-    os.chdir("/home/cole/madrid/sites")
-def cd_job():
-    os.chdir("/home/cole/cole_scripts/job_scheduling_env/")
-
-import sys
-sys.path.append(r'/home/cole/cole_scripts/job_scheduling_env/Job_Shop_Scheduling_Benchmark_Environments_and_Instances')
-cd_job()
-import Job_Shop_Scheduling_Benchmark_Environments_and_Instances.scheduling_environment.simulationEnv as sim
+import scheduling_environment.simulationEnv as sim
 from data_parsers.custom_instance_parser import parse
 from plotting.drawer import plot_gantt_chart
 from solution_methods.GA.src.initialization import initialize_run
 from solution_methods.GA.run_GA import run_GA
-#from solution_methods.CP_SAT.run_cp_sat import run_CP_SAT
-from solution_methods.cp_sat.run_cp_sat import run_CP_SAT
-cd_site()
+from solution_methods.CP_SAT.run_cp_sat import run_CP_SAT
 import numpy as np
+
+
+
+os.chdir("/home/cole/madrid/sites")
+import frappe
+frappe.connect("test", db_name="cole")
 
 class Workstations:
     def __init__(self) -> None:
