@@ -1,0 +1,110 @@
+{
+    "Schedule": [
+        {
+            "job": 0,
+            "tasks": [
+                {
+                    "duration": 1,
+                    "machine": 4,
+                    "start": 0,
+                    "task": 0
+                },
+                {
+                    "duration": 1,
+                    "machine": 0,
+                    "start": 1,
+                    "task": 1
+                },
+                {
+                    "duration": 1,
+                    "machine": 1,
+                    "start": 2,
+                    "task": 2
+                },
+                {
+                    "duration": 1,
+                    "machine": 0,
+                    "start": 3,
+                    "task": 3
+                }
+            ]
+        },
+        {
+            "job": 1,
+            "tasks": [
+                {
+                    "duration": 1,
+                    "machine": 3,
+                    "start": 0,
+                    "task": 0
+                },
+                {
+                    "duration": 1,
+                    "machine": 3,
+                    "start": 1,
+                    "task": 1
+                },
+                {
+                    "duration": 1,
+                    "machine": 4,
+                    "start": 2,
+                    "task": 2
+                },
+                {
+                    "duration": 1,
+                    "machine": 2,
+                    "start": 3,
+                    "task": 3
+                }
+            ]
+        },
+        {
+            "job": 2,
+            "tasks": [
+                {
+                    "duration": 1,
+                    "machine": 2,
+                    "start": 0,
+                    "task": 0
+                },
+                {
+                    "duration": 1,
+                    "machine": 4,
+                    "start": 1,
+                    "task": 1
+                },
+                {
+                    "duration": 1,
+                    "machine": 0,
+                    "start": 2,
+                    "task": 2
+                },
+                {
+                    "duration": 1,
+                    "machine": 4,
+                    "start": 3,
+                    "task": 3
+                }
+            ]
+        },
+        {
+            "job": 3,
+            "tasks": [
+                {
+                    "duration": 0,
+                    "machine": 4,
+                    "start": 0,
+                    "task": 0
+                }
+            ]
+        }
+    ],
+    "conflicts": 0,
+    "numBranches": 0,
+    "objValue": 4.0,
+    "runtime": 0.144012735,
+    "solution_methods": 3,
+    "status": 4,
+    "statusString": "OPTIMAL",
+    "time_limit": "10000"
+}
