@@ -26,7 +26,10 @@ def compare_schema(reference, target, path="root", flexible_types=None):
                 return result
 
         # Allow extra keys in `processing_times` and `sequence_dependent_setup_times`
-        if path.endswith(".processing_times") or path == "root.sequence_dependent_setup_times":
+        if (
+            path.endswith(".processing_times")
+            or path == "root.sequence_dependent_setup_times"
+        ):
             return None  # Allow extra keys
 
         for key in target:
@@ -57,7 +60,6 @@ def compare_schema(reference, target, path="root", flexible_types=None):
         return f"Type mismatch at {path}: Expected {type(reference).__name__}, got {type(target).__name__}"
 
     return None
-
 
 
 # Example Usage
@@ -133,9 +135,11 @@ processing_info_test = {
 
 
 import json
-with open(r'/home/cole/cole_scripts/job_scheduling_env/processing_info.json', "r") as file:
-    processing_info = json.load(file)
 
+with open(
+    r"/home/cole/cole_scripts/job_scheduling_env/processing_info.json", "r"
+) as file:
+    processing_info = json.load(file)
 
 
 # Validate
@@ -144,8 +148,6 @@ if result:
     print(f"Schema mismatch: {result}")
 else:
     print("Schemas match.")
-
-
 
 
 # processing_info = {
