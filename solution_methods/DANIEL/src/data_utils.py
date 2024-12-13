@@ -142,8 +142,8 @@ def load_data_from_files(directory):
     dataset_op_pt = []
     for root, dirs, files in os.walk(directory):
         # sort files by index
-        files.sort(key=lambda s: int(re.findall("\d+", s)[0]))
-        files.sort(key=lambda s: int(re.findall("\d+", s)[-1]))
+        files.sort(key=lambda s: int(re.findall(r"\d+", s)[0]))
+        files.sort(key=lambda s: int(re.findall(r"\d+", s)[-1]))
         for f in files:
             # print(f)
             g = open(os.path.join(root, f), "r").readlines()
@@ -226,7 +226,6 @@ def generate_data_to_files(seed, directory, config):
 
 class CaseGenerator:
     """
-
     the generator of SD1 data (imported from "songwenas12/fjsp-drl"),
     used for generating training instances
 
@@ -387,27 +386,3 @@ class CaseGenerator:
             doc.close()
 
         return job_length, op_pt, self.num_options / self.num_opes
-
-
-# def main():
-#     if configs.data_type == "test":
-#         generate_data_to_files(
-#             configs.seed_datagen, f"./data/{configs.data_source}/", configs
-#         )
-#     elif configs.data_type == "vali":
-#         # generate validation instances
-#         generate_data_to_files(
-#             configs.seed_train_vali_datagen,
-#             f"./data/data_train_vali/{configs.data_source}/",
-#             configs,
-#         )
-#     else:
-#         print(
-#             f"Error from Instance Generation: incorrect data type {configs.data_type}"
-#         )
-#         sys.exit()
-#
-#
-# if __name__ == "__main__":
-#     main()
-#     print("success!")
