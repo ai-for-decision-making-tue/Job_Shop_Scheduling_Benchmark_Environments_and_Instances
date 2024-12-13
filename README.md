@@ -1,3 +1,6 @@
+![python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20-blue)
+[![License: GPLv3](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/ai-for-decision-making-tue/Job_Shop_Scheduling_Benchmark_Environments_and_Instances/blob/main/LICENSE)
+
 ## Job Shop Scheduling Benchmark: Environments and Instances for Learning and Non-learning Methods
 
 ### 📖 Overview:
@@ -53,7 +56,14 @@ Here we provide some short examples on how to use the solution methods in this r
   jobShopEnv = load_job_shop_env(parameters['instance'].get('problem_instance'))
   makespan, jobShopEnv = run_L2D(jobShopEnv, **parameters)
   ```
-  
+
+### 🖼️ Plotting:
+We provide plotting functions to draw both the precedence relations  between operationsand the Gantt chart for the job shop scheduling problems:
+
+
+| ![Precedence Constraints](assets/images/precedence_constraints.PNG) | ![Gantt Chart](assets/images/gantt_chart.PNG) |
+|---------------------------------------------------------------------|------------------------------------------------|
+
 
 ### 🏗️ Repository Structure
 The repository is structured to provide ease of use and flexibility:
