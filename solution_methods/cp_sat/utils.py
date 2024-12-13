@@ -83,6 +83,6 @@ def results_saving(results, path):
     os.makedirs(path, exist_ok=True)
 
     # Save results to JSON
-    file_path = os.path.join(path, "milp_results.json")
+    file_path = os.path.join(path, "cp_sat_results.json")
     with open(file_path, "w") as outfile:
         json.dump(results, outfile, indent=4)

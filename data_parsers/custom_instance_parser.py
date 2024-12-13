@@ -37,11 +37,13 @@ def parse(processing_info, instance_name="custom_problem_instance"):
     precedence_relations = {}
     for job_info in processing_info["jobs"]:
         for op_info in job_info["operations"]:
-            if op_info["predecessor"] is not None:
+            if op_info["predecessors"] is not None:
                 operation = jobShop.get_operation(op_info["operation_id"])
-                predecessor_operation = jobShop.get_operation(op_info["predecessor"])
-                operation.add_predecessors([predecessor_operation])
-                precedence_relations[op_info["operation_id"]] = [predecessor_operation]
+                precedence_relations[op_info["operation_id"]] = []
+                for predecessor in op_info["predecessors"]:
+                    predecessor_operation = jobShop.get_operation(predecessor)
+                    operation.add_predecessors([predecessor_operation])
+                    precedence_relations[op_info["operation_id"]].append(predecessor_operation)
             else:
                 precedence_relations[op_info["operation_id"]] = []
 
@@ -76,16 +78,16 @@ if __name__ == "__main__":
         "nr_machines": 2,
         "jobs": [
             {"job_id": 0, "operations": [
-                {"operation_id": 0, "processing_times": {"machine_1": 10, "machine_2": 20}, "predecessor": None},
-                {"operation_id": 1, "processing_times": {"machine_1": 25, "machine_2": 19}, "predecessor": 0}
+                {"operation_id": 0, "processing_times": {"machine_1": 10, "machine_2": 20}, "predecessors": None},
+                {"operation_id": 1, "processing_times": {"machine_1": 25, "machine_2": 19}, "predecessors": [0]}
             ]},
             {"job_id": 1, "operations": [
-                {"operation_id": 2, "processing_times": {"machine_1": 23, "machine_2": 21}, "predecessor": None},
-                {"operation_id": 3, "processing_times": {"machine_1": 12, "machine_2": 24}, "predecessor": 2}
+                {"operation_id": 2, "processing_times": {"machine_1": 23, "machine_2": 21}, "predecessors": None},
+                {"operation_id": 3, "processing_times": {"machine_1": 12, "machine_2": 24}, "predecessors": [2]}
             ]},
             {"job_id": 2, "operations": [
-                {"operation_id": 4, "processing_times": {"machine_1": 37, "machine_2": 21}, "predecessor": None},
-                {"operation_id": 5, "processing_times": {"machine_1": 23, "machine_2": 34}, "predecessor": 4}
+                {"operation_id": 4, "processing_times": {"machine_1": 37, "machine_2": 21}, "predecessors": None},
+                {"operation_id": 5, "processing_times": {"machine_1": 23, "machine_2": 34}, "predecessors": [4]}
             ]}
         ],
         "sequence_dependent_setup_times": {

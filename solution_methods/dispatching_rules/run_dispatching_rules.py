@@ -2,8 +2,8 @@ import argparse
 import logging
 import os
 
-from plotting.drawer import plot_gantt_chart
 from scheduling_environment.jobShop import JobShop
+from plotting.drawer import plot_gantt_chart, draw_precedence_relations
 from solution_methods.dispatching_rules.utils import configure_simulation_env, output_dir_exp_name, results_saving
 from solution_methods.helper_functions import load_parameters, load_job_shop_env
 from solution_methods.dispatching_rules.src.scheduling_functions import scheduler
@@ -58,12 +58,18 @@ def main(param_file: str = PARAM_FILE):
         save_gantt = output_config.get('save_gantt')
         save_results = output_config.get('save_results')
         show_gantt = output_config.get('show_gantt')
+        show_precedences = output_config.get('show_precedences')
 
         if save_gantt or save_results:
             output_dir, exp_name = output_dir_exp_name(parameters)
             output_dir = os.path.join(output_dir, f"{exp_name}")
             os.makedirs(output_dir, exist_ok=True)
 
+        # Draw precedence relations if required
+        if show_precedences:
+            draw_precedence_relations(jobShopEnv)
+
+        # Plot Gantt chart if required
         if show_gantt or save_gantt:
             logging.info("Generating Gantt chart.")
             plt = plot_gantt_chart(jobShopEnv)

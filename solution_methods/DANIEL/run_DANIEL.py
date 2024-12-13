@@ -3,7 +3,7 @@ import logging
 import os
 import torch
 
-from plotting.drawer import plot_gantt_chart
+from plotting.drawer import plot_gantt_chart, draw_precedence_relations
 from solution_methods.helper_functions import load_job_shop_env, load_parameters, initialize_device, set_seeds
 from solution_methods.DANIEL.src.common_utils import greedy_select_action, sample_action
 from solution_methods.DANIEL.src.env_test import FJSPEnv_test
@@ -37,7 +37,6 @@ def run_DANIEL_FJSP(jobShopEnv, **parameters):
     ppo.policy.eval()
     logging.info(f"Trained policy loaded from {parameters['test_parameters']['trained_policy']}.")
 
-
     # Get state and completion signal
     state = env_test.state
 
@@ -65,9 +64,9 @@ def run_DANIEL_FJSP(jobShopEnv, **parameters):
             break
 
     makespan = env_test.JSP_instance.makespan
+    logging.info(f"Makespan: {makespan}")
 
     return makespan, env_test.JSP_instance
-    logging.info(f"Makespan: {makespan}")
 
 
 def main(param_file=PARAM_FILE):
@@ -86,11 +85,16 @@ def main(param_file=PARAM_FILE):
         save_gantt = output_config.get('save_gantt')
         save_results = output_config.get('save_results')
         show_gantt = output_config.get('show_gantt')
+        show_precedences = output_config.get('show_precedences')
 
         if save_gantt or save_results:
             output_dir, exp_name = output_dir_exp_name(parameters)
             output_dir = os.path.join(output_dir, f"{exp_name}")
             os.makedirs(output_dir, exist_ok=True)
+
+        # Draw precedence relations if required
+        if show_precedences:
+            draw_precedence_relations(jobShopEnv)
 
         # Plot Gantt chart if required
         if show_gantt or save_gantt:

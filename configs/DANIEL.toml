@@ -1,9 +1,10 @@
 [test_parameters]
 seed = 2024                 # Set random seed for result replication
-problem_instance = "/fjsp/1_Brandimarte/Mk09.fjs"  # Problem instance for testing
+problem_instance = "/fjsp/brandimarte/Mk09.fjs"  # Problem instance for testing
 trained_policy = '10x5+mix'     # model for testing
 sample = false              # sample from policy if true, else use argmax (greedy)
 sample_times = 100          # Sampling times for the sampling strategy
+show_precedences = true     # draw precedence relations graph of the problem instance
 show_gantt = true           # draw ganttchart of found solution
 save_gantt = true           # save ganttchart to file
 save_results = true         # save results to file
