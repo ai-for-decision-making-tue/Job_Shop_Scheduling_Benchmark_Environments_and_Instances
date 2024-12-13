@@ -210,6 +210,7 @@ class JobShop:
             raise ValueError(
                 f"Invalid machine ID {machine_id}")
         machine.add_operation_to_schedule(operation, duration, self._sequence_dependent_setup_times)
+        self.mark_operation_as_scheduled(operation)
 
     def schedule_operation_with_backfilling(self, operation: Operation, machine_id, duration) -> None:
         """Schedule an operation"""
@@ -231,10 +232,6 @@ class JobShop:
 
     def mark_operation_as_scheduled(self, operation: Operation) -> None:
         """Mark an operation as scheduled."""
-        if operation not in self.operations_available_for_scheduling:
-            raise ValueError(
-                f"Operation {operation.operation_id} is not available for scheduling")
-        self.operations_available_for_scheduling.remove(operation)
         self.scheduled_operations.append(operation)
         self.operations_to_be_scheduled.remove(operation)
 
@@ -244,7 +241,6 @@ class JobShop:
             raise ValueError(
                 f"Operation {operation.operation_id} is not scheduled")
         self.scheduled_operations.remove(operation)
-        self.operations_available_for_scheduling.append(operation)
         self.operations_to_be_scheduled.append(operation)
 
     def update_operations_available_for_scheduling(self) -> None:

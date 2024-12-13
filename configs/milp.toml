@@ -5,6 +5,7 @@ problem_instance = "/jsp/adams/abz5"
 time_limit = 3600       # time limit for the gurobi solver, in seconds
 
 [output]
+show_precedences = true # draw precedence relations graph of the problem instance
 show_gantt = true       # draw ganttchart of found solution
 save_gantt = true       # save ganttchart to file
 save_results = true     # save results to file

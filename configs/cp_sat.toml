@@ -1,11 +1,12 @@
 [instance]
-problem_instance = "/fjsp/1_Brandimarte/Mk01.fjs"
+problem_instance = "/fjsp/brandimarte/Mk01.fjs"
 
 [solver]
 time_limit = 3600       # time limit for the OR-tools CP-SAT solver, in seconds
 model = "fjsp"          # model to use, either 'jsp', 'fsp', fjsp' or 'fjsp_sdst'
 
 [output]
+show_precedences = true # draw precedence relations graph of the problem instance
 show_gantt = true       # draw ganttchart of found solution
 save_gantt = true       # save ganttchart to file
 save_results = true     # save results to file

@@ -11,7 +11,7 @@ import logging
 import os
 import torch
 
-from plotting.drawer import plot_gantt_chart
+from plotting.drawer import plot_gantt_chart, draw_precedence_relations
 from solution_methods.helper_functions import load_job_shop_env, load_parameters, initialize_device, set_seeds
 from solution_methods.FJSP_DRL.src.env_test import FJSPEnv_test
 from solution_methods.FJSP_DRL.src.PPO import HGNNScheduler
@@ -49,7 +49,6 @@ def run_FJSP_DRL(jobShopEnv, **parameters):
         model_parameters["critic_in_dim"] = model_parameters["out_size_ma"] + model_parameters["out_size_ope"]
 
         hgnn_model = HGNNScheduler(model_parameters).to(device)
-        print('\nloading saved model:', trained_policy)
         hgnn_model.load_state_dict(policy)
 
     # Get state and completion signal
@@ -84,11 +83,16 @@ def main(param_file=PARAM_FILE):
         save_gantt = output_config.get('save_gantt')
         save_results = output_config.get('save_results')
         show_gantt = output_config.get('show_gantt')
+        show_precedences = output_config.get('show_precedences')
 
         if save_gantt or save_results:
             output_dir, exp_name = output_dir_exp_name(parameters)
             output_dir = os.path.join(output_dir, f"{exp_name}")
             os.makedirs(output_dir, exist_ok=True)
+
+        # Draw precedence relations if required
+        if show_precedences:
+            draw_precedence_relations(jobShopEnv)
 
         # Plot Gantt chart if required
         if show_gantt or save_gantt:

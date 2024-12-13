@@ -1,6 +1,6 @@
 [instance]
 online_arrivals = false         # false for static instance (from data) or true for online job arrivals
-problem_instance = "/fjsp_sdst/1_Fattahi/Fattahi_setup_20.fjs"  # static instance (no online arrivals)
+problem_instance = "/fjsp_sdst/fattahi/Fattahi_setup_20.fjs"  # static instance (no online arrivals)
 dispatching_rule = "MOR"        # FIFO: First In First Out, MOR: Most Operation Remaining, LOR: Least Operations Remaining,
                                 # MWR: Most Work Remaining, LWR: Least Work Remaining
 machine_assignment_rule = "EET" # SPT: Shortest Processing Time, EET: Earliest End Time
@@ -16,6 +16,7 @@ max_duration_per_operation = 40 # max duration of online arrived operation
 
 [output]
 logbook = true                  # display logbook during search
+show_precedences = true         # draw precedence relations graph of the problem instance
 show_gantt = true               # draw ganttchart of found solution
 save_gantt = true               # save ganttchart to file
 save_results = true             # save results to file

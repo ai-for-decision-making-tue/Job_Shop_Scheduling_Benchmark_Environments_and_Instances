@@ -1,16 +1,17 @@
 [instance]
-problem_instance = "/fjsp_sdst/1_Fattahi/Fattahi_setup_20.fjs"
+problem_instance = "/fjsp/fattahi/MFJS10.fjs"
 
 [algorithm]
 population_size = 10    # number of individuals in the population
 ngen = 10               # number of generations
 seed = 5                # random seed
-indpb = 0.2             # probability of mutating each gene
+indpb = 0.1             # probability of mutating each gene
 cr = 0.7                # probability of mating
 multiprocessing = true  # use multiprocessing for parallel evaluation of individuals (default uses all threads)
 
 [output]
 logbook = true          # display logbook during search
+show_precedences = true # draw precedence relations graph of the problem instance
 show_gantt = true       # draw ganttchart of found solution
 save_gantt = true       # save ganttchart to file
 save_results = true     # save results to file

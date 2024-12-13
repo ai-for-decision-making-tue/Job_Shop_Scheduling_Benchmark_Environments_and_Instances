@@ -1,18 +1,11 @@
 import copy
-import os
-import random
-import logging
-from statistics import mean
-
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import networkx as nx
-import numpy as np
-
-from scheduling_environment.jobShop import JobShop
 
 
 def create_colormap():
+    # Create a custom colormap to prevent repeating colors
     colors = [
         '#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78', '#2ca02c',
         '#98df8a', '#d62728', '#ff9896', '#9467bd', '#c5b0d5',
@@ -38,8 +31,8 @@ def create_colormap():
     return mcolors.ListedColormap(colors)
 
 
-# Plot the Gantt chart of the job shop schedule
-def plot_gantt_chart(JobShop, save=False, filename=None):
+def plot_gantt_chart(JobShop):
+    # Plot the Gantt chart of the job shop schedule
     fig, ax = plt.subplots()
     colormap = create_colormap()
 
@@ -49,10 +42,9 @@ def plot_gantt_chart(JobShop, save=False, filename=None):
             operation_start = operation.scheduling_information['start_time']
             operation_end = operation.scheduling_information['end_time']
             operation_duration = operation_end - operation_start
-            # operation_label = f"J{operation['operation'].job_id}O{operation['operation'].operation_id}"
             operation_label = f"{operation.operation_id}"
 
-            # Set color based on job ID with color cycling for job_id 100
+            # Set color based on job ID
             color_index = operation.job_id % len(JobShop.jobs)
             if color_index >= colormap.N:
                 color_index = color_index % colormap.N
@@ -90,72 +82,51 @@ def plot_gantt_chart(JobShop, save=False, filename=None):
     ax.set_yticklabels([f'M{machine_id+1}' for machine_id in range(JobShop.nr_of_machines)])
     ax.set_xlabel('Time')
     ax.set_ylabel('Machine')
-    ax.set_title('Job Shop Scheduling Gantt Chart')
+    ax.set_title('Gantt Chart')
     ax.grid(True)
 
     return plt
 
 
-def draw_precedence_relations(JobShop: JobShop):
+def draw_precedence_relations(JobShop):
     colormap = create_colormap()
 
+    # Convert precedence relations into a usable format
     precedence_relations = copy.deepcopy(JobShop.precedence_relations_operations)
-    G = nx.DiGraph()
-
     for key, value in precedence_relations.items():
         value = [i.operation_id for i in value]
-        precedence_relations.update({key: value})
+        precedence_relations[key] = value
 
+    # Add nodes and edges to the graph
+    G = nx.DiGraph()
     for key, value in precedence_relations.items():
-        for i in range(len(value)):
-            G.add_edge(value[i], key)
+        for successor in value:
+            G.add_edge(successor, key)  # Reverse the edge direction
 
-    left_nodes, right_nodes, middle_nodes = [], [], {}
+    # Assign levels to nodes using breadth-first search (BFS)
+    levels = {}
+    queue = [node for node in G.nodes if not list(G.predecessors(node))]
+    for node in queue:
+        levels[node] = 0
 
-    for node in G.nodes:
-        if precedence_relations[node] == []:
-            left_nodes.append(node)
+    while queue:
+        current = queue.pop(0)
+        for successor in G.successors(current):
+            levels[successor] = max(levels.get(successor, 0), levels[current] + 1)
+            queue.append(successor)
 
-    for node in G.nodes:
-        final = True
-        for key, value in precedence_relations.items():
-            if node in value:
-                final = False
-        if final:
-            right_nodes.append(node)
+    # Group nodes by their levels
+    level_nodes = {}
+    for node, level in levels.items():
+        level_nodes.setdefault(level, []).append(node)
 
-    max_length = 0
-    for node in G.nodes:
-        if node not in left_nodes and node not in right_nodes:
-            length = len(nx.nodes(nx.dfs_tree(G, node)))
-            middle_nodes[length] = []
-            if length > max_length:
-                max_length = length
+    # Set positions for nodes
+    pos = {}
+    for level, nodes in level_nodes.items():
+        for i, node in enumerate(sorted(nodes)):
+            pos[node] = (level, i - len(nodes) / 2)
 
-    for node in G.nodes:
-        if node not in left_nodes and node not in right_nodes:
-            length = len(nx.nodes(nx.dfs_tree(G, node)))
-            middle_nodes[length].append(node)
-
-    # set the position of nodes with no predecessor (x-coord)
-    pos = {n: (0, i) for i, n in enumerate(left_nodes)}
-
-    # set position of nodes with no successor
-    if (max_length + 1 % 2) == 0:
-        pos.update({n: (max_length + 1, i) for i, n in enumerate(right_nodes)})
-    else:
-        pos.update({n: (max_length + 1, i + 0.5)
-                    for i, n in enumerate(right_nodes)})
-
-    # set position of all 'middle' nodes (according to number of predecessors)
-    for key, value in middle_nodes.items():
-        if (key % 2) == 0:
-            pos.update({n: (max_length - key + 1, i)
-                        for i, n in enumerate(value)})
-        else:
-            pos.update({n: (max_length - key + 1, i + 0.5)
-                        for i, n in enumerate(value)})
-
+    # Draw the graph
     options = {
         "font_size": 8,
         "node_size": 500,
@@ -165,17 +136,15 @@ def draw_precedence_relations(JobShop: JobShop):
         "width": 1,
     }
 
-    # Assign colors to nodes based on their properties
+    # Assign colors to nodes based on job ID
     for node in G.nodes:
-        options["node_color"].append(colormap(JobShop.get_operation(node).job_id % colormap.N))
+        job_id = JobShop.get_operation(node).job_id
+        options["node_color"].append(colormap(job_id % colormap.N))
 
     nx.draw_networkx(G, pos, **options)
 
-    ax = plt.gca()
-    ax.margins(0.20)
-
-    fig = ax.figure
-    fig.set_size_inches(16, 8)
-
+    # Adjust plot settings
+    plt.gca().margins(0.20)
+    plt.gcf().set_size_inches(16, 8)
     plt.axis("off")
     plt.show()

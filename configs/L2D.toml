@@ -4,6 +4,7 @@ device = "cpu"                      # Device for test ("cpu" or "cuda")
 problem_instance = "/jsp/adams/abz5" # instance to test (in testing mode)
 trained_policy = "/saved_models/30_20_1_99.pth" # Load pretrained policy
 sample = false                      # sample from policy if true, else use argmax (greedy)
+show_precedences = true             # draw precedence relations graph of the problem instance
 show_gantt = true                   # draw ganttchart of found solution
 save_gantt = true                   # save ganttchart to file
 save_results = true                 # save results to file
