@@ -56,7 +56,7 @@ def run_FJSP_DRL(jobShopEnv, **parameters):
     done = False
 
     # Generate schedule for instance
-    while ~done:
+    while not done:
         with torch.no_grad():
             actions = hgnn_model.act(state, [], done, flag_train=False, flag_sample=test_parameters['sample'])
         state, _, done = env_test.step(actions)

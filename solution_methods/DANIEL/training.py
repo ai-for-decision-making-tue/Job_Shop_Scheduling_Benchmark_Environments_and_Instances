@@ -1,14 +1,13 @@
 import argparse
+import logging
 import os
 import random
 import sys
 import time
 from copy import deepcopy
-import logging
 from pathlib import Path
 import numpy as np
 import torch
-
 from tqdm import tqdm
 
 from solution_methods.DANIEL.src.common_utils import greedy_select_action, sample_action, setup_seed, strToSuffix
@@ -30,7 +29,6 @@ str_time = time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time()))
 
 class Trainer:
     def __init__(self, config, device):
-
         self.n_j = config["env"]["n_j"]
         self.n_m = config["env"]["n_m"]
         self.low = config["env"]["low"]

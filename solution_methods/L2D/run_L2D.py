@@ -136,7 +136,7 @@ def main(param_file=PARAM_FILE):
             plt = plot_gantt_chart(jobShopEnv)
 
             if save_gantt:
-                plt.savefig(output_dir + "\gantt.png")
+                plt.savefig(output_dir + "/gantt.png")
                 logging.info(f"Gantt chart saved to {output_dir}")
 
             if show_gantt:
