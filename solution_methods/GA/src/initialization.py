@@ -1,10 +1,7 @@
 import logging
-
 import multiprocessing
-
-# from multiprocessing.pool import Pool
-
 import numpy as np
+
 from deap import base, creator, tools
 
 from solution_methods.GA.src.operators import (

@@ -15,6 +15,9 @@ def select_next_operation_from_job(jobShopEnv: JobShop, job_id) -> Operation:
 
 
 def pox_crossover(ind1, ind2, nr_preserving_jobs):
+    if max(ind1) == nr_preserving_jobs:
+        return ind1, ind2
+
     preserving_jobs = random.sample(range(1, max(ind1)), nr_preserving_jobs)
 
     new_sequence_ind1 = list(filter(lambda a: a not in preserving_jobs, ind2))

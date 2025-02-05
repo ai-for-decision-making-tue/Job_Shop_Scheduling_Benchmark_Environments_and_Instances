@@ -10,14 +10,14 @@ def parse_fjsp(JobShop, instance, from_absolute_path=False):
     JobShop.set_instance_name(instance)
 
     if not from_absolute_path:
-        base_path = Path(__file__).parent.parent.absolute()
+        base_path = Path(__file__).resolve().parents[2]
         data_path = base_path.joinpath('data' + instance)
     else:
         data_path = instance
 
     with open(data_path, "r") as data:
         total_jobs, total_machines, max_operations = re.findall(
-            '\S+', data.readline())
+            '\\S+', data.readline())
         number_total_jobs, number_total_machines, number_max_operations = int(
             total_jobs), int(total_machines), int(float(max_operations))
 
@@ -32,7 +32,7 @@ def parse_fjsp(JobShop, instance, from_absolute_path=False):
             if key >= number_total_jobs:
                 break
             # Split data with multiple spaces as separator
-            parsed_line = re.findall('\S+', line)
+            parsed_line = re.findall('\\S+', line)
 
             # Current item of the parsed line
             i = 1

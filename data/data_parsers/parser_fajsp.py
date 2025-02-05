@@ -9,14 +9,14 @@ from scheduling_environment.operation import Operation
 def parse_fajsp(JobShop, instance, from_absolute_path=False):
     JobShop.set_instance_name(instance)
     if not from_absolute_path:
-        base_path = Path(__file__).parent.parent.absolute()
+        base_path = Path(__file__).resolve().parents[2]
         data_path = base_path.joinpath('data' + instance)
     else:
         data_path = instance
 
     with open(data_path, "r") as data:
         total_operations, total_precedence_relations, total_machines = re.findall(
-            '\S+', data.readline())
+            '\\S+', data.readline())
         number_total_operations, number_precedence_relations, number_total_machines = int(
             total_operations), int(total_precedence_relations), int(total_machines)
 
@@ -25,7 +25,7 @@ def parse_fajsp(JobShop, instance, from_absolute_path=False):
 
         for key, line in enumerate(data):
             # Split data with multiple spaces as separator
-            parsed_line = re.findall('\S+', line)
+            parsed_line = re.findall('\\S+', line)
 
             if key <= number_precedence_relations - 1:
                 if int(parsed_line[1]) in precedence_relations.keys():

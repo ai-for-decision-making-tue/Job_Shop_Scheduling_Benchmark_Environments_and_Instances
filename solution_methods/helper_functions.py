@@ -1,12 +1,10 @@
-import os
 import random
 import numpy as np
 
-import pandas as pd
 import tomli
 import torch
 
-from data_parsers import parser_fajsp, parser_fjsp, parser_fjsp_sdst, parser_jsp_fsp
+from data.data_parsers import parser_fjsp, parser_fajsp, parser_fjsp_sdst, parser_jsp_fsp
 from scheduling_environment.jobShop import JobShop
 
 

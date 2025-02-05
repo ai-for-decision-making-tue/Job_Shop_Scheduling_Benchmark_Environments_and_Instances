@@ -7,7 +7,7 @@ from gymnasium.utils import EzPickle
 
 from solution_methods.helper_functions import load_parameters
 from solution_methods.L2D.src.permissibleLS import permissibleLeftShift
-from solution_methods.L2D.data.instance_generator import override
+from solution_methods.L2D.training_data.instance_generator import override
 from solution_methods.L2D.src.updateAdjMat import getActionNbghs
 from solution_methods.L2D.src.updateEntTimeLB import calEndTimeLB
 

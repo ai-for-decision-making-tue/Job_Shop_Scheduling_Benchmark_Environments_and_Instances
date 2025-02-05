@@ -11,9 +11,10 @@ import logging
 import os
 import torch
 
-from plotting.drawer import plot_gantt_chart, draw_precedence_relations
+from visualisation import gantt_chart, precedence_chart
 from solution_methods.helper_functions import load_job_shop_env, load_parameters, initialize_device, set_seeds
 from solution_methods.FJSP_DRL.src.env_test import FJSPEnv_test
+
 from solution_methods.FJSP_DRL.src.PPO import HGNNScheduler
 from solution_methods.FJSP_DRL.utils import output_dir_exp_name, results_saving
 
@@ -92,12 +93,12 @@ def main(param_file=PARAM_FILE):
 
         # Draw precedence relations if required
         if show_precedences:
-            draw_precedence_relations(jobShopEnv)
+            precedence_chart.plot(jobShopEnv)
 
         # Plot Gantt chart if required
         if show_gantt or save_gantt:
             logging.info("Generating Gantt chart.")
-            plt = plot_gantt_chart(jobShopEnv)
+            plt = gantt_chart.plot(jobShopEnv)
 
             if save_gantt:
                 plt.savefig(output_dir + "/gantt.png")

@@ -8,7 +8,7 @@ from scheduling_environment.operation import Operation
 def parse_fjsp_sdst(JobShop, instance, from_absolute_path=False):
     JobShop.set_instance_name(instance)
     if not from_absolute_path:
-        base_path = Path(__file__).parent.parent.absolute()
+        base_path = Path(__file__).resolve().parents[2]
         data_path = base_path.joinpath('data' + instance)
     else:
         data_path = instance

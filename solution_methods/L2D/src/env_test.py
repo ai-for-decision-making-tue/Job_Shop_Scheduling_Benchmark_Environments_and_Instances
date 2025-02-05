@@ -12,9 +12,6 @@ sys.path.append(str(base_path))
 param_file = str(base_path) + "/configs/L2D.toml"
 parameters = load_parameters(param_file)
 env_parameters = parameters["env_parameters"]
-model_parameters = parameters["network_parameters"]
-train_parameters = parameters["train_parameters"]
-test_parameters = parameters["test_parameters"]
 
 
 class NipsJSPEnv_test():

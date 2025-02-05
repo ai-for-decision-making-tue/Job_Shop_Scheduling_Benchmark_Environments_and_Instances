@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 
-from plotting.drawer import plot_gantt_chart, draw_precedence_relations
+from visualisation import gantt_chart, precedence_chart
 from solution_methods.helper_functions import load_parameters, load_job_shop_env
 from solution_methods.CP_SAT.utils import results_saving, output_dir_exp_name
 from solution_methods.CP_SAT.models import FJSPSDSTmodel, FJSPmodel, JSPmodel
@@ -64,12 +64,12 @@ def main(param_file=PARAM_FILE):
 
         # Draw precedence relations if required
         if show_precedences:
-            draw_precedence_relations(jobShopEnv)
+            precedence_chart.plot(jobShopEnv)
 
         # Plot Gantt chart if required
         if show_gantt or save_gantt:
             logging.info("Generating Gantt chart.")
-            plt = plot_gantt_chart(jobShopEnv)
+            plt = gantt_chart.plot(jobShopEnv)
 
             if save_gantt:
                 plt.savefig(output_dir + "/gantt.png")
