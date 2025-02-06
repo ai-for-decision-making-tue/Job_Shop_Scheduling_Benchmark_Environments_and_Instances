@@ -5,7 +5,7 @@ import os
 from visualisation import gantt_chart, precedence_chart
 from solution_methods.helper_functions import load_parameters, load_job_shop_env
 from solution_methods.CP_SAT.utils import results_saving, output_dir_exp_name
-from solution_methods.CP_SAT.models import FJSPSDSTmodel, FJSPmodel, JSPmodel
+from solution_methods.CP_SAT.models import FJSPSDSTmodel, FAJSPmodel, FJSPmodel, JSPmodel
 from solution_methods.CP_SAT.utils import solve_model
 
 PARAM_FILE = os.path.abspath("../../configs/cp_sat.toml")
@@ -16,7 +16,9 @@ def run_CP_SAT(jobShopEnv, **kwargs):
     """
     Solve the scheduling problem for the provided input file.
     """
-    if kwargs["solver"]["model"] == "fjsp_sdst":
+    if kwargs["solver"]["model"] == "fajsp":
+        model, vars = FAJSPmodel.fajsp_cp_sat_model(jobShopEnv)
+    elif kwargs["solver"]["model"] == "fjsp_sdst":
         model, vars = FJSPSDSTmodel.fjsp_sdst_cp_sat_model(jobShopEnv)
     elif kwargs["solver"]["model"] == "fjsp":
         model, vars = FJSPmodel.fjsp_cp_sat_model(jobShopEnv)
@@ -28,7 +30,9 @@ def run_CP_SAT(jobShopEnv, **kwargs):
     solver, status, solution_count = solve_model(model, kwargs["solver"]["time_limit"])
 
     # Update jobShopEnv with found solution
-    if kwargs["solver"]["model"] == "fjsp_sdst":
+    if kwargs["solver"]["model"] == "fajsp":
+        jobShopEnv, results = FAJSPmodel.update_env(jobShopEnv, vars, solver, status, solution_count, kwargs["solver"]["time_limit"])
+    elif kwargs["solver"]["model"] == "fjsp_sdst":
         jobShopEnv, results = FJSPSDSTmodel.update_env(jobShopEnv, vars, solver, status, solution_count, kwargs["solver"]["time_limit"])
     elif kwargs["solver"]["model"] == "fjsp":
         jobShopEnv, results = FJSPmodel.update_env(jobShopEnv, vars, solver, status, solution_count, kwargs["solver"]["time_limit"])
