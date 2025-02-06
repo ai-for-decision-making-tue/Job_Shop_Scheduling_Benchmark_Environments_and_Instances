@@ -1,8 +1,10 @@
 [test_parameters]
 seed = 2024                 # Set random seed for result replication
 device = "cpu"              # Device for testing ("cpu" or "cuda")
+online_arrivals = true      # false for static instance (from data) or true for online job arrivals
 problem_instance = "/fjsp/brandimarte/Mk02.fjs" # Problem instance for testing
 trained_policy = "/saved_models/train_20240314_192906/song_10_5.pt" # Load pretrained policy
+
 sample = false              # sample from policy if true, else use argmax (greedy)
 show_precedences = true     # draw precedence relations graph of the problem instance
 show_gantt = true           # draw ganttchart of found solution
@@ -12,6 +14,15 @@ exp_name = ""               # name of the experiment, used for saving results.
                             # If empty (""), the name of the problem instance is used
 folder = ""                 # folder to save results, used for saving results.
                             # If empty (""), the results are saved to the current working directory.
+
+[online_arrival_details]        # Only needed for_online arrivals = true
+number_total_machines = 5       # number of machines
+inter_arrival_time = 15         # inter_arrival_time between jobs
+simulation_time = 500           # simulation duration time
+min_nr_operations_per_job = 2   # min number of operations per online arrived job
+max_nr_operations_per_job = 7   # max number of operations per online arrived job
+min_duration_per_operation = 2  # min duration of online arrived operation
+max_duration_per_operation = 40 # max duration of online arrived operation
 
 [train_parameters]
 lr = 0.0002                 # Learning rate

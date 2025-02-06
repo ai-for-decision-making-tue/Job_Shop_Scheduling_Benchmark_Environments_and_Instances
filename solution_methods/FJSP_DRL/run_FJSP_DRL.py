@@ -11,12 +11,15 @@ import logging
 import os
 import torch
 
-from visualisation import gantt_chart, precedence_chart
+from visualization import gantt_chart, precedence_chart
 from solution_methods.helper_functions import load_job_shop_env, load_parameters, initialize_device, set_seeds
 from solution_methods.FJSP_DRL.src.env_test import FJSPEnv_test
+from scheduling_environment.simulationEnv import SimulationEnv
 
 from solution_methods.FJSP_DRL.src.PPO import HGNNScheduler
 from solution_methods.FJSP_DRL.utils import output_dir_exp_name, results_saving
+from solution_methods.FJSP_DRL.src.online_FJSP_DRL import run_online_dispatcher
+
 
 PARAM_FILE = "../../configs/FJSP_DRL.toml"
 logging.basicConfig(level=logging.INFO)
@@ -31,9 +34,6 @@ def run_FJSP_DRL(jobShopEnv, **parameters):
     torch.set_default_device('cuda' if device.type == 'cuda' else 'cpu')
     if device.type == 'cuda':
         torch.cuda.set_device(device)
-
-    # Configure environment and load instance
-    env_test = FJSPEnv_test(jobShopEnv, parameters["test_parameters"])
 
     # Load trained policy
     model_parameters = parameters["model_parameters"]
@@ -52,18 +52,37 @@ def run_FJSP_DRL(jobShopEnv, **parameters):
         hgnn_model = HGNNScheduler(model_parameters).to(device)
         hgnn_model.load_state_dict(policy)
 
-    # Get state and completion signal
-    state = env_test.state
-    done = False
+    if not parameters['test_parameters']['online_arrivals']:
 
-    # Generate schedule for instance
-    while not done:
-        with torch.no_grad():
-            actions = hgnn_model.act(state, [], done, flag_train=False, flag_sample=test_parameters['sample'])
-        state, _, done = env_test.step(actions)
+        env_test = FJSPEnv_test(jobShopEnv, parameters["test_parameters"])
+        state = env_test.state
+        done = False
 
-    makespan = env_test.JSP_instance.makespan
-    logging.info(f"Makespan: {makespan}")
+        # Generate schedule for instance
+        while not done:
+            with torch.no_grad():
+                actions = hgnn_model.act(state, [], done, flag_train=False, flag_sample=test_parameters['sample'])
+            state, _, done = env_test.step(actions)
+        makespan = env_test.JSP_instance.makespan
+
+    else:
+        simulationEnv = SimulationEnv(
+            online_arrivals=parameters["online_arrival_details"]
+        )
+        simulationEnv.set_online_arrival_details(parameters["online_arrival_details"])
+        simulationEnv.jobShopEnv.set_nr_of_machines(
+            parameters["online_arrival_details"]["number_total_machines"]
+        )
+        simulationEnv.simulator.process(
+            run_online_dispatcher(
+                simulationEnv, hgnn_model
+            )
+        )
+        simulationEnv.simulator.run(
+            until=parameters["online_arrival_details"]["simulation_time"]
+        )
+        makespan = simulationEnv.jobShopEnv.makespan
+        jobShopEnv = simulationEnv.jobShopEnv
 
     return makespan, jobShopEnv
 
@@ -77,6 +96,7 @@ def main(param_file=PARAM_FILE):
 
     jobShopEnv = load_job_shop_env(parameters['test_parameters']['problem_instance'])
     makespan, jobShopEnv = run_FJSP_DRL(jobShopEnv, **parameters)
+
 
     if makespan is not None:
         # Check output configuration and prepare output paths if needed

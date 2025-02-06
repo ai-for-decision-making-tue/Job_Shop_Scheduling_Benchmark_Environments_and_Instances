@@ -12,7 +12,7 @@ import os
 import numpy as np
 import torch
 
-from visualisation import gantt_chart, precedence_chart
+from visualization import gantt_chart, precedence_chart
 from solution_methods.helper_functions import load_job_shop_env, load_parameters, initialize_device, set_seeds
 from solution_methods.L2D.src.agent_utils import sample_select_action, greedy_select_action
 from solution_methods.L2D.src.env_test import NipsJSPEnv_test as Env_test

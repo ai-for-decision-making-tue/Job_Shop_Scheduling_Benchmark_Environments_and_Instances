@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 
-from visualisation import gantt_chart, precedence_chart
+from visualization import gantt_chart, precedence_chart
 from solution_methods.helper_functions import load_parameters, load_job_shop_env
 from solution_methods.MILP.models import JSPmodel, FJSPmodel, FJSPSDSTmodel, FAJSPmodel
 from solution_methods.MILP.utils import retrieve_decision_variables, results_saving, output_dir_exp_name

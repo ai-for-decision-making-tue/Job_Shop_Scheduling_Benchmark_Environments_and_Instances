@@ -1,5 +1,5 @@
 [instance]
-problem_instance = "/fjsp/brandimarte/Mk01.fjs"
+problem_instance = "/fajsp/dafjs/DAFJS01"
 
 [solver]
 time_limit = 3600       # time limit for the OR-tools CP-SAT solver, in seconds
