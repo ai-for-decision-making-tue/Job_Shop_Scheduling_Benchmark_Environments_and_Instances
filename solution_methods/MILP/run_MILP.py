@@ -4,18 +4,20 @@ import os
 
 from visualisation import gantt_chart, precedence_chart
 from solution_methods.helper_functions import load_parameters, load_job_shop_env
-from solution_methods.MILP.models import JSPmodel, FJSPmodel, FJSPSDSTmodel
+from solution_methods.MILP.models import JSPmodel, FJSPmodel, FJSPSDSTmodel, FAJSPmodel
 from solution_methods.MILP.utils import retrieve_decision_variables, results_saving, output_dir_exp_name
 
 PARAM_FILE = os.path.abspath("../../configs/milp.toml")
 logging.basicConfig(level=logging.INFO)
 
 MODEL_MAP = {
-    'fjsp_sdst': FJSPSDSTmodel,
-    'fjsp': FJSPmodel,
-    'jsp': JSPmodel,
-    'fsp': JSPmodel  # FSP is solved as a special case of JSP
+    'fjsp_sdst': (FJSPSDSTmodel, "fjsp_sdst_milp"),
+    'fjsp': (FJSPmodel, "fjsp_milp"),
+    'fajsp': (FAJSPmodel, "fajsp_milp"),
+    'jsp': (JSPmodel, "jsp_milp"),
+    'fsp': (JSPmodel, "jsp_milp")  # FSP is solved as a special case of JSP
 }
+
 
 
 def run_MILP(jobShopEnv, **kwargs):
@@ -32,8 +34,9 @@ def run_MILP(jobShopEnv, **kwargs):
     try:
         instance_type = next((key for key in MODEL_MAP if key in kwargs['instance']['problem_instance']), None)
         if instance_type:
+            model_class, method_name = MODEL_MAP[instance_type]  # Unpack tuple
             jobShopEnv = load_job_shop_env(kwargs['instance']['problem_instance'])
-            model = MODEL_MAP[instance_type].__dict__[f"{instance_type}_milp"](jobShopEnv, kwargs['solver']['time_limit'])
+            model = getattr(model_class, method_name)(jobShopEnv, kwargs['solver']['time_limit'])
         else:
             raise ValueError("Unsupported problem instance type.")
     except Exception as e:
@@ -45,7 +48,7 @@ def run_MILP(jobShopEnv, **kwargs):
 
     # Retrieve and update the decision variables in jobShopEnv
     results = retrieve_decision_variables(model, kwargs['solver']['time_limit'])
-    jobShopEnv = MODEL_MAP[instance_type].update_env(jobShopEnv, results)
+    jobShopEnv = model_class.update_env(jobShopEnv, results)
 
     return results, jobShopEnv
 

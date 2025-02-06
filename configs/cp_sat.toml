@@ -3,7 +3,7 @@ problem_instance = "/fjsp/brandimarte/Mk01.fjs"
 
 [solver]
 time_limit = 3600       # time limit for the OR-tools CP-SAT solver, in seconds
-model = "fjsp"          # model to use, either 'jsp', 'fsp', fjsp' or 'fjsp_sdst'
+model = "fajsp"          # model to use, either 'jsp', 'fsp', fjsp' or 'fjsp_sdst'
 
 [output]
 show_precedences = true # draw precedence relations graph of the problem instance

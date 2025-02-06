@@ -1,5 +1,5 @@
 [instance]
-problem_instance = "/jsp/adams/abz5"
+problem_instance = "/fajsp/dafjs/DAFJS01" #"/jsp/adams/abz5" #
 
 [solver]
 time_limit = 3600       # time limit for the gurobi solver, in seconds
