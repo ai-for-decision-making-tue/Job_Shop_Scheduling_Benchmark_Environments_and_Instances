@@ -60,6 +60,37 @@ def load_fjs(path, num_mas, num_opes, num_jobs):
     return drl_tensors, jobShopEnv
 
 
+# def load_feats_from_sim(jobShopEnv: JobShop, num_mas, num_opes):
+#     """convert scheduling_environment environment to DRL environment"""
+#     matrix_proc_time = torch.zeros(size=(num_opes, num_mas))
+#     matrix_ope_ma_adj = torch.zeros(size=(num_opes, num_mas)).int()
+#     matrix_pre_proc = torch.full(size=(num_opes, num_opes), dtype=torch.bool, fill_value=False)
+#     matrix_cal_cumul = torch.zeros(size=(num_opes, num_opes)).int()
+#     opes_appertain = torch.zeros(size=(num_opes,)).int()
+#     num_ope_biases = torch.zeros(size=(jobShopEnv.nr_of_jobs,)).int()
+#     nums_ope = torch.zeros(size=(jobShopEnv.nr_of_jobs,)).int()
+#
+#     for job in jobShopEnv.jobs:
+#         num_ope_biases[job.job_id] = job.operations[0].operation_id
+#         nums_ope[job.job_id] = len(job.operations)
+#
+#         nr_remaining_ops = len(job.operations)
+#         for operation in job.operations:
+#             nr_remaining_ops -= 1
+#             for op in range(1, nr_remaining_ops + 1):
+#                 matrix_cal_cumul[operation.operation_id][operation.operation_id + op] = 1
+#     for operation in jobShopEnv.operations:
+#         opes_appertain[operation.operation_id] = operation.job_id
+#         for machine_id, duration in operation.processing_times.items():
+#             matrix_proc_time[operation.operation_id][machine_id] = duration
+#             matrix_ope_ma_adj[operation.operation_id][machine_id] = 1
+#             for predecessor in operation.predecessors:
+#                 predecessor: Operation
+#                 matrix_pre_proc[predecessor.operation_id][operation.operation_id] = True
+#
+#     return matrix_proc_time, matrix_ope_ma_adj, matrix_pre_proc, matrix_pre_proc.t(), opes_appertain, num_ope_biases, \
+#            nums_ope, matrix_cal_cumul
+
 def load_feats_from_sim(jobShopEnv: JobShop, num_mas, num_opes):
     """convert scheduling_environment environment to DRL environment"""
     matrix_proc_time = torch.zeros(size=(num_opes, num_mas))
@@ -69,11 +100,9 @@ def load_feats_from_sim(jobShopEnv: JobShop, num_mas, num_opes):
     opes_appertain = torch.zeros(size=(num_opes,)).int()
     num_ope_biases = torch.zeros(size=(jobShopEnv.nr_of_jobs,)).int()
     nums_ope = torch.zeros(size=(jobShopEnv.nr_of_jobs,)).int()
-
     for job in jobShopEnv.jobs:
         num_ope_biases[job.job_id] = job.operations[0].operation_id
         nums_ope[job.job_id] = len(job.operations)
-
         nr_remaining_ops = len(job.operations)
         for operation in job.operations:
             nr_remaining_ops -= 1
@@ -81,12 +110,17 @@ def load_feats_from_sim(jobShopEnv: JobShop, num_mas, num_opes):
                 matrix_cal_cumul[operation.operation_id][operation.operation_id + op] = 1
     for operation in jobShopEnv.operations:
         opes_appertain[operation.operation_id] = operation.job_id
-        for machine_id, duration in operation.processing_times.items():
-            matrix_proc_time[operation.operation_id][machine_id] = duration
-            matrix_ope_ma_adj[operation.operation_id][machine_id] = 1
-            for predecessor in operation.predecessors:
-                predecessor: Operation
-                matrix_pre_proc[predecessor.operation_id][operation.operation_id] = True
+        if operation.scheduling_information == {}:  # If the operation has not been scheduled
+            for machine_id, duration in operation.processing_times.items():
+                matrix_proc_time[operation.operation_id][machine_id] = duration
+                matrix_ope_ma_adj[operation.operation_id][machine_id] = 1
+        else:
+            scheduled_machine = operation.scheduling_information['machine_id']
+            matrix_proc_time[operation.operation_id][scheduled_machine] = operation.scheduling_information['processing_time']
+            matrix_ope_ma_adj[operation.operation_id][scheduled_machine] = 1
+        for predecessor in operation.predecessors:
+            predecessor: Operation
+            matrix_pre_proc[predecessor.operation_id][operation.operation_id] = True
 
     return matrix_proc_time, matrix_ope_ma_adj, matrix_pre_proc, matrix_pre_proc.t(), opes_appertain, num_ope_biases, \
            nums_ope, matrix_cal_cumul

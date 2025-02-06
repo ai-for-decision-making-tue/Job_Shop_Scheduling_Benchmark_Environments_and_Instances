@@ -3,7 +3,7 @@ import logging
 import os
 import torch
 
-from plotting import gantt_chart, precedence_chart
+from visualization import gantt_chart, precedence_chart
 from solution_methods.helper_functions import load_job_shop_env, load_parameters, initialize_device, set_seeds
 from solution_methods.DANIEL.src.common_utils import greedy_select_action, sample_action
 from solution_methods.DANIEL.src.env_test import FJSPEnv_test

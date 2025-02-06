@@ -3,7 +3,7 @@ import logging
 import os
 
 from scheduling_environment.jobShop import JobShop
-from visualisation import gantt_chart, precedence_chart
+from visualization import gantt_chart, precedence_chart
 from solution_methods.dispatching_rules.utils import configure_simulation_env, output_dir_exp_name, results_saving
 from solution_methods.helper_functions import load_parameters, load_job_shop_env
 from solution_methods.dispatching_rules.src.scheduling_functions import scheduler

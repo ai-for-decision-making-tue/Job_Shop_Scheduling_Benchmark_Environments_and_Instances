@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from visualisation.color_scheme import create_colormap
+from visualization.color_scheme import create_colormap
 
 
 def plot(JobShop):

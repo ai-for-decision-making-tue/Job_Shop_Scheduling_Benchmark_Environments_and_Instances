@@ -4,7 +4,7 @@ import os
 
 from deap import tools
 
-from visualisation import gantt_chart, precedence_chart
+from visualization import gantt_chart, precedence_chart
 from solution_methods.helper_functions import load_parameters, load_job_shop_env
 from solution_methods.GA.src.operators import (evaluate_individual, evaluate_population, repair_precedence_constraints, variation)
 from solution_methods.GA.utils import record_stats, output_dir_exp_name, results_saving

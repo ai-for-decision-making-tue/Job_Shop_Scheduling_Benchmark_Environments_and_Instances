@@ -98,5 +98,6 @@ class SimulationEnv:
                 operation_id += 1
 
             self.jobShopEnv.add_job(job)
+            self.jobShopEnv.set_nr_of_jobs(self.jobShopEnv.nr_of_jobs + 1)
             # print(f"Job {job_id} generated with {num_operations} operations")  # Debugging print statement
             job_id += 1
