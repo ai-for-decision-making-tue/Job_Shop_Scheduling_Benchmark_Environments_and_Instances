@@ -79,21 +79,20 @@ The repository is structured to provide ease of use and flexibility:
 ### 📄 Reference
 For more detailed information, please refer to our paper. If you use this repository in your research, please consider citing the following paper:
 
-> Reijnen, R., van Straaten, K., Bukhsh, Z., & Zhang, Y. (2023). 
-> Job Shop Scheduling Benchmark: Environments and Instances for Learning and Non-learning Methods. 
-> arXiv preprint arXiv:2308.12794.
-> https://doi.org/10.48550/arXiv.2308.12794
+Reijnen, R., Smit, I.G., Zhang, H. et al. Job shop scheduling benchmark: environments and instances for learning and non-learning methods. Ann Math Artif Intell (2026). https://doi.org/10.1007/s10472-026-10007-3
 
 Or, using the following BibTeX entry:
 ```bibtex
-@article{reijnen2023job,
-  title={Job Shop Scheduling Benchmark: Environments and Instances for Learning and Non-learning Methods},
-  author={Reijnen, Robbert and van Straaten, Kjell and Bukhsh, Zaharah and Zhang, Yingqian},
-  journal={arXiv preprint arXiv:2308.12794},
-  year={2023}
+@article{Reijnen2026,
+  author  = {Reijnen, R. and Smit, I. G. and Zhang, H.},
+  title   = {Job shop scheduling benchmark: environments and instances for learning and non-learning methods},
+  journal = {Annals of Mathematics and Artificial Intelligence},
+  year    = {2026},
+  doi     = {10.1007/s10472-026-10007-3},
+  url     = {https://doi.org/10.1007/s10472-026-10007-3}
 }
 ```
-A preprint of this paper is available or [arXiv][1]. Please note that this version is a placeholder, and will be updated shortely with the final version.
+A preprint of this paper is available or [arXiv][1].
 
 [1]: https://arxiv.org/abs/2308.12794
 [2]: https://github.com/ai-for-decision-making-tue/Job_Shop_Scheduling_Benchmark_Environments_and_Instances/blob/main/tutorial_benchmark_environment.ipynb
