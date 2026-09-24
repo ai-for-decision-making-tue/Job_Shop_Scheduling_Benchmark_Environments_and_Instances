@@ -79,17 +79,17 @@ The repository is structured to provide ease of use and flexibility:
 ### 📄 Reference
 For more detailed information, please refer to our paper. If you use this repository in your research, please consider citing the following paper:
 
-Reijnen, R., Smit, I.G., Zhang, H. et al. Job shop scheduling benchmark: environments and instances for learning and non-learning methods. Ann Math Artif Intell (2026). https://doi.org/10.1007/s10472-026-10007-3
+Reijnen, R., Smit, I. G., Zhang, H., Wu, Y., Bukhsh, Z., & Zhang, Y. (2026). Job shop scheduling benchmark: Environments and instances for learning and non-learning methods. Annals of Mathematics and Artificial Intelligence, 1-31. https://doi.org/10.1007/s10472-026-10007-3
 
 Or, using the following BibTeX entry:
 ```bibtex
-@article{Reijnen2026,
-  author  = {Reijnen, R. and Smit, I. G. and Zhang, H.},
-  title   = {Job shop scheduling benchmark: environments and instances for learning and non-learning methods},
-  journal = {Annals of Mathematics and Artificial Intelligence},
-  year    = {2026},
-  doi     = {10.1007/s10472-026-10007-3},
-  url     = {https://doi.org/10.1007/s10472-026-10007-3}
+@article{reijnen2026job,
+  title={Job shop scheduling benchmark: Environments and instances for learning and non-learning methods},
+  author={Reijnen, Robbert and Smit, Igor G and Zhang, Hongxiang and Wu, Yaoxin and Bukhsh, Zaharah and Zhang, Yingqian},
+  journal={Annals of Mathematics and Artificial Intelligence},
+  pages={1--31},
+  year={2026},
+  publisher={Springer}
 }
 ```
 A preprint of this paper is available or [arXiv][1].
