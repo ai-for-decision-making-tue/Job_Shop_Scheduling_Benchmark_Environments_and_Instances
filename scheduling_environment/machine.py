@@ -1,6 +1,6 @@
 from typing import List
 
-from scheduling_environment.operation import Operation
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.scheduling_environment.operation import Operation
 
 
 class Machine:
@@ -8,12 +8,73 @@ class Machine:
         self._machine_id = machine_id
         self._machine_name = machine_name
         self._processed_operations = []
+        self._current_operation = []
+        self._available = True
 
     def __str__(self):
         return f"Machine {self._machine_id}, {len(self._processed_operations)} scheduled operations"
 
     def reset(self):
         self._processed_operations = []
+        self._current_operation = []
+        self.unlock()
+
+    @property
+    def available(self):
+        return self._available
+    
+    def lock(self,):
+        self._available = False
+    
+    def unlock(self):
+        assert len(self._current_operation) == 0, "Machine is not available"
+        self._available = True
+    
+    def add_operation(self, operation: Operation, processing_time, processed_time=0):
+        self._current_operation.append([operation, processing_time, processed_time])
+        self.lock()
+
+    def process_current_operation(self, _now):
+
+        if len(self._current_operation) == 0:
+            return None
+        # process the current operation
+        # if the operation is finished, add it to the processed operations and unlock the machine
+        if self._current_operation[0][0].start_time == -1:
+            self._current_operation[0][0].start_time = _now
+
+        self._current_operation[0][2] += 1
+        if self._current_operation[0][2] == self._current_operation[0][1]:
+            self._processed_operations.append(self._current_operation[0][0])
+            processed_operation = self._current_operation[0][0]
+            setup_time = 0
+
+            processed_operation.add_operation_scheduling_information_step(self.machine_id, setup_time, self._current_operation[0][2])
+            self._current_operation = []
+            self.unlock()
+            return processed_operation
+        return None
+    
+    def process_current_operation_fast(self, _now, fast_time_taken):
+        # add time current shortest operation to _now
+        if len(self._current_operation) == 0:
+            return None
+        # process the current operation
+        # if the operation is finished, add it to the processed operations and unlock the machine
+        if self._current_operation[0][0].start_time == -1:
+            self._current_operation[0][0].start_time = _now
+        self._current_operation[0][2] += fast_time_taken
+        assert self._current_operation[0][2] <= self._current_operation[0][1], "out of time bound"
+        if self._current_operation[0][2] == self._current_operation[0][1]:
+            self._processed_operations.append(self._current_operation[0][0])
+            processed_operation = self._current_operation[0][0]
+            setup_time = 0
+
+            processed_operation.add_operation_scheduling_information_step(self.machine_id, setup_time, self._current_operation[0][2])
+            self._current_operation = []
+            self.unlock()
+            return processed_operation
+        return None
 
     @property
     def machine_id(self):

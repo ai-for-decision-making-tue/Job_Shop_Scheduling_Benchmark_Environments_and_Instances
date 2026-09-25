@@ -1,4 +1,4 @@
-from solution_methods.dispatching_rules.src.helper_functions import *
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.solution_methods.dispatching_rules.src.helper_functions import *
 
 
 def fifo_priority(operation):
@@ -42,3 +42,23 @@ def eet_rule(simulationEnv, operation, machine_id):
     """ EET Rule: Earliest End Time """
     earliest_end_time_machines = get_earliest_end_time_machines(simulationEnv, operation)
     return machine_id in earliest_end_time_machines
+
+
+def mor_priority_fast(jobshopEnv, operation):
+    """ MOR Rule: Most Operations Remaining (Fast version) """
+    return get_operations_remaining_fast(jobshopEnv, operation)
+
+
+def lor_priority_fast(jobshopEnv, operation):
+    """ LOR Rule: Least Operations Remaining (Fast version) """
+    return get_operations_remaining_fast(jobshopEnv, operation)
+
+
+def mwr_priority_fast(jobshopEnv, operation):
+    """ MWR Rule: Most Work Remaining (Fast version) """
+    return get_work_remaining_fast(jobshopEnv, operation)
+
+
+def lwr_priority_fast(jobshopEnv, operation):
+    """ LWR Rule: Least Work Remaining (Fast version) """
+    return get_work_remaining_fast(jobshopEnv, operation)

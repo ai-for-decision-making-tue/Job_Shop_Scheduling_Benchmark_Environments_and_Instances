@@ -3,10 +3,10 @@ from typing import Dict, Optional
 
 import simpy
 
-from scheduling_environment.job import Job
-from scheduling_environment.jobShop import JobShop
-from scheduling_environment.machine import Machine
-from scheduling_environment.operation import Operation
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.scheduling_environment.job import Job
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.scheduling_environment.jobShop import JobShop
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.scheduling_environment.machine import Machine
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.scheduling_environment.operation import Operation
 
 
 class SimulationEnv:
@@ -56,6 +56,7 @@ class SimulationEnv:
                 start_time = self.simulator.now + setup_time
                 processing_time = operation.processing_times[machine.machine_id]
                 machine.add_operation_to_schedule_at_time(operation, start_time, processing_time, setup_time)
+                print("processing_time,setup_time",processing_time,setup_time)
                 yield self.simulator.timeout(processing_time + setup_time - 0.0001)
                 self.processed_operations.add(operation)
 
@@ -98,6 +99,5 @@ class SimulationEnv:
                 operation_id += 1
 
             self.jobShopEnv.add_job(job)
-            self.jobShopEnv.set_nr_of_jobs(self.jobShopEnv.nr_of_jobs + 1)
             # print(f"Job {job_id} generated with {num_operations} operations")  # Debugging print statement
             job_id += 1

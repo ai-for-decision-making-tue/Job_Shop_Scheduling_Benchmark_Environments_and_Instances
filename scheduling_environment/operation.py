@@ -10,6 +10,9 @@ class Operation:
         self._processing_times = OrderedDict()
         self._predecessors: List = []
         self._scheduling_information = {}
+        self.start_time = -1
+        self._scheduled = False
+        self._prec_satisfied = False
 
     def __repr__(self):
         return (
@@ -18,6 +21,16 @@ class Operation:
 
     def reset(self):
         self._scheduling_information = {}
+        self.start_time = -1
+        self._prec_satisfied = False
+        self._scheduled = False
+    
+    def set_scheduled(self):
+        self._scheduled = True
+    
+    @property
+    def scheduled(self):
+        return self._scheduled
 
     @property
     def job(self):
@@ -113,4 +126,16 @@ class Operation:
             'processing_time': duration,
             'start_setup': start_time - setup_time,
             'end_setup': start_time,
+            'setup_time': setup_time}
+    
+
+    def add_operation_scheduling_information_step(self, machine_id: int, setup_time: int, duration) -> None:
+        """Add scheduling information to the current operation."""
+        self._scheduling_information = {
+            'machine_id': machine_id,
+            'start_time': self.start_time,
+            'end_time': self.start_time + duration,
+            'processing_time': duration,
+            'start_setup': self.start_time - setup_time,
+            'end_setup': self.start_time,
             'setup_time': setup_time}

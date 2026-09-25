@@ -2,11 +2,11 @@ import argparse
 import logging
 import os
 
-from scheduling_environment.jobShop import JobShop
-from visualization import gantt_chart, precedence_chart
-from solution_methods.dispatching_rules.utils import configure_simulation_env, output_dir_exp_name, results_saving
-from solution_methods.helper_functions import load_parameters, load_job_shop_env
-from solution_methods.dispatching_rules.src.scheduling_functions import scheduler
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.scheduling_environment.jobShop import JobShop
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.plotting.drawer import plot_gantt_chart, draw_precedence_relations
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.solution_methods.dispatching_rules.utils import configure_simulation_env, output_dir_exp_name, results_saving
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.solution_methods.helper_functions import load_parameters, load_job_shop_env
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.solution_methods.dispatching_rules.src.scheduling_functions import scheduler
 
 logging.basicConfig(level=logging.INFO)
 PARAM_FILE = "../../configs/dispatching_rules.toml"
@@ -15,7 +15,7 @@ PARAM_FILE = "../../configs/dispatching_rules.toml"
 def run_dispatching_rules(jobShopEnv, **kwargs):
     dispatching_rule = kwargs['instance']['dispatching_rule']
     machine_assignment_rule = kwargs['instance']['machine_assignment_rule']
-
+    print(dispatching_rule, machine_assignment_rule)
     if dispatching_rule == 'SPT' and machine_assignment_rule != 'SPT':
         raise ValueError("SPT dispatching rule requires SPT machine assignment rule.")
 
@@ -67,12 +67,12 @@ def main(param_file: str = PARAM_FILE):
 
         # Draw precedence relations if required
         if show_precedences:
-            precedence_chart.plot(jobShopEnv)
+            draw_precedence_relations(jobShopEnv)
 
         # Plot Gantt chart if required
         if show_gantt or save_gantt:
             logging.info("Generating Gantt chart.")
-            plt = gantt_chart.plot(jobShopEnv)
+            plt = plot_gantt_chart(jobShopEnv)
 
             if save_gantt:
                 plt.savefig(output_dir + "/gantt.png")

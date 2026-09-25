@@ -2,8 +2,8 @@ import os
 import json
 import datetime
 
-from scheduling_environment.simulationEnv import SimulationEnv
-from solution_methods.helper_functions import load_job_shop_env
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.scheduling_environment.simulationEnv import SimulationEnv
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.solution_methods.helper_functions import load_job_shop_env
 
 DEFAULT_RESULTS_ROOT = os.getcwd() + "/results/dispatching_rules/"
 

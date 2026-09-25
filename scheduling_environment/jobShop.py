@@ -1,9 +1,9 @@
 import numpy as np
 from typing import Dict, List
 
-from scheduling_environment.job import Job
-from scheduling_environment.machine import Machine
-from scheduling_environment.operation import Operation
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.scheduling_environment.job import Job
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.scheduling_environment.machine import Machine
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.scheduling_environment.operation import Operation
 
 
 class JobShop:

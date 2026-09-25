@@ -1,5 +1,5 @@
 from typing import List
-from scheduling_environment.operation import Operation
+from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.scheduling_environment.operation import Operation
 
 
 class Job:
